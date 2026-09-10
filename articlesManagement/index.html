@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ניהול כתבות - The Web Daily</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dashboard-body">
+        
+    <!-- הדר עליון -->
+    <header class="dashboard-header">
+        <div class="header-inner">
+            <!-- אזור משתמש (ימין) -->
+            <div class="user-profile">
+                <div class="avatar">👤</div>
+                <div class="user-details">
+                    <div class="user-name">דנה כהן <span class="arrow-down">⌄</span></div>
+                    <div class="user-role">כותבת תוכן</div>
+                </div>
+            </div>
+
+            <!-- תפריט ניווט (מרכז) -->
+            <nav class="top-nav">
+                <a href="#">עורכים</a>
+                <a href="#">קטגוריות</a>
+                <a href="#">כתבות</a>
+                <a href="#">דף הבית</a>
+            </nav>
+
+            <!-- לוגו (שמאל) -->
+            <div class="brand-logo">
+                <span class="logo-title">The Web Daily</span>
+                <span class="logo-subtitle">חדשות שמחברות אותך לעולם</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- תוכן מרכזי -->
+    <div class="dashboard-container">
+
+        <!-- כותרת העמוד -->
+        <div class="page-title-section">
+            <h1 class="page-title">ניהול כתבות</h1>
+            <p class="page-subtitle">כאן ניתן לנהל את הכתבות שלך</p>
+        </div>
+
+        <!-- 4 כרטיסי סטטיסטיקה -->
+        <div class="stats-grid">
+            <!-- כרטיס 1 -->
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-number color-blue">3</div>
+                    <div class="stat-label">בהכנה</div>
+                </div>
+                <div class="stat-icon-box bg-blue-light">📄</div>
+            </div>
+
+            <!-- כרטיס 2 -->
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-number color-orange">2</div>
+                    <div class="stat-label">ממתינות לאישור</div>
+                </div>
+                <div class="stat-icon-box bg-orange-light">🕒</div>
+            </div>
+
+            <!-- כרטיס 3 -->
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-number color-green">5</div>
+                    <div class="stat-label">פורסמו</div>
+                </div>
+                <div class="stat-icon-box bg-green-light">☑️</div>
+            </div>
+
+            <!-- כרטיס 4 -->
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-number color-red">1</div>
+                    <div class="stat-label">הוחזרה לתיקונים</div>
+                </div>
+                <div class="stat-icon-box bg-red-light">📝</div>
+            </div>
+        </div>
+
+        <!-- כרטיס הטבלה הראשי -->
+        <div class="main-card">
+
+            <!-- סרגל כלים וסינון -->
+            <div class="toolbar-section">
+                <button class="btn-new-article">
+                    <span class="plus-icon">+</span> כתבה חדשה
+                </button>
+
+                <div class="filter-controls">
+                    <div class="custom-select">
+                        <select>
+                            <option>כל הקטגוריות</option>
+                        </select>
+                        <span class="select-arrow">♢</span>
+                        <span class="select-arrow-down">⌄</span>
+                    </div>
+
+                    <div class="custom-select">
+                        <select>
+                            <option>כל הסטטוסים</option>
+                        </select>
+                        <span class="select-arrow">🌪️</span>
+                        <span class="select-arrow-down">⌄</span>
+                    </div>
+
+                    <div class="search-box">
+                        <input type="text" placeholder="חיפוש כתבות...">
+                        <span class="search-icon">🔍</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- טבלת הנתונים -->
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="th-title">כותרת הכתבה</th>
+                            <th class="th-category">קטגוריה</th>
+                            <th class="th-status">סטטוס</th>
+                            <th class="th-date">עדכון אחרון</th>
+                            <th class="th-actions">פעולות</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- שורה 1 -->
+                        <tr>
+                            <td>
+                                <div class="article-info">
+                                    <div class="article-img thumb-robot"></div>
+                                    <div class="article-text">
+                                        <div class="article-heading">העתיד של בינה מלאכותית בעולם העבודה</div>
+                                        <div class="article-sub">איך AI משנה את הדרך בה אנחנו עובדים, ומה זה...</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>טכנולוגיה</td>
+                            <td><span class="badge badge-blue">בהכנה</span></td>
+                            <td class="date-cell">
+                                <div>15 באפר' 2024</div>
+                                <div class="time-str">10:24</div>
+                            </td>
+                            <td>
+                                <div class="action-group">
+                                    <button class="btn-outline">✏️ עריכה</button>
+                                    <button class="btn-dots">⋮</button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- שורה 2 -->
+                        <tr>
+                            <td>
+                                <div class="article-info">
+                                    <div class="article-img thumb-laptop"></div>
+                                    <div class="article-text">
+                                        <div class="article-heading">5 טיפים לצמיחה עסקית בעידן הדיגיטלי</div>
+                                        <div class="article-sub">כלים פרקטיים שיעזרו לעסקים קטנים לגדול...</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>עסקים</td>
+                            <td><span class="badge badge-orange">ממתינה לאישור</span></td>
+                            <td class="date-cell">
+                                <div>14 באפר' 2024</div>
+                                <div class="time-str">16:32</div>
+                            </td>
+                            <td>
+                                <div class="action-group">
+                                    <button class="btn-outline btn-blue-border">✈️ שליחה לאישור</button>
+                                    <button class="btn-dots">⋮</button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- שורה 3 -->
+                        <tr>
+                            <td>
+                                <div class="article-info">
+                                    <div class="article-img thumb-city"></div>
+                                    <div class="article-text">
+                                        <div class="article-heading">שוק העבודה הישראלי: מגמות לשנת 2024</div>
+                                        <div class="article-sub">סקירה מקיפה של המגמות המרכזיות בשוק העבודה...</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>חדשות</td>
+                            <td><span class="badge badge-green">פורסמה</span></td>
+                            <td class="date-cell">
+                                <div>12 באפר' 2024</div>
+                                <div class="time-str">09:15</div>
+                            </td>
+                            <td>
+                                <div class="action-group">
+                                    <button class="btn-outline">👁️ צפייה</button>
+                                    <button class="btn-dots">⋮</button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- שורה 4 -->
+                        <tr>
+                            <td>
+                                <div class="article-info">
+                                    <div class="article-img thumb-person"></div>
+                                    <div class="article-text">
+                                        <div class="article-heading">איך יוצרים איזון בין עבודה לחיים פרטיים</div>
+                                        <div class="article-sub">מבט מעמיק על האתגרים והפתרונות בעולם המודרני...</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>חברה</td>
+                            <td><span class="badge badge-red">הוחזרה לתיקונים</span></td>
+                            <td class="date-cell">
+                                <div>10 באפר' 2024</div>
+                                <div class="time-str">14:20</div>
+                            </td>
+                            <td>
+                                <div class="action-group">
+                                    <button class="btn-outline">✏️ עריכה</button>
+                                    <button class="btn-dots">⋮</button>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- שורה 5 -->
+                        <tr>
+                            <td>
+                                <div class="article-info">
+                                    <div class="article-img thumb-food"></div>
+                                    <div class="article-text">
+                                        <div class="article-heading">המדריך המלא לאורח חיים בריא יותר</div>
+                                        <div class="article-sub">צעדים קטנים שעושים הבדל גדול – הבריאות מתחילה...</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>בריאות</td>
+                            <td><span class="badge badge-blue">בהכנה</span></td>
+                            <td class="date-cell">
+                                <div>8 באפר' 2024</div>
+                                <div class="time-str">11:07</div>
+                            </td>
+                            <td>
+                                <div class="action-group">
+                                    <button class="btn-outline">💬 הערת עורך</button>
+                                    <button class="btn-dots">⋮</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- סרגל דפדוף בתחתית -->
+            <div class="pagination-bar">
+                <div class="pagination-summary">מציג 5 מתוך 11 כתבות</div>
+                <div class="pagination-buttons">
+                    <button class="p-btn">&lt;</button>
+                    <button class="p-btn active">1</button>
+                    <button class="p-btn">2</button>
+                    <button class="p-btn">3</button>
+                    <button class="p-btn">&gt;</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+</body>
+</html>
