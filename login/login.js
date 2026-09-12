@@ -1,5 +1,10 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+/**
+ * --------------------------------------------------------------------------
+ * QUERY SELECTORS
+ * --------------------------------------------------------------------------
+ */
     const usernameInput = document.querySelector('input[type="text"]');
     const passwordInput = document.querySelector('input[type="password"]');
     const togglePasswordBtn = passwordInput.nextElementSibling; // כפתור העין
@@ -7,6 +12,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginForm = document.querySelector('.login-form');
 
 
+ /**
+ * --------------------------------------------------------------------------
+ * FUNCTIONS
+ * --------------------------------------------------------------------------
+ */
     function togglePasswordVisibility() 
     {
         const STATE_HIDDEN = 'password';
@@ -100,6 +110,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     togglePasswordBtn.style.cursor = 'pointer';
+
+ /**
+ * --------------------------------------------------------------------------
+ * EVENT LISTENERS
+ * --------------------------------------------------------------------------
+ */
     togglePasswordBtn.addEventListener('click', togglePasswordVisibility);
     
     submitBtn.addEventListener('click', handleLogin);
