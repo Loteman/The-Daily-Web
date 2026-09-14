@@ -1,0 +1,189 @@
+/* איפוס הגדרות ברירת מחדל */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* הגדרות גוף העמוד - שימוש בפונטים מובנים במערכת בלבד */
+body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f7f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #333;
+}
+
+/* הכרטיסייה הראשית */
+.card-container {
+    display: flex;
+    background-color: #ffffff;
+    width: 900px;
+    max-width: 95%;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+}
+
+/* -------------------------------- */
+/* צד ימין - אזור הטופס (ראשון ב-RTL) */
+/* -------------------------------- */
+.form-section {
+    flex: 1;
+    padding: 60px 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-section h2 {
+    font-size: 28px;
+    color: #111827;
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+
+.form-subtitle {
+    font-size: 15px;
+    color: #6b7280;
+    margin-bottom: 35px;
+}
+
+.login-form {
+    width: 100%;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.input-group {
+    position: relative;
+    width: 100%;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 14px 42px 14px 14px; /* ריווח מצד ימין לאייקון */
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 15px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.input-group input:focus {
+    border-color: #2563eb;
+}
+
+/* ריווח משמאל בשדה סיסמה עבור אייקון העין */
+.input-group input[type="password"] {
+    padding-left: 42px; 
+}
+
+/* מיקום האייקונים בתוך השדות */
+.icon-right {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    display: flex;
+}
+
+.icon-left {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    cursor: pointer;
+    display: flex;
+}
+
+.btn-submit {
+    background-color: #1d4ed8;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: background-color 0.2s;
+    font-family: inherit;
+}
+
+.btn-submit:hover {
+    background-color: #1e40af;
+}
+
+
+/* -------------------------------- */
+/* צד שמאל - אזור המיתוג */
+/* -------------------------------- */
+.brand-section {
+    flex: 1;
+    background-color: #f8fafc;
+    padding: 60px 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand-header {
+    width: 100%;
+    text-align: left;
+    direction: ltr; /* אנגלית משמאל לימין */
+}
+
+.brand-title {
+    font-size: 32px;
+    font-weight: 800;
+    color: #111827;
+    margin-bottom: 4px;
+}
+
+.brand-title .text-blue {
+    color: #1d4ed8;
+}
+
+.brand-subtitle {
+    font-size: 15px;
+    color: #64748b;
+}
+
+.brand-footer {
+    text-align: center;
+    width: 100%;
+}
+
+.brand-footer-text {
+    font-size: 18px;
+    color: #475569;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+
+
+/* התאמה למסכים קטנים */
+@media (max-width: 768px) {
+    .card-container {
+        flex-direction: column-reverse;
+        width: 100%;
+        max-width: 450px;
+    }
+    .brand-section {
+        padding: 40px 20px;
+    }
+    .form-section {
+        padding: 40px 20px;
+    }
+}
