@@ -16,12 +16,75 @@ export class ArticlesManagementView
     }
 
 
-    renderUserProfile(user) 
+    renderUserProfile(user)
     {
-        if (!this.userNameEl || !this.userRoleEl)
-            return;
-        this.userNameEl.textContent = user.name;
-        this.userRoleEl.textContent = user.role;
+        document.querySelector('.page-title').textContent = user.role + ' — ניהול כתבות';
+        document.querySelector('.page-subtitle').textContent = user.name;
+    }
+
+    setRole(role)
+    {
+        this.newArticleBtn.hidden = role !== 'creator';
+    }
+
+    showMessage(message)
+    {
+        document.querySelector('.management-message').textContent = message;
+    }
+
+    openArticle(article, mode)
+    {
+        const dialog = document.querySelector('.article-dialog');
+        const form = dialog.querySelector('form');
+        form.reset();
+        this.editingId = article?.id || null;
+        this.dialogMode = mode;
+        for (const field of ['title', 'summary', 'category'])
+        {
+            form.elements[field].value = article?.[field] || '';
+            form.elements[field].readOnly = mode !== 'edit';
+        }
+        form.elements.content.value = (article?.paragraphs || []).join('\n\n');
+        form.elements.content.readOnly = mode !== 'edit';
+        dialog.querySelector('.dialog-title').textContent = mode === 'edit' ? 'עריכת כתבה' : 'בדיקת כתבה';
+        dialog.querySelector('.editor-note').textContent = article?.editorNote || '';
+        dialog.querySelector('.review-note-label').hidden = mode !== 'review';
+        dialog.querySelector('.save-draft').hidden = mode !== 'edit';
+        dialog.querySelector('.publish-article').hidden = mode !== 'review';
+        dialog.querySelector('.return-article').hidden = mode !== 'review';
+        dialog.querySelector('.dialog-message').textContent = '';
+        dialog.showModal();
+    }
+
+    bindEditor(onSave, onReview)
+    {
+        const dialog = document.querySelector('.article-dialog');
+        const form = dialog.querySelector('form');
+        form.addEventListener('submit', event => {
+            event.preventDefault();
+            if (this.dialogMode === 'edit')
+                onSave(this.editingId, Object.fromEntries(new FormData(form)));
+        });
+        dialog.querySelector('.close-dialog').addEventListener('click', () => dialog.close());
+        dialog.querySelector('.publish-article').addEventListener('click', () => onReview(this.editingId, 'published', ''));
+        dialog.querySelector('.return-article').addEventListener('click', () => onReview(this.editingId, 'returned', form.elements.editorNote.value));
+    }
+
+    closeEditor()
+    {
+        document.querySelector('.article-dialog').close();
+    }
+
+    showEditorError(message)
+    {
+        document.querySelector('.dialog-message').textContent = message;
+    }
+
+    escape(value)
+    {
+        const element = document.createElement('span');
+        element.textContent = value ?? '';
+        return element.innerHTML.replaceAll('"', '&quot;');
     }
 
     renderStats(stats) 
@@ -40,10 +103,10 @@ export class ArticlesManagementView
         if (this.selectElements.length >= 2) 
         {
             this.selectElements[0].innerHTML = options.categories
-                .map(cat => `<option value="${cat}">${cat}</option>`).join('');
+                .map(cat => `<option value="${this.escape(cat)}">${this.escape(cat)}</option>`).join('');
 
             this.selectElements[1].innerHTML = options.statuses
-                .map(status => `<option value="${status}">${status}</option>`).join('');
+                .map(status => `<option value="${this.escape(status)}">${this.escape(status)}</option>`).join('');
         }
     }
 
@@ -75,21 +138,20 @@ export class ArticlesManagementView
                     <div class="article-info">
                         <div class="article-img ${article.thumbClass || 'thumb-robot'}"></div>
                         <div class="article-text">
-                            <div class="article-heading">${DOMPurify.sanitize(article.title)}</div>
-                            <div class="article-sub">${DOMPurify.sanitize(article.subtitle)}</div>
+                            <div class="article-heading">${this.escape(article.title)}</div>
+                            <div class="article-sub">${this.escape(article.subtitle)}</div>
                         </div>
                     </div>
                 </td>
-                <td>${DOMPurify.sanitize(article.category)}</td>
-                <td><span class="badge ${article.badgeClass}">${DOMPurify.sanitize(article.statusText)}</span></td>
+                <td>${this.escape(article.category)}</td>
+                <td><span class="badge ${article.badgeClass}">${this.escape(article.statusText)}</span></td>
                 <td class="date-cell">
                     <div>${article.date}</div>
                     <div class="time-str">${article.time}</div>
                 </td>
                 <td>
                     <div class="action-group">
-                        <button class="btn-outline action-main-btn" data-id="${article.id}" data-action="${article.actionType}">${DOMPurify.sanitize(article.actionText)}</button>
-                        <button class="btn-dots btn-menu-options" data-id="${article.id}">⋮</button>
+                        ${article.actions.map(action => `<button class="btn-outline action-main-btn" data-id="${article.id}" data-action="${action.type}">${action.label}</button>`).join('')}
                     </div>
                 </td>
             `;
@@ -173,14 +235,13 @@ export class ArticlesManagementView
         this.newArticleBtn.addEventListener('click', handler);
     }
 
-    bindTableActions(onActionHandler, onOptionsHandler) 
+    bindTableActions(onActionHandler)
     {
         if (!this.tableBody) 
             return;
 
         this.tableBody.addEventListener('click', (e) => {
             const actionBtn = e.target.closest('.action-main-btn');
-            const optionsBtn = e.target.closest('.btn-menu-options');
 
             if (actionBtn) 
             {
@@ -189,11 +250,6 @@ export class ArticlesManagementView
                 onActionHandler(articleId, actionType);
             }
 
-            if (optionsBtn) 
-            {
-                const articleId = optionsBtn.getAttribute('data-id');
-                onOptionsHandler(articleId);
-            }
         });
     }
 }

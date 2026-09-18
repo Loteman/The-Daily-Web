@@ -12,6 +12,8 @@ export class ArticlesFeedController
     async init() 
     {
         this.view.renderCategoryOptions();
+        const featured = await this.model.getArticles({}, 1);
+        this.view.renderFeaturedArticle(featured.articles[0]);
         await this.updateView();
 
         this.view.bindFilterChange(() => this.handleFilterChange());
@@ -36,13 +38,12 @@ export class ArticlesFeedController
 
     async handleArticleClick(id) 
     {
-        await this.model.toggleReadStatus(id);
-        await this.updateView();
+        window.location.href = `../article/index.html?id=${encodeURIComponent(id)}`;
     }
 
     async handleLoadMore() 
     {
-        this.displayCount += 4; // מוסיף עוד כתבות להצגה
+        this.displayCount += 20; // מוסיף עוד כתבות להצגה
         await this.updateView();
     }
 }

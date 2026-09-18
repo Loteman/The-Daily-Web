@@ -5,48 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ניהול כתבות - The Web Daily</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../header/style.css">
 </head>
 <body class="dashboard-body">
         
     <!-- הדר עליון -->
-    <header class="dashboard-header">
-        <div class="header-inner">
-            <!-- אזור משתמש (ימין) -->
-            <div class="user-profile">
-                <div class="avatar">👤</div>
-                <div class="user-details">
-                    <div class="user-name"><span class="arrow-down">⌄</span></div>
-                    <div class="user-role"></div>
-                </div>
-            </div>
-
-            <!-- תפריט ניווט (מרכז) -->
-            <nav class="top-nav">
-                <a href="#">עורכים</a>
-                <a href="#">קטגוריות</a>
-                <a href="#">כתבות</a>
-                <a href="#">דף הבית</a>
-            </nav>
-
-            <!-- לוגו (שמאל) -->
-            <div class="brand-logo">
-                <span class="logo-title">The Web Daily</span>
-                <span class="logo-subtitle">חדשות שמחברות אותך לעולם</span>
-            </div>
-        </div>
-    </header>
+    <header class="header"></header>
 
     <!-- תוכן מרכזי -->
     <div class="dashboard-container">
 
         <!-- כותרת העמוד -->
         <div class="page-title-section">
+            <p class="management-message" role="status"></p>
             <h1 class="page-title">ניהול כתבות</h1>
             <p class="page-subtitle">כאן ניתן לנהל את הכתבות שלך</p>
         </div>
 
         <!-- 4 כרטיסי סטטיסטיקה -->
-        <div class="stats-grid">
+        <div class="stats-grid" id="statistics">
             <!-- כרטיס 1 -->
             <div class="stat-card">
                 <div class="stat-content">
@@ -129,132 +106,7 @@
                             <th class="th-actions">פעולות</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <!-- שורה 1 -->
-                        <tr>
-                            <td>
-                                <div class="article-info">
-                                    <div class="article-img thumb-robot"></div>
-                                    <div class="article-text">
-                                        <div class="article-heading"></div>
-                                        <div class="article-sub"></div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td></td>
-                            <td><span class="badge badge-blue"></span></td>
-                            <td class="date-cell">
-                                <div></div>
-                                <div class="time-str"></div>
-                            </td>
-                            <td>
-                                <div class="action-group">
-                                    <button class="btn-outline"></button>
-                                    <button class="btn-dots"></button>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <!-- שורה 2 -->
-                        <tr>
-                            <td>
-                                <div class="article-info">
-                                    <div class="article-img thumb-laptop"></div>
-                                    <div class="article-text">
-                                        <div class="article-heading"></div>
-                                        <div class="article-sub"></div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td></td>
-                            <td><span class="badge badge-orange"></span></td>
-                            <td class="date-cell">
-                                <div></div>
-                                <div class="time-str"></div>
-                            </td>
-                            <td>
-                                <div class="action-group">
-                                    <button class="btn-outline btn-blue-border"></button>
-                                    <button class="btn-dots"></button>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <!-- שורה 3 -->
-                        <tr>
-                            <td>
-                                <div class="article-info">
-                                    <div class="article-img thumb-city"></div>
-                                    <div class="article-text">
-                                        <div class="article-heading"></div>
-                                        <div class="article-sub"></div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td></td>
-                            <td><span class="badge badge-green"></span></td>
-                            <td class="date-cell">
-                                <div></div>
-                                <div class="time-str"></div>
-                            </td>
-                            <td>
-                                <div class="action-group">
-                                    <button class="btn-outline"></button>
-                                    <button class="btn-dots"></button>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <!-- שורה 4 -->
-                        <tr>
-                            <td>
-                                <div class="article-info">
-                                    <div class="article-img thumb-person"></div>
-                                    <div class="article-text">
-                                        <div class="article-heading"></div>
-                                        <div class="article-sub"></div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>חברה</td>
-                            <td><span class="badge badge-red"></span></td>
-                            <td class="date-cell">
-                                <div></div>
-                                <div class="time-str"></div>
-                            </td>
-                            <td>
-                                <div class="action-group">
-                                    <button class="btn-outline"></button>
-                                    <button class="btn-dots"></button>
-                                </div>
-                            </td>
-                        </tr>
-
-                        <!-- שורה 5 -->
-                        <tr>
-                            <td>
-                                <div class="article-info">
-                                    <div class="article-img thumb-food"></div>
-                                    <div class="article-text">
-                                        <div class="article-heading"></div>
-                                        <div class="article-sub"></div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td></td>
-                            <td><span class="badge badge-blue"></span></td>
-                            <td class="date-cell">
-                                <div></div>
-                                <div class="time-str"></div>
-                            </td>
-                            <td>
-                                <div class="action-group">
-                                    <button class="btn-outline"></button>
-                                    <button class="btn-dots">⋮</button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
 
@@ -273,7 +125,30 @@
         </div>
     </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.0.8/purify.min.js"></script>
+    <dialog class="article-dialog">
+        <form id="article-form">
+            <h2 class="dialog-title"></h2>
+            <p class="editor-note"></p>
+            <label>כותרת<input name="title" required maxlength="200"></label>
+            <label>תקציר<textarea name="summary" required rows="3"></textarea></label>
+            <label>קטגוריה<input name="category" required maxlength="60" list="article-categories"></label>
+            <datalist id="article-categories">
+                <option value="עולם"><option value="כלכלה"><option value="טכנולוגיה">
+                <option value="ספורט"><option value="סביבה"><option value="מדע">
+                <option value="תרבות"><option value="בריאות">
+            </datalist>
+            <label>תוכן הכתבה<textarea name="content" required rows="10"></textarea></label>
+            <label class="review-note-label">הערה ליוצר<textarea name="editorNote" rows="3"></textarea></label>
+            <p class="dialog-message" role="alert"></p>
+            <div class="dialog-actions">
+                <button type="submit" class="btn-new-article save-draft">שמירת טיוטה</button>
+                <button type="button" class="btn-outline publish-article">אישור ופרסום</button>
+                <button type="button" class="btn-outline return-article">החזרה לתיקונים</button>
+                <button type="button" class="btn-outline close-dialog">סגירה</button>
+            </div>
+        </form>
+    </dialog>
+    <script type="module" src="../header/header.js"></script>
 
 <script type="module" src="articlesManagement.js"></script>
 

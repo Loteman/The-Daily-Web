@@ -56,8 +56,8 @@ export class LoginView
         const messageDiv = document.createElement('div');
         messageDiv.className = `form-message ${type}`;
         
-        // שימוש ב-DOMPurify לאבטחה
-        messageDiv.innerHTML = DOMPurify.sanitize(text);
+        // הצגת הודעה כטקסט בלבד
+        messageDiv.textContent = text;
         
         // עיצוב הודעה
         messageDiv.style.position = 'absolute';

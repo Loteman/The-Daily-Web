@@ -46,6 +46,25 @@ export class ArticlesFeedView
         ).join('');
     }
 
+    renderFeaturedArticle(article)
+    {
+        const hero = document.querySelector('.hero-card');
+        if (!article)
+        {
+            hero.style.display = 'none';
+            return;
+        }
+
+        hero.style.display = '';
+        const category = hero.querySelector('.category');
+        category.textContent = article.category;
+        category.className = `category ${this.getCategoryClass(article.category)}`;
+        hero.querySelector('.hero-title').textContent = article.title;
+        hero.querySelector('.hero-summary').textContent = article.summary;
+        hero.querySelector('.hero-meta').textContent = `${article.author} | ${article.date}`;
+        hero.querySelector('.btn-read-more').href = `../article/index.html?id=${encodeURIComponent(article.id)}`;
+    }
+
     renderArticles(articles) 
     {
         if (!this.articlesGrid) 
@@ -83,36 +102,24 @@ export class ArticlesFeedView
         if (!this.loadMoreContainer) 
             return;
 
-        this.loadMoreContainer.innerHTML = '';
-        this.loadMoreContainer.style.display = 'flex';
-        this.loadMoreContainer.style.justifyContent = 'center';
-        this.loadMoreContainer.style.alignItems = 'center';
+        this.hasMore = hasMore;
+        this.loadMoreContainer.textContent = hasMore
+            ? ''
+            : 'אין כתבות נוספות להצגה';
 
-        if (hasMore) 
+        if (this.loadMoreObserver)
         {
-            this.loadMoreButton = document.createElement('button');
-            this.loadMoreButton.className = 'btn-load-more';
-            this.loadMoreButton.innerHTML = `
-                <span class="spinner-icon">🔄</span>
-                טעינת כתבות נוספות
-            `;
-            this.loadMoreContainer.appendChild(this.loadMoreButton);
-        } 
-        else 
-        {
-            const noMoreText = document.createElement('p');
-            noMoreText.style.textAlign = 'center';
-            noMoreText.style.color = '#64748b';
-            noMoreText.style.margin = '10px 0';
-            noMoreText.textContent = 'אין כתבות נוספות להצגה';
-            this.loadMoreContainer.appendChild(noMoreText);
-            this.loadMoreButton = null;
+            this.loadMoreObserver.unobserve(this.loadMoreContainer);
+            if (hasMore)
+                this.loadMoreObserver.observe(this.loadMoreContainer);
         }
     }
 
     getFilterValues() 
     {
+        const searchInput = document.querySelector('#article-search');
         return {
+            search: searchInput ? searchInput.value : '',
             category: this.categorySelect ? this.categorySelect.value : 'הכל',
             status: this.statusSelect ? this.statusSelect.value : 'הכל',
             sortBy: this.sortSelect ? this.sortSelect.value : 'תאריך פרסום'
@@ -121,6 +128,10 @@ export class ArticlesFeedView
 
     bindFilterChange(handler) 
     {
+        const searchInput = document.querySelector('#article-search');
+        if (searchInput)
+            searchInput.addEventListener('input', handler);
+
         if (this.categorySelect)
             this.categorySelect.addEventListener('change', handler);
         if (this.statusSelect) 
@@ -145,15 +156,27 @@ export class ArticlesFeedView
         }
     }
 
-    bindLoadMore(handler) 
+    bindLoadMore(handler)
     {
-        if (this.loadMoreContainer) 
-        {
-            this.loadMoreContainer.addEventListener('click', (event) => {
-                const button = event.target.closest('.btn-load-more');
-                if (button && handler) 
-                    handler();
-            });
-        }
+        if (!this.loadMoreContainer)
+            return;
+
+        this.loadMoreObserver = new IntersectionObserver(async (entries) => {
+            if (!entries.some(entry => entry.isIntersecting) || !this.hasMore || this.isLoadingMore)
+                return;
+
+            this.isLoadingMore = true;
+            try
+            {
+                await handler();
+            }
+            finally
+            {
+                this.isLoadingMore = false;
+            }
+        }, { rootMargin: '0px 0px 300px 0px' });
+
+        if (this.hasMore)
+            this.loadMoreObserver.observe(this.loadMoreContainer);
     }
 }

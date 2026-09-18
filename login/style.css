@@ -119,6 +119,21 @@ body {
     font-family: inherit;
 }
 
+.btn-back {
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    color: #475569;
+    text-align: center;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.btn-back:hover {
+    background-color: #f8fafc;
+}
+
 .btn-submit:hover {
     background-color: #1e40af;
 }

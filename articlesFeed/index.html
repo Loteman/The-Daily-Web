@@ -33,6 +33,11 @@
             </div>
         </section>
 
+        <div class="feed-search search-bar">
+            <span class="search-icon" aria-hidden="true">&#128269;</span>
+            <input id="article-search" type="search" placeholder="&#1495;&#1497;&#1508;&#1493;&#1513; &#1499;&#1514;&#1489;&#1493;&#1514;..." aria-label="&#1495;&#1497;&#1508;&#1493;&#1513; &#1499;&#1514;&#1489;&#1493;&#1514;">
+        </div>
+
         <section class="filter-bar">
             <div class="filter-group">
                 <label>קטגוריה:</label>
@@ -187,23 +192,11 @@
 
         </section>
 
-        <div class="load-more-container">
-            <button class="btn-load-more">
-                <span class="spinner-icon">🔄</span>
-                טעינת כתבות נוספות
-            </button>
-        </div>
+        <div class="load-more-container" role="status" aria-live="polite"></div>
 
     </main>
 
- <script>
-        fetch('/header/index.html')
-            .then(response => response.text())
-            .then(data => {
-                document.querySelector('.header').innerHTML = data;
-            })
-            .catch(error => console.error('שגיאה בטעינת ההאדר:', error));
-    </script>
+<script type="module" src="../header/header.js"></script>
 <script type="module" src="articlesFeed.js"></script>
 
 </body>

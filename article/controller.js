@@ -10,14 +10,29 @@ export class ArticleController
 
     async init() 
     {
-        this.view.renderArticle(this.model.articleData);
+        const id = new URLSearchParams(window.location.search).get('id');
+        try
+        {
+            const article = id ? await this.model.loadArticle(id) : null;
+            if (!article)
+            {
+                this.view.showArticleError('הכתבה לא נמצאה');
+                return;
+            }
+            this.view.renderArticle(article);
+        }
+        catch (error)
+        {
+            this.view.showArticleError('שגיאה בטעינת הכתבה');
+            return;
+        }
         this.view.renderRelatedPosts(this.model.relatedPosts);
         this.view.renderComments(this.model.comments);
 
+        this.view.bindCommentSubmit(this.handleCommentSubmit.bind(this));
+
         const weatherData = await this.model.fetchWeather();
         this.view.renderWeatherData(weatherData);
-
-        this.view.bindCommentSubmit(this.handleCommentSubmit.bind(this));
     }
 
     async handleCommentSubmit(author, text) 
@@ -51,6 +66,15 @@ export class ArticleController
         } 
         catch (err) 
         {
+            if (err.code === 'GUEST_COMMENT_LIMIT')
+            {
+                this.view.showFormError(
+                    `אורחים יכולים לשלוח עד 3 תגובות בדקה. נסו שוב בעוד ${err.retryAfterSeconds} שניות.`,
+                    'text'
+                );
+                return;
+            }
+
             console.error("שגיאה בשמירת התגובה:", err);
             this.view.showFormError("אירעה שגיאה בשליחת התגובה. נסה שוב שנית.", 'text');
         }

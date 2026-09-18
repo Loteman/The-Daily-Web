@@ -1,6 +1,9 @@
+import { submitGuestComment } from '../data/guestCommentLimiter.js';
+import { ArticleRepository } from '../data/articleRepository.js';
+
 export class ArticleModel 
 {
-    constructor() 
+    constructor(repository = new ArticleRepository())
     {
         this.weatherApiKey = 'ca7e198fa478ce43e107cc122973e064';
         this.mockWeatherData = {
@@ -9,28 +12,24 @@ export class ArticleModel
             condition: "לא ידוע",
             icon: "☀️",
         };
-        this.articleData = {
-            category: "עולם",
-            title: "פסגת האקלים העולמית: הישגים חדשים לשנת 2026",
-            summary: "ראשי מדינות מרכזיות סיכמו על צעדים דרמטיים לצמצום פליטות הפחמן, תוך הקצאת משאבים אדירים למעבר לאנרגיה ירוקה.",
-            author: "דור כהן",
-            date: "20.07.2025",
-            paragraphs: [
-                "זהו טקסט דמה מלא ומעמיק לכתבה. כאן יופיע תוכן הכתבה המלא, עם פסקאות שמסבירות את הנושא בצורה ברורה ומפורטת כדי לתת חוויית קריאה מושלמת לגולשים.",
-                "בהמשך הדיונים, הדגישו המומחים כי שיתוף הפעולה בין המגזר הפרטי לציבורי יהיה קריטי להצלחת היעדים החדשים, וימנע משבר אקלימי חמור בעשורים הקרובים.",
-                "בסיום הכתבה ניתן לראות כיצד השפעות אלו מתחילות לבוא לידי ביטוי גם בכלכלות מקומיות ובשוק התעסוקה הגלובלי."
-            ]
-        };
-        this.relatedPosts = [
-            { id: 1, category: "עולם", categoryClass: "tag-blue", title: "פסגת האקלים: מדינות חדשות על יעד חדש", date: "20.07.2025" },
-            { id: 2, category: "סביבה", categoryClass: "tag-green", title: "הטכנולוגיה שמצילה את היערות בעולם", date: "19.07.2025" },
-            { id: 3, category: "טכנולוגיה", categoryClass: "tag-purple", title: "בינה מלאכותית משנה את שוק העבודה...", date: "18.07.2025" }
-        ];
-        this.comments = [
-            { id: 1, name: "נועה ברק", date: "20.07.2025", text: "כתבה מעולה! נותנת זווית חדשה על הנושא." },
-            { id: 2, name: "עידן כהן", date: "19.07.2025", text: "תודה על הכתבה המפורטת והמקיפה." },
-            { id: 3, name: "מיכל רוזן", date: "18.07.2025", text: "מעניין מאוד, מחכה לעדכונים נוספים בנושא." }
-        ];
+        this.repository = repository;
+        this.articleData = null;
+        this.relatedPosts = [];
+        this.comments = [];
+    }
+
+    async loadArticle(id)
+    {
+        this.articleData = await this.repository.getById(id);
+        if (!this.articleData)
+            return null;
+
+        const articles = await this.repository.getAll();
+        this.relatedPosts = articles
+            .filter(article => String(article.id) !== String(id) && article.category === this.articleData.category)
+            .slice(0, 3);
+        this.comments = this.articleData.comments || [];
+        return this.articleData;
     }
 
     getWeatherIcon(iconCode) 
@@ -77,13 +76,16 @@ export class ArticleModel
         }
     }
 
-    addComment(commentObj) 
+    async addComment(commentObj)
     {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                this.comments.unshift(commentObj);
-                resolve(this.comments);
-            }, 300);
-        });
+        const saveComment = () => {
+            this.comments.unshift(commentObj);
+            return this.comments;
+        };
+
+        if (sessionStorage.getItem('username'))
+            return saveComment();
+
+        return submitGuestComment(saveComment);
     }
 }

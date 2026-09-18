@@ -416,3 +416,31 @@
     color: #ffffff;
     border-color: #0055ff;
 }
+
+.article-dialog {
+    width: min(700px, 94vw);
+    max-height: 90vh;
+    margin: auto;
+    padding: 24px;
+    border: 0;
+    border-radius: 12px;
+    overflow-y: auto;
+}
+
+.article-dialog::backdrop { background: rgb(15 23 42 / 50%); }
+.article-dialog form, .article-dialog label { display: flex; flex-direction: column; gap: 8px; }
+.article-dialog form { gap: 16px; }
+.article-dialog input, .article-dialog textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font: inherit;
+}
+.article-dialog textarea { resize: vertical; }
+.dialog-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.dialog-message { color: #b91c1c; }
+.editor-note { white-space: pre-wrap; color: #92400e; }
+.management-message { margin-bottom: 12px; }
+.action-group { flex-wrap: wrap; }
+[hidden] { display: none !important; }

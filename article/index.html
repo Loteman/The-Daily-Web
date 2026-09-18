@@ -37,7 +37,7 @@
             <div class="widget related-posts-widget">
                 <div class="widget-header">
                     <h3>כתבות נוספות</h3>
-                        <a href="#" class="see-all"> הצג הכל←</a>   
+                        <a href="../articlesFeed/index.html" class="see-all"> הצג הכל←</a>
                 </div>
                 
                 <div class="related-post">
@@ -103,9 +103,7 @@
                 </svg>
             </div>
 
-            <p class="article-text"></p>
-            <p class="article-text"></p>
-            <p class="article-text"></p>
+            <div class="article-body"></div>
 
             <div class="comments-section">
                 <h2></h2>
@@ -158,14 +156,7 @@
 
     </main>
 
- <script>
-        fetch('/header/index.html')
-            .then(response => response.text())
-            .then(data => {
-                document.querySelector('.header').innerHTML = data;
-            })
-            .catch(error => console.error('שגיאה בטעינת ההאדר:', error));
-</script>
+<script type="module" src="../header/header.js"></script>
 
 <script type="module" src="article.js"></script>
 

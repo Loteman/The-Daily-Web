@@ -13,7 +13,7 @@ export class ArticleView
         this.authorSpanEl = document.querySelector('.article-details .author span');
         this.dateSpanEl = document.querySelector('.article-details .date span');
         this.categoryDetailSpanEl = document.querySelector('.article-details .category-detail span');
-        this.articleParagraphsEls = document.querySelectorAll('.article-section .article-text');
+        this.articleBodyEl = document.querySelector('.article-body');
 
         this.relatedPostsWidgetEl = document.querySelector('.related-posts-widget');
         this.commentsSectionEl = document.querySelector('.comments-section');
@@ -69,13 +69,27 @@ export class ArticleView
         if (this.categoryDetailSpanEl) 
             this.categoryDetailSpanEl.textContent = article.category;
 
-        if (this.articleParagraphsEls.length > 0) {
-            this.articleParagraphsEls.forEach((pEl, index) => {
-                if (article.paragraphs[index]) {
-                    pEl.textContent = article.paragraphs[index];
-                }
-            });
-        }
+        document.title = `${article.title} - The Web Daily`;
+        this.articleBodyEl.replaceChildren();
+        const paragraphs = article.paragraphs || [article.summary];
+        paragraphs.forEach(text => {
+            const paragraph = document.createElement('p');
+            paragraph.className = 'article-text';
+            paragraph.textContent = text;
+            this.articleBodyEl.appendChild(paragraph);
+        });
+    }
+
+    showArticleError(message)
+    {
+        const section = document.querySelector('.article-section');
+        const title = document.createElement('h1');
+        title.textContent = message;
+        const backLink = document.createElement('a');
+        backLink.href = '../articlesFeed/index.html';
+        backLink.textContent = 'חזרה לכתבות';
+        section.replaceChildren(title, backLink);
+        this.relatedPostsWidgetEl.hidden = true;
     }
 
     renderRelatedPosts(posts) 
@@ -87,11 +101,11 @@ export class ArticleView
         
         posts.forEach(post => {
             postsHtml += `
-                <div class="related-post" data-id="${post.id}">
+                <div class="related-post" data-id="${this.sanitizeInput(String(post.id))}">
                     <div class="post-meta">
-                        <span class="category ${post.categoryClass}">${post.category}</span>
-                        <p class="post-title">${post.title}</p>
-                        <span class="post-date">${post.date}</span>
+                        <span class="category tag-blue">${this.sanitizeInput(post.category)}</span>
+                        <p class="post-title"><a href="?id=${encodeURIComponent(post.id)}">${this.sanitizeInput(post.title)}</a></p>
+                        <span class="post-date">${this.sanitizeInput(post.date)}</span>
                     </div>
                     <div class="post-thumb-placeholder"></div>
                 </div>
