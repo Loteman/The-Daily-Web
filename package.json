@@ -9,16 +9,16 @@
     "seed": "node scripts/seed.js"
   },
   "dependencies": {
-    "express": "",
-    "mongoose": "",
-    "ejs": "",
-    "express-ejs-layouts": "",
+    "axios": "",
     "bcrypt": "",
-    "express-session": "",
     "connect-mongo": "",
+    "dotenv": "^18.0.1",
+    "ejs": "",
+    "express": "",
+    "express-ejs-layouts": "",
     "express-rate-limit": "",
-    "dotenv": "",
-    "axios": ""
+    "express-session": "",
+    "mongoose": "^9.10.1"
   },
   "devDependencies": {
     "nodemon": ""
