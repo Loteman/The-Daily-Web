@@ -30,7 +30,7 @@ export class ArticlesManagementModel
     {
         const articles = await this.getArticles();
         return {
-            categories: ['כל הקטגוריות', ...new Set(articles.map(article => article.category))],
+            categories: ['כל הקטגוריות', ...new Set(articles.map(article => article.category).filter(Boolean))],
             statuses: ['כל הסטטוסים', ...Object.values(statuses).map(status => status[0])]
         };
     }
@@ -81,9 +81,6 @@ export class ArticlesManagementModel
         const summary = fields.summary.trim();
         const category = fields.category.trim();
         const paragraphs = fields.content.split(/\n\s*\n/).map(text => text.trim()).filter(Boolean);
-        if (!title || !summary || !category || !paragraphs.length)
-            throw new Error('יש למלא כותרת, תקציר, קטגוריה ותוכן.');
-
         return this.repository.save({
             ...existing,
             id: existing?.id || 'managed-' + crypto.randomUUID(),
@@ -108,6 +105,9 @@ export class ArticlesManagementModel
             && ['published', 'returned'].includes(status);
         if (!creatorSubmit && !editorReview)
             throw new Error('הפעולה אינה זמינה למשתמש או למצב הכתבה.');
+        if (['pending', 'published'].includes(status)
+            && (!article.title.trim() || !article.summary.trim() || !article.category.trim() || !article.paragraphs.length))
+            throw new Error('יש למלא כותרת, תקציר, קטגוריה ותוכן לפני שליחה לאישור.');
         if (status === 'returned' && !note.trim())
             throw new Error('יש להזין הערה ליוצר לפני החזרה לתיקונים.');
         return this.repository.save({
