@@ -38,6 +38,9 @@ export class ArticlesManagementView
         const form = dialog.querySelector('form');
         form.reset();
         this.editingId = article?.id || null;
+        this.draftDirty = false;
+        this.savePromise = null;
+        clearTimeout(this.autosaveTimer);
         this.dialogMode = mode;
         for (const field of ['title', 'summary', 'category'])
         {
@@ -49,7 +52,7 @@ export class ArticlesManagementView
         dialog.querySelector('.dialog-title').textContent = mode === 'edit' ? 'עריכת כתבה' : 'בדיקת כתבה';
         dialog.querySelector('.editor-note').textContent = article?.editorNote || '';
         dialog.querySelector('.review-note-label').hidden = mode !== 'review';
-        dialog.querySelector('.save-draft').hidden = mode !== 'edit';
+        dialog.querySelector('.autosave-status').textContent = mode === 'edit' ? 'השינויים נשמרים אוטומטית' : '';
         dialog.querySelector('.publish-article').hidden = mode !== 'review';
         dialog.querySelector('.return-article').hidden = mode !== 'review';
         dialog.querySelector('.dialog-message').textContent = '';
@@ -60,14 +63,85 @@ export class ArticlesManagementView
     {
         const dialog = document.querySelector('.article-dialog');
         const form = dialog.querySelector('form');
-        form.addEventListener('submit', event => {
-            event.preventDefault();
-            if (this.dialogMode === 'edit')
-                onSave(this.editingId, Object.fromEntries(new FormData(form)));
+        this.onDraftSave = onSave;
+        form.addEventListener('submit', event => event.preventDefault());
+        form.addEventListener('input', () => {
+            if (this.dialogMode !== 'edit')
+                return;
+            this.draftDirty = true;
+            dialog.querySelector('.autosave-status').textContent = 'שינויים ממתינים לשמירה...';
+            clearTimeout(this.autosaveTimer);
+            this.autosaveTimer = setTimeout(() => this.saveDraftAutomatically(), 600);
         });
-        dialog.querySelector('.close-dialog').addEventListener('click', () => dialog.close());
+
+        const close = async () => {
+            if (await this.saveDraftAutomatically())
+                dialog.close();
+        };
+        dialog.querySelector('.close-dialog').addEventListener('click', close);
+        dialog.addEventListener('cancel', event => {
+            event.preventDefault();
+            close();
+        });
+        window.addEventListener('beforeunload', event => {
+            if (this.draftDirty || this.savePromise)
+            {
+                event.preventDefault();
+                event.returnValue = '';
+            }
+        });
         dialog.querySelector('.publish-article').addEventListener('click', () => onReview(this.editingId, 'published', ''));
         dialog.querySelector('.return-article').addEventListener('click', () => onReview(this.editingId, 'returned', form.elements.editorNote.value));
+    }
+
+    async saveDraftAutomatically()
+    {
+        clearTimeout(this.autosaveTimer);
+        if (this.savePromise)
+            return this.savePromise;
+        if (this.dialogMode !== 'edit' || !this.draftDirty)
+            return true;
+
+        const dialog = document.querySelector('.article-dialog');
+        const form = dialog.querySelector('form');
+        const status = dialog.querySelector('.autosave-status');
+        this.savePromise = (async () => {
+            try
+            {
+                while (this.draftDirty)
+                {
+                    const fields = Object.fromEntries(new FormData(form));
+                    this.draftDirty = false;
+                    if (!this.editingId && !['title', 'summary', 'category', 'content'].some(key => fields[key].trim()))
+                    {
+                        status.textContent = 'השינויים נשמרים אוטומטית';
+                        continue;
+                    }
+                    status.textContent = 'שומר טיוטה...';
+                    const article = await this.onDraftSave(this.editingId, fields);
+                    this.editingId = article.id;
+                }
+                dialog.querySelector('.dialog-message').textContent = '';
+                status.textContent = this.editingId ? 'הטיוטה נשמרה אוטומטית' : '';
+                return true;
+            }
+            catch (error)
+            {
+                this.draftDirty = true;
+                status.textContent = 'הטיוטה לא נשמרה';
+                this.showEditorError(error.message);
+                return false;
+            }
+        })();
+
+        try
+        {
+            return await this.savePromise;
+        }
+        finally
+        {
+            this.savePromise = null;
+        }
     }
 
     closeEditor()
@@ -138,7 +212,7 @@ export class ArticlesManagementView
                     <div class="article-info">
                         <div class="article-img ${article.thumbClass || 'thumb-robot'}"></div>
                         <div class="article-text">
-                            <div class="article-heading">${this.escape(article.title)}</div>
+                            <div class="article-heading">${this.escape(article.title || 'טיוטה ללא כותרת')}</div>
                             <div class="article-sub">${this.escape(article.subtitle)}</div>
                         </div>
                     </div>

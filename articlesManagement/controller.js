@@ -118,20 +118,9 @@ export class ArticlesManagementController
 
     async handleSave(id, fields)
     {
-        try
-        {
-            await this.model.saveDraft(id, fields);
-            this.view.closeEditor();
-            this.view.renderFilters(await this.model.getFilterOptions());
-            this.selectedCategory = 'כל הקטגוריות';
-            this.selectedStatus = 'כל הסטטוסים';
-            await this.updateView();
-            this.view.showMessage('הטיוטה נשמרה.');
-        }
-        catch (error)
-        {
-            this.view.showEditorError(error.message);
-        }
+        const article = await this.model.saveDraft(id, fields);
+        await this.updateView();
+        return article;
     }
 
     async handleReview(id, status, note)
