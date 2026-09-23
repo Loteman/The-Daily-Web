@@ -122,6 +122,11 @@ test('database website workflows on an isolated local replica set', { timeout: 1
         assert.equal(stored.content, 'Reporter comment');
     });
     await t.test('statistics obey ownership, cross-origin writes blocked, logout revokes access', async () => {
+        const filtered = await reporter('/api/statistics?articleId=art_fixture');
+        assert.equal(filtered.status, 200);
+        assert.deepEqual(filtered.body.statuses, { draft: 0, pending: 0, published: 1, returned: 0 });
+        assert.equal(filtered.body.publications.every(item => item.articleId === 'art_fixture'), true);
+        assert.equal((await fetch(fixture.base + '/public/statistics/index.html')).status, 200);
         assert.equal((await reporter('/api/statistics')).body.totalViews, 2);
         assert.equal((await other('/api/statistics')).body.totalViews, 0);
         assert.equal((await other('/api/statistics?articleId=art_fixture')).status, 404);

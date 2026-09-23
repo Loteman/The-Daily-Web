@@ -6,7 +6,7 @@ async function getStatistics(user, articleId) {
   if (articleId && !articles.some(article => article.id === articleId)) throw httpError(404, 'הכתבה לא נמצאה.');
   const ids = articleId ? [articleId] : articles.map(article => article.id);
   const statuses = { draft: 0, pending: 0, published: 0, returned: 0 };
-  articles.forEach(article => { if (article.status in statuses) statuses[article.status]++; });
+  articles.filter(article => ids.includes(article.id)).forEach(article => { if (article.status in statuses) statuses[article.status]++; });
   const dailyViews = await database().collection('Views').aggregate([
     { $match: { articleId: { $in: ids } } },
     { $set: { date: { $convert: { input: '$viewedAt', to: 'date', onError: null, onNull: null } } } },
