@@ -6,7 +6,6 @@ export class ArticlesFeedModel
     {
         this.repository = repository;
         
-        localStorage.removeItem('catalog_read_states');
     }
 
     async getArticles(filters = {}, displayCount = 8) 
@@ -46,18 +45,13 @@ export class ArticlesFeedModel
         });
     }
 
+    async getCategories()
+    {
+        return this.repository.getCategories();
+    }
+
     async toggleReadStatus(id) 
     {
-        const targetId = String(id);
-        const articles = await this.repository.getAll();
-        articles.forEach(art => {
-            if (String(art.id) === targetId)
-                // אם היא כבר הייתה מסומנת, נבטל את הסימון, או נסמן אותה בלבד
-                art.isRead = !art.isRead;
-            else 
-                art.isRead = false; // כל השאר לא מסומנות
-            
-        });
-        return Promise.resolve();
+        return this.repository.recordView(id);
     }
 }

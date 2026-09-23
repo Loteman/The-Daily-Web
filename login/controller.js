@@ -47,8 +47,8 @@ export class LoginController
         // עדכון ה-View בהתאם לתשובה מה-Model
         if (result.success) 
         {
-            sessionStorage.setItem('username', result.username);
-            sessionStorage.setItem('role', result.role);
+            sessionStorage.removeItem('username');
+            sessionStorage.removeItem('role');
             window.location.href = '../articlesFeed/index.html';
         }
         else 

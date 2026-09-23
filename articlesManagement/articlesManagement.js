@@ -1,15 +1,17 @@
-
-import { ArticlesManagementModel } from './model.js';
+﻿import { ArticlesManagementModel } from './model.js';
 import { ArticlesManagementView } from './view.js';
 import { ArticlesManagementController } from './controller.js';
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const model = new ArticlesManagementModel();
-    if (!model.canAccess())
-    {
-        window.location.replace('../login/index.html');
-        return;
-    }
     const view = new ArticlesManagementView();
-    new ArticlesManagementController(model, view);
+    try {
+        if (!await model.initialize()) {
+            window.location.replace('../login/index.html');
+            return;
+        }
+        view.setCategories(model.categories);
+        const controller = new ArticlesManagementController(model, view);
+        await controller.ready;
+    } catch (error) { view.showMessage(error.message); }
 });

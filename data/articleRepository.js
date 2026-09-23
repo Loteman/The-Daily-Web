@@ -1,18 +1,17 @@
-import { ManagementRepository } from './managementRepository.js';
-import { articles } from './articles.js';
+﻿import { api } from './api.js';
 
-// Shared data access for the feed and article page.
-// Later, replace these method bodies with requests to the backend API.
-export class ArticleRepository
-{
-    async getAll()
-    {
-        const managed = await new ManagementRepository().getAll();
-        return [...articles, ...managed.filter(article => article.status === 'published')];
+export class ArticleRepository {
+    async getAll() { return api('/api/articles'); }
+    async getCategories() { return api('/api/categories'); }
+    async getById(id) {
+        try { return await api('/api/articles/' + encodeURIComponent(id)); }
+        catch (error) { if (error.status === 404) return null; throw error; }
     }
-
-    async getById(id)
-    {
-        return (await this.getAll()).find(article => String(article.id) === String(id)) || null;
+    async getComments(id) { return api('/api/articles/' + encodeURIComponent(id) + '/comments'); }
+    async addComment(id, fields) {
+        return api('/api/articles/' + encodeURIComponent(id) + '/comments', { method: 'POST', body: fields });
+    }
+    async recordView(id) {
+        return api('/api/articles/' + encodeURIComponent(id) + '/views', { method: 'POST', body: {} });
     }
 }

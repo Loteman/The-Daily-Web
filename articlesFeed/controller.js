@@ -11,9 +11,18 @@ export class ArticlesFeedController
 
     async init() 
     {
-        this.view.renderCategoryOptions();
-        const featured = await this.model.getArticles({}, 1);
-        this.view.renderFeaturedArticle(featured.articles[0]);
+        this.view.renderFeaturedArticle(null);
+        try
+        {
+            const catalog = await this.model.getArticles({}, Infinity);
+            this.view.renderCategoryOptions((await this.model.getCategories()).map(category => category.name));
+            this.view.renderFeaturedArticle(catalog.articles[0]);
+        }
+        catch (error)
+        {
+            this.view.showLoadError();
+            return;
+        }
         await this.updateView();
 
         this.view.bindFilterChange(() => this.handleFilterChange());
@@ -24,10 +33,18 @@ export class ArticlesFeedController
     async updateView() 
     {
         const filters = this.view.getFilterValues();
-        const result = await this.model.getArticles(filters, this.displayCount);
-        
-        this.view.renderArticles(result.articles);
-        this.view.updateLoadMoreVisibility(result.hasMore);
+        const requestId = this.requestId = (this.requestId || 0) + 1;
+        try
+        {
+            const result = await this.model.getArticles(filters, this.displayCount);
+            if (requestId !== this.requestId) return;
+            this.view.renderArticles(result.articles);
+            this.view.updateLoadMoreVisibility(result.hasMore);
+        }
+        catch (error)
+        {
+            if (requestId === this.requestId) this.view.showLoadError();
+        }
     }
 
     async handleFilterChange() 

@@ -12,7 +12,7 @@ export class ArticlesManagementController
         this.selectedCategory = "כל הקטגוריות";
         this.selectedStatus = "כל הסטטוסים";
 
-        this.init();
+        this.ready = this.init();
     }
 
 
@@ -60,6 +60,7 @@ export class ArticlesManagementController
         this.currentPage = Math.min(this.currentPage, Math.max(1, Math.ceil(filteredArticles.length / this.itemsPerPage)));
         this.view.renderArticles(filteredArticles, this.currentPage, this.itemsPerPage);
         this.view.renderStats(await this.model.calculateStats());
+        this.view.renderAnalytics(await this.model.getStatistics());
     }
 
     async handleSearch(searchTerm) 
@@ -107,6 +108,8 @@ export class ArticlesManagementController
                 await this.updateView();
                 this.view.showMessage('הכתבה נשלחה לאישור.');
             }
+            else if (actionType === 'revise')
+                this.view.openArticle(await this.model.startRevision(articleId), 'edit');
             else
                 this.view.openArticle(article, actionType === 'edit' ? 'edit' : actionType === 'review' ? 'review' : 'preview');
         }

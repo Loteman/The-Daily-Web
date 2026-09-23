@@ -1,36 +1,18 @@
-import { managementArticles } from './managementArticles.js';
+﻿import { api } from './api.js';
 
-export class ManagementRepository
-{
-    async getAll()
-    {
-        const saved = localStorage.getItem('managed_articles');
-        if (saved)
-            return JSON.parse(saved);
-
-        return managementArticles.map(article => ({
-            ...article,
-            id: 'managed-' + article.id,
-            creator: 'admin_creator',
-            author: 'admin_creator',
-            summary: article.subtitle,
-            paragraphs: [article.subtitle],
-            date: '2025-07-22',
-            editorNote: '',
-            views: 0,
-            isRead: false
-        }));
+export class ManagementRepository {
+    getAll() { return api('/api/management/articles'); }
+    getCategories() { return api('/api/categories'); }
+    saveDraft(id, fields) {
+        return api('/api/management/articles' + (id ? '/' + encodeURIComponent(id) : ''), {
+            method: id ? 'PUT' : 'POST', body: fields
+        });
     }
-
-    async save(article)
-    {
-        const articles = await this.getAll();
-        const index = articles.findIndex(item => item.id === article.id);
-        if (index === -1)
-            articles.unshift(article);
-        else
-            articles[index] = article;
-        localStorage.setItem('managed_articles', JSON.stringify(articles));
-        return article;
+    changeStatus(id, fields) {
+        return api('/api/management/articles/' + encodeURIComponent(id) + '/status', { method: 'PATCH', body: fields });
     }
+    startRevision(id, fields) {
+        return api('/api/management/articles/' + encodeURIComponent(id) + '/revisions', { method: 'POST', body: fields });
+    }
+    getStatistics() { return api('/api/statistics'); }
 }

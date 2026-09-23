@@ -1,19 +1,12 @@
-export class LoginModel
-{
-    constructor()
-    {
-        this.users = [
-            { username: 'admin', password: '123456', role: 'editor' },
-            { username: 'admin_creator', password: '123456', role: 'creator' },
-            { username: 'admin_editor', password: '123456', role: 'editor' }
-        ];
-    }
+﻿import { api } from '../data/api.js';
 
-    async validateCredentials(username, password)
-    {
-        const user = this.users.find(user => user.username === username && user.password === password);
-        if (user)
-            return { success: true, username: user.username, role: user.role };
-        return { success: false, message: 'שם המשתמש או הסיסמה שגויים' };
+export class LoginModel {
+    async validateCredentials(username, password) {
+        try {
+            const result = await api('/api/auth/login', { method: 'POST', body: { username, password } });
+            return { success: true, ...result.user };
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
     }
 }

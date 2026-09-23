@@ -1,5 +1,7 @@
 
-export class ArticlesManagementView 
+import { showImage } from '../data/presentation.js';
+
+export class ArticlesManagementView
 {
     constructor() 
     {
@@ -24,12 +26,48 @@ export class ArticlesManagementView
 
     setRole(role)
     {
-        this.newArticleBtn.hidden = role !== 'creator';
+        this.newArticleBtn.hidden = role !== 'reporter';
     }
 
     showMessage(message)
     {
         document.querySelector('.management-message').textContent = message;
+    }
+
+    setCategories(categories)
+    {
+        this.categories = categories;
+        const select = document.querySelector('[name="categoryId"]');
+        select.replaceChildren(...categories.map(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            return option;
+        }));
+    }
+
+    renderAnalytics(statistics)
+    {
+        const container = document.querySelector('.view-statistics');
+        container.innerHTML = `<h2>צפיות בכתבות — ${statistics.totalViews}</h2>
+            <table class="data-table"><thead><tr><th>תאריך</th><th>צפיות</th><th>גרסאות שפורסמו</th></tr></thead><tbody></tbody></table>`;
+        const dates = new Set(statistics.dailyViews.map(day => day.date));
+        const publicationDay = value => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(value));
+        statistics.publications.filter(item => item.publishedAt).forEach(item => dates.add(publicationDay(item.publishedAt)));
+        for (const date of [...dates].sort())
+        {
+            const row = document.createElement('tr');
+            const publications = statistics.publications.filter(item => item.publishedAt && publicationDay(item.publishedAt) === date);
+            for (const value of [date, statistics.dailyViews.find(day => day.date === date)?.views || 0,
+                publications.map(item => item.articleId + ' v' + item.version).join(', ') || '—'])
+            {
+                const cell = document.createElement('td');
+                cell.textContent = value;
+                row.appendChild(cell);
+            }
+            container.querySelector('tbody').appendChild(row);
+        }
+        if (!dates.size) container.append('אין נתוני צפייה עדיין.');
     }
 
     openArticle(article, mode)
@@ -42,11 +80,13 @@ export class ArticlesManagementView
         this.savePromise = null;
         clearTimeout(this.autosaveTimer);
         this.dialogMode = mode;
-        for (const field of ['title', 'summary', 'category'])
+        for (const field of ['title', 'summary', 'mainImage'])
         {
             form.elements[field].value = article?.[field] || '';
             form.elements[field].readOnly = mode !== 'edit';
         }
+        form.elements.categoryId.value = article?.categoryId ?? this.categories[0]?.id ?? '';
+        form.elements.categoryId.disabled = mode !== 'edit';
         form.elements.content.value = (article?.paragraphs || []).join('\n\n');
         form.elements.content.readOnly = mode !== 'edit';
         dialog.querySelector('.dialog-title').textContent = mode === 'edit' ? 'עריכת כתבה' : 'בדיקת כתבה';
@@ -112,7 +152,7 @@ export class ArticlesManagementView
                 {
                     const fields = Object.fromEntries(new FormData(form));
                     this.draftDirty = false;
-                    if (!this.editingId && !['title', 'summary', 'category', 'content'].some(key => fields[key].trim()))
+                    if (!this.editingId && !['title', 'summary', 'mainImage', 'content'].some(key => fields[key].trim()))
                     {
                         status.textContent = 'השינויים נשמרים אוטומטית';
                         continue;
@@ -220,16 +260,17 @@ export class ArticlesManagementView
                 <td>${this.escape(article.category)}</td>
                 <td><span class="badge ${article.badgeClass}">${this.escape(article.statusText)}</span></td>
                 <td class="date-cell">
-                    <div>${article.date}</div>
-                    <div class="time-str">${article.time}</div>
+                    <div>${this.escape(new Date(article.date).toLocaleDateString('he-IL'))}</div>
+                    <div class="time-str">${this.escape(article.time)}</div>
                 </td>
                 <td>
                     <div class="action-group">
-                        ${article.actions.map(action => `<button class="btn-outline action-main-btn" data-id="${article.id}" data-action="${action.type}">${action.label}</button>`).join('')}
+                        ${article.actions.map(action => `<button class="btn-outline action-main-btn" data-id="${this.escape(article.id)}" data-action="${action.type}">${action.label}</button>`).join('')}
                     </div>
                 </td>
             `;
             this.tableBody.appendChild(tr);
+            showImage(tr.querySelector('.article-img'), article.mainImage, article.title);
         });
 
         if (this.paginationSummary) 

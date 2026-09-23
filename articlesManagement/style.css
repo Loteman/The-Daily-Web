@@ -430,7 +430,7 @@
 .article-dialog::backdrop { background: rgb(15 23 42 / 50%); }
 .article-dialog form, .article-dialog label { display: flex; flex-direction: column; gap: 8px; }
 .article-dialog form { gap: 16px; }
-.article-dialog input, .article-dialog textarea {
+.article-dialog input, .article-dialog textarea, .article-dialog select {
     width: 100%;
     padding: 10px;
     border: 1px solid #cbd5e1;

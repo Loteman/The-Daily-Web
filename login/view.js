@@ -24,7 +24,7 @@ export class LoginView
 
     getPassword() 
     {
-        return this.passwordInput.value.trim();
+        return this.passwordInput.value;
     }
 
     setPasswordType(type) 

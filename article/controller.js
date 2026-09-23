@@ -28,6 +28,8 @@ export class ArticleController
         }
         this.view.renderRelatedPosts(this.model.relatedPosts);
         this.view.renderComments(this.model.comments);
+        this.view.setCommentUser(this.model.user);
+        this.model.repository.recordView(id).catch(error => console.error('View tracking failed:', error.message));
 
         this.view.bindCommentSubmit(this.handleCommentSubmit.bind(this));
 
@@ -39,7 +41,8 @@ export class ArticleController
     {
         this.view.clearFormMsg();
 
-        if (author.length < 2) 
+        author = this.model.user?.fullName || author;
+        if (author.length < 2)
         {
             this.view.showFormError("נא להזין שם מלא תקין (לפחות 2 תווים).", 'author');
             return;

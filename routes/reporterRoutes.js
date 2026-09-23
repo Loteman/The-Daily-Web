@@ -1,1 +1,11 @@
-// Reporter-only pages/actions (auth + role guard applied): dashboard, new/edit article, submit for review
+﻿const router = require('express').Router();
+const { requireAuth } = require('../middlewares/auth');
+const { getArticles } = require('../services/articleService');
+const { createDraft, saveDraft, startRevision, changeStatus } = require('../services/managementService');
+router.use(requireAuth);
+router.get('/', async (req, res) => res.json(await getArticles({ user: req.user, management: true })));
+router.post('/', async (req, res) => res.status(201).json(await createDraft(req.user, req.body)));
+router.put('/:id', async (req, res) => res.json(await saveDraft(req.params.id, req.user, req.body)));
+router.post('/:id/revisions', async (req, res) => res.status(201).json(await startRevision(req.params.id, req.user, req.body)));
+router.patch('/:id/status', async (req, res) => res.json(await changeStatus(req.params.id, req.user, req.body)));
+module.exports = router;

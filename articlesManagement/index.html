@@ -27,7 +27,7 @@
             <!-- כרטיס 1 -->
             <div class="stat-card">
                 <div class="stat-content">
-                    <div class="stat-number color-blue">3</div>
+                    <div class="stat-number color-blue">?</div>
                     <div class="stat-label">בהכנה</div>
                 </div>
                 <div class="stat-icon-box bg-blue-light">📄</div>
@@ -36,7 +36,7 @@
             <!-- כרטיס 2 -->
             <div class="stat-card">
                 <div class="stat-content">
-                    <div class="stat-number color-orange">2</div>
+                    <div class="stat-number color-orange">?</div>
                     <div class="stat-label">ממתינות לאישור</div>
                 </div>
                 <div class="stat-icon-box bg-orange-light">🕒</div>
@@ -45,7 +45,7 @@
             <!-- כרטיס 3 -->
             <div class="stat-card">
                 <div class="stat-content">
-                    <div class="stat-number color-green">5</div>
+                    <div class="stat-number color-green">?</div>
                     <div class="stat-label">פורסמו</div>
                 </div>
                 <div class="stat-icon-box bg-green-light">☑️</div>
@@ -54,7 +54,7 @@
             <!-- כרטיס 4 -->
             <div class="stat-card">
                 <div class="stat-content">
-                    <div class="stat-number color-red">1</div>
+                    <div class="stat-number color-red">?</div>
                     <div class="stat-label">הוחזרה לתיקונים</div>
                 </div>
                 <div class="stat-icon-box bg-red-light">📝</div>
@@ -66,7 +66,7 @@
 
             <!-- סרגל כלים וסינון -->
             <div class="toolbar-section">
-                <button class="btn-new-article">
+                <button class="btn-new-article" hidden>
                     <span class="plus-icon">+</span> כתבה חדשה
                 </button>
 
@@ -113,30 +113,21 @@
             <!-- סרגל דפדוף בתחתית -->
             <div class="pagination-bar">
                 <div class="pagination-summary"></div>
-                <div class="pagination-buttons">
-                    <button class="p-btn">&lt;</button>
-                    <button class="p-btn active">1</button>
-                    <button class="p-btn">2</button>
-                    <button class="p-btn">3</button>
-                    <button class="p-btn">&gt;</button>
-                </div>
+                <div class="pagination-buttons"></div>
             </div>
 
         </div>
     </div>
 
+    <section class="view-statistics dashboard-container" aria-live="polite"></section>
     <dialog class="article-dialog">
         <form id="article-form">
             <h2 class="dialog-title"></h2>
             <p class="editor-note"></p>
             <label>כותרת<input name="title" required maxlength="200"></label>
             <label>תקציר<textarea name="summary" required rows="3"></textarea></label>
-            <label>קטגוריה<input name="category" required maxlength="60" list="article-categories"></label>
-            <datalist id="article-categories">
-                <option value="עולם"><option value="כלכלה"><option value="טכנולוגיה">
-                <option value="ספורט"><option value="סביבה"><option value="מדע">
-                <option value="תרבות"><option value="בריאות">
-            </datalist>
+            <label>קטגוריה<select name="categoryId" required></select></label>
+            <label>כתובת תמונה<input name="mainImage" type="url" maxlength="2000"></label>
             <label>תוכן הכתבה<textarea name="content" required rows="10"></textarea></label>
             <label class="review-note-label">הערה ליוצר<textarea name="editorNote" rows="3"></textarea></label>
             <p class="autosave-status" role="status" aria-live="polite"></p>

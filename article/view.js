@@ -1,4 +1,6 @@
-export class ArticleView 
+import { formatDate, showImage } from '../data/presentation.js';
+
+export class ArticleView
 {
     constructor() 
     {
@@ -65,11 +67,12 @@ export class ArticleView
         if (this.authorSpanEl) 
             this.authorSpanEl.textContent = article.author;
         if (this.dateSpanEl) 
-            this.dateSpanEl.textContent = article.date;
+            this.dateSpanEl.textContent = formatDate(article.date);
         if (this.categoryDetailSpanEl) 
             this.categoryDetailSpanEl.textContent = article.category;
 
         document.title = `${article.title} - The Web Daily`;
+        showImage(document.querySelector('.illustration-placeholder'), article.mainImage, article.title);
         this.articleBodyEl.replaceChildren();
         const paragraphs = article.paragraphs || [article.summary];
         paragraphs.forEach(text => {
@@ -105,7 +108,7 @@ export class ArticleView
                     <div class="post-meta">
                         <span class="category tag-blue">${this.sanitizeInput(post.category)}</span>
                         <p class="post-title"><a href="?id=${encodeURIComponent(post.id)}">${this.sanitizeInput(post.title)}</a></p>
-                        <span class="post-date">${this.sanitizeInput(post.date)}</span>
+                        <span class="post-date">${formatDate(post.date)}</span>
                     </div>
                     <div class="post-thumb-placeholder"></div>
                 </div>
@@ -122,12 +125,12 @@ export class ArticleView
         
         comments.forEach(comment => {
             commentsHtml += `
-                <div class="comment" data-id="${comment.id}">
+                <div class="comment" data-id="${this.sanitizeInput(String(comment.id)).replaceAll('"', '&quot;')}">
                     <div class="avatar">👤</div>
                     <div class="comment-content">
                         <div class="comment-details">
                             <span class="user-name">${this.sanitizeInput(comment.name)}</span>
-                            <span class="comment-date">${comment.date}</span>
+                            <span class="comment-date">${this.sanitizeInput(new Date(comment.date).toLocaleString('he-IL'))}</span>
                         </div>
                         <p class="comment-text">${this.sanitizeInput(comment.text)}</p>
                     </div>
@@ -137,7 +140,17 @@ export class ArticleView
         this.commentsSectionEl.innerHTML = commentsHtml;
     }
 
-    showFormError(message, targetField) 
+    setCommentUser(user)
+    {
+        if (user && this.commentAuthorInputEl)
+        {
+            this.commentAuthorInputEl.value = user.fullName || user.username;
+            this.commentAuthorInputEl.defaultValue = this.commentAuthorInputEl.value;
+            this.commentAuthorInputEl.readOnly = true;
+        }
+    }
+
+    showFormError(message, targetField)
     {
         if (!this.formMsgEl) 
             return;

@@ -1,21 +1,19 @@
-// טעינת משתני הסביבה מקובץ ה-.env (חייב להיות בשורה הראשונה)
-require('dotenv').config();
-
-const express = require('express');
+require('dotenv').config({ path: ['.env.local', '.env'] });
+const createApp = require('./app');
 const connectDB = require('./config/db');
 
-const app = express();
+async function start() {
+  await connectDB();
+  const app = createApp();
+  const port = process.env.PORT || 3000;
+  return app.listen(port, () => console.log(`Website running at http://localhost:${port}/articlesFeed/index.html`));
+}
 
-// התחברות למסד הנתונים
-connectDB();
+if (require.main === module) {
+  start().catch(error => {
+    console.error('Server startup failed:', error.name, error.code || '');
+    process.exitCode = 1;
+  });
+}
 
-// Middleware לקריאת JSON
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// כאן מגיעים שאר ה-Routes שלך...
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+module.exports = start;
