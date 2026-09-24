@@ -54,10 +54,32 @@ export class ArticleModel
                 throw new Error('שגיאה באיתור המיקום האוטומטי');
             
             const ipData = await ipResponse.json();
-            const cityName = ipData.city || 'Petah Tikva';
+            const cityName = ipData.city || 'Tel Aviv';
 
-            const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${this.weatherApiKey}&units=metric&lang=he`;
-            const weatherResponse = await fetch(weatherUrl);
+            // שלב 1: המרת שם העיר שחזר מה-IP לקואורדינטות מדויקות דרך ה-Geocoding API
+            const geoUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(cityName)}&limit=1&appid=${this.weatherApiKey}`;
+            const geoResponse = await fetch(geoUrl);
+        
+            if (!geoResponse.ok)
+                throw new Error('שגיאה באיתור קואורדינטות לעיר');
+
+            const geoData = await geoResponse.json();
+        
+            // אם העיר לא נמצאה ב-Geo, ניפול לערך ברירת מחדל או ניקח את Petah Tikva
+            let lat, lon;
+            if (geoData && geoData.length > 0) 
+            {
+                lat = geoData[0].lat;
+                lon = geoData[0].lon;
+            } 
+            else 
+            {
+            // ברירת מחדל במקרה שהעיר מה-IP לא זוהתה (ת"א)
+                lat = 32.0853;
+                lon = 34.7818;
+            }
+
+            const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=he&appid=${this.weatherApiKey}`;            const weatherResponse = await fetch(weatherUrl);
             if (!weatherResponse.ok) 
                 throw new Error('שגיאה בטעינת מזג האוויר');
 

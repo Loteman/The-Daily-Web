@@ -69,6 +69,7 @@ export class LoginView
         messageDiv.style.borderRadius = '6px';
         messageDiv.style.textAlign = 'center';
         messageDiv.style.fontSize = '14px';
+        messageDiv.style.marginBottom = '7px';
         messageDiv.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
         
         if (type === 'error') 

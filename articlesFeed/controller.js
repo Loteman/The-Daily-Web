@@ -4,7 +4,7 @@ export class ArticlesFeedController
     {
         this.model = model;
         this.view = view;
-        this.displayCount = 4; // כמות התחלתית שמוצגת בעמוד
+        this.displayCount = 8; // כמות התחלתית שמוצגת בעמוד
 
         this.init();
     }
