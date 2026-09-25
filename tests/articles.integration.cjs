@@ -42,11 +42,22 @@ test('published articles API and browser repository', async t => {
     assert.deepEqual(await detail.json(), result);
   }
   assert.equal((await fetch(`${base}/api/articles/__missing_article__`)).status, 404);
-  for (const path of ['/articlesFeed/index.html', '/article/index.html', '/data/articleRepository.js', '/header/index.html']) {
+  for (const path of ['/articlesFeed/index.html', '/data/articleRepository.js', '/header/index.html']) {
     assert.equal((await fetch(base + path)).status, 200);
   }
   for (const path of ['/.env', '/config/db.js', '/server.js']) {
     assert.equal((await fetch(base + path)).status, 404);
+  }
+
+  // The article page is server-rendered (EJS) so its full content is in the initial HTML, for SEO/crawlers.
+  assert.equal((await fetch(`${base}/article/index.html`)).status, 404);
+  assert.equal((await fetch(`${base}/article/index.html?id=__missing_article__`)).status, 404);
+  if (expected.length) {
+    const { article, update } = expected[0];
+    const ssrResponse = await fetch(`${base}/article/index.html?id=${encodeURIComponent(article.articleId)}`);
+    assert.equal(ssrResponse.status, 200);
+    const html = await ssrResponse.text();
+    assert.ok(html.includes(`<h1 class="article-title">${update.title ?? article.title ?? ''}</h1>`));
   }
 
   const { pathToFileURL } = require('node:url');

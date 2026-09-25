@@ -3,11 +3,14 @@ const path = require('node:path');
 const createSession = require('./config/session');
 const { loadUser } = require('./middlewares/auth');
 const { getCategories, httpError } = require('./services/schemaService');
+const { getPublishedArticles } = require('./services/articleService');
 const { logError } = require('./utils/logger');
 
 function createApp({ sessionStore } = {}) {
   const app = express();
   app.disable('x-powered-by');
+  app.set('view engine', 'ejs');
+  app.set('views', __dirname);
   app.use(express.json({ limit: '150kb' }));
   app.use('/api', (req, res, next) => {
     res.set('Cache-Control', 'no-store');
@@ -28,6 +31,16 @@ function createApp({ sessionStore } = {}) {
   app.use('/api/statistics', require('./routes/api/statsApi'));
   app.use('/api/users', require('./routes/usersRoutes'));
   app.get('/', (req, res) => res.redirect('/articlesFeed/index.html'));
+  // Server-rendered so an article's full content is in the initial HTML - required for search engines
+  // and link-preview crawlers, which don't execute the client-side JavaScript that fills the page otherwise.
+  app.get('/article/index.html', async (req, res, next) => {
+    try {
+      const id = req.query.id;
+      const [article] = id ? await getPublishedArticles(id) : [];
+      const dateFormatted = article ? new Date(article.date).toLocaleDateString('he-IL') : '';
+      res.status(article ? 200 : 404).render('article/article', { article: article || null, dateFormatted });
+    } catch (error) { next(error); }
+  });
   for (const directory of ['articlesFeed', 'article', 'header', 'login', 'articlesManagement', 'users', 'data', 'public']) {
     app.use('/' + directory, express.static(path.join(__dirname, directory)));
   }
