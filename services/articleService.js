@@ -13,6 +13,30 @@ async function getArticles({
     ...(articleId === undefined ? {} : { articleId }),
     ...(management && user?.role === 'reporter' ? { reporterIdNumber: user.idNumber } : {})
   };
+  const isListing = articleId === undefined;
+  // Views are only needed before pagination when a query actually filters/sorts by them; otherwise
+  // (the common case - default feed and management views) they're fetched afterwards for just the
+  // page being returned, instead of joining every matching article to compute a page of 8-50 rows.
+  const needsViewsUpfront = sortBy === 'popularity' || (!management && isListing && (status === 'read' || status === 'unread'));
+  // Users (author name) is never used for filtering/sorting, so listings always defer it; single-
+  // article lookups keep it inline since there's only one document, so there's no fan-out to save.
+  const deferLookups = isListing;
+  const usersLookupStage = { $lookup: {
+    from: 'Users', let: { reporter: '$reporterIdNumber' },
+    pipeline: [
+      { $match: { $expr: { $eq: ['$idNumber', '$$reporter'] } } },
+      { $project: { _id: 0, username: 1, fullName: 1 } }
+    ], as: 'reporter'
+  } };
+  const viewsLookupStage = { $lookup: {
+    from: 'Views', let: { id: '$articleId' },
+    pipeline: [
+      { $match: { $expr: { $eq: ['$articleId', '$$id'] } } },
+      { $group: { _id: null, total: { $sum: 1 },
+        read: { $max: user ? { $cond: [{ $eq: ['$idNumber', { $literal: user.idNumber }] }, 1, 0] } : 0 }
+      } }
+    ], as: 'viewCount'
+  } };
   const pipeline = [
     { $match: match },
     { $lookup: {
@@ -22,27 +46,13 @@ async function getArticles({
         { $sort: { version: -1, updatedAt: -1, _id: -1 } }, { $limit: 1 }
       ], as: 'currentUpdate'
     } },
-    { $unwind: '$currentUpdate' },
-    { $lookup: {
-      from: 'Users', let: { reporter: '$reporterIdNumber' },
-      pipeline: [
-        { $match: { $expr: { $eq: ['$idNumber', '$$reporter'] } } },
-        { $project: { _id: 0, username: 1, fullName: 1 } }
-      ], as: 'reporter'
-    } },
-    { $lookup: {
-      from: 'Views', let: { id: '$articleId' },
-      pipeline: [
-        { $match: { $expr: { $eq: ['$articleId', '$$id'] } } },
-        { $group: { _id: null, total: { $sum: 1 },
-          read: { $max: user ? { $cond: [{ $eq: ['$idNumber', { $literal: user.idNumber }] }, 1, 0] } : 0 }
-        } }
-      ], as: 'viewCount'
-    } }
+    { $unwind: '$currentUpdate' }
   ];
+  if (!deferLookups) pipeline.push(usersLookupStage);
+  if (!deferLookups || needsViewsUpfront) pipeline.push(viewsLookupStage);
   // Single-article / "my management list" lookups skip search, filters, sort and paging entirely -
   // only the listing endpoints (public feed, management table) ever pass those in.
-  if (articleId === undefined) {
+  if (isListing) {
     if (categoryId !== undefined) {
       pipeline.push({ $match: { $expr: { $eq: [
         { $toString: { $ifNull: ['$currentUpdate.categoryId', '$categoryId'] } }, String(categoryId)
@@ -79,10 +89,34 @@ async function getArticles({
   const facet = limit !== undefined ? (rows[0] || { data: [], totalCount: [] }) : null;
   const total = facet ? facet.totalCount[0]?.count || 0 : undefined;
   const sliced = facet ? facet.data : rows;
+
+  let userMap = new Map(), viewMap = null;
+  if (deferLookups && sliced.length) {
+    const reporterIds = [...new Set(sliced.map(article => article.reporterIdNumber))];
+    const promises = [
+      db.collection('Users').find(
+        { idNumber: { $in: reporterIds } }, { projection: { _id: 0, idNumber: 1, username: 1, fullName: 1 } }
+      ).toArray()
+    ];
+    if (!needsViewsUpfront) {
+      const articleIds = sliced.map(article => article.articleId);
+      promises.push(db.collection('Views').aggregate([
+        { $match: { articleId: { $in: articleIds } } },
+        { $group: { _id: '$articleId', total: { $sum: 1 },
+          read: { $max: user ? { $cond: [{ $eq: ['$idNumber', { $literal: user.idNumber }] }, 1, 0] } : 0 }
+        } }
+      ]).toArray());
+    }
+    const [users, viewRows] = await Promise.all(promises);
+    userMap = new Map(users.map(row => [row.idNumber, row]));
+    if (viewRows) viewMap = new Map(viewRows.map(row => [row._id, row]));
+  }
+
   const categoryMap = new Map(categories.map(item => [String(item.id), item.name]));
   const mapped = sliced.map(article => {
     const update = article.currentUpdate;
-    const reporter = article.reporter[0] || {};
+    const reporter = deferLookups ? (userMap.get(article.reporterIdNumber) || {}) : (article.reporter[0] || {});
+    const viewEntry = viewMap ? viewMap.get(article.articleId) : article.viewCount[0];
     const content = String(update.content || '');
     const date = management ? update.updatedAt : update.publishedAt || update.updatedAt;
     const result = {
@@ -95,8 +129,8 @@ async function getArticles({
       author: reporter.fullName || reporter.username || '',
       date: date || article.createdAt,
       mainImage: update.mainImage ?? article.mainImage ?? '',
-      views: article.viewCount[0]?.total || 0,
-      isRead: Boolean(article.viewCount[0]?.read || (!user && readArticleIds.includes(article.articleId))),
+      views: viewEntry?.total || 0,
+      isRead: Boolean(viewEntry?.read || (!user && readArticleIds.includes(article.articleId))),
       status: update.status, version: update.version, updateId: update.updateId
     };
     if (management) Object.assign(result, {
@@ -139,4 +173,26 @@ async function getRelatedArticles(excludeId, categoryName, limit = 3) {
   return rows.map(row => ({ ...row, category: categoryName }));
 }
 
-module.exports = { getArticles, getPublishedArticles, getRelatedArticles };
+// Lightweight lookup for the statistics screen: only the id + current status of every article the
+// user can manage, no Users/Views lookups and no content - the full getArticles({management:true})
+// pipeline was overkill just to count statuses and know which article ids to aggregate views for.
+// A $lookup-per-article (like getArticles uses) re-runs a sub-query for each of the user's articles
+// one at a time, which doesn't scale; grouping directly on Updates does it in a single indexed pass.
+async function getManagementStatuses(user) {
+  const db = database();
+  let match = {};
+  if (user?.role === 'reporter') {
+    const owned = await db.collection('Articles').find(
+      { reporterIdNumber: user.idNumber }, { projection: { _id: 0, articleId: 1 } }
+    ).toArray();
+    match = { articleId: { $in: owned.map(row => row.articleId) } };
+  }
+  return db.collection('Updates').aggregate([
+    { $match: match },
+    { $sort: { articleId: 1, version: -1, updatedAt: -1, _id: -1 } },
+    { $group: { _id: '$articleId', status: { $first: '$status' } } },
+    { $project: { _id: 0, id: '$_id', status: 1 } }
+  ]).toArray();
+}
+
+module.exports = { getArticles, getPublishedArticles, getRelatedArticles, getManagementStatuses };

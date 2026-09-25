@@ -27,8 +27,8 @@ export class ArticlesManagementController
         const filterOptions = this.model.getFilterOptions();
         this.view.renderFilters(filterOptions);
 
-        await this.refreshStats();
-        await this.loadPage(1);
+        // Neither depends on the other, so run them together instead of one after the other.
+        await Promise.all([this.refreshStats(), this.loadPage(1)]);
         this.view.setLoading(false);
 
         this.view.bindSearchEvent(this.handleSearch.bind(this));
@@ -60,8 +60,7 @@ export class ArticlesManagementController
 
     async updateView()
     {
-        await this.loadPage(this.currentPage);
-        await this.refreshStats();
+        await Promise.all([this.loadPage(this.currentPage), this.refreshStats()]);
     }
 
     async handleSearch(searchTerm)

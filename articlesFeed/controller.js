@@ -13,21 +13,32 @@ export class ArticlesFeedController
     async init()
     {
         this.view.renderFeaturedArticle(null);
+        this.articles = [];
+        this.skip = 0;
+        this.hasMore = true;
         try
         {
-            const [categories, featured] = await Promise.all([
+            // All three are independent of each other (the featured article and first page never
+            // depend on filters at this point), so fetching them together turns 2 sequential
+            // round-trips to the database into 1 - the single biggest cost on this page's load time.
+            const [categories, featured, page] = await Promise.all([
                 this.model.getCategories(),
-                this.model.getArticles({}, 0, 1) // הכתבה המובילה קבועה, לא תלויה בסינון
+                this.model.getArticles({}, 0, 1), // הכתבה המובילה קבועה, לא תלויה בסינון
+                this.model.getArticles({}, 0, this.pageSize)
             ]);
             this.view.renderCategoryOptions(categories.map(category => category.name));
             this.view.renderFeaturedArticle(featured.articles[0] || null);
+            this.skip = page.articles.length;
+            this.hasMore = page.hasMore;
+            this.articles = page.articles;
+            this.view.renderArticles(this.articles);
+            this.view.updateLoadMoreVisibility(this.hasMore);
         }
         catch (error)
         {
             this.view.showLoadError();
             return;
         }
-        await this.resetAndLoad();
 
         this.view.bindFilterChange(() => this.handleFilterChange());
         this.view.bindArticleClick((id) => this.handleArticleClick(id));
