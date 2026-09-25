@@ -10,7 +10,7 @@ export class ArticlesManagementView
         this.tableBody = document.querySelector('.data-table tbody');
         this.searchInput = document.querySelector('.search-box input');
         this.newArticleBtn = document.querySelector('.btn-new-article');
-        this.selectElements = document.querySelectorAll('.custom-select select');
+        this.selectElements = document.querySelectorAll('.filter-group select');
         this.paginationContainer = document.querySelector('.pagination-buttons');
         this.paginationSummary = document.querySelector('.pagination-summary');
         
@@ -20,8 +20,7 @@ export class ArticlesManagementView
 
     renderUserProfile(user)
     {
-        document.querySelector('.page-title').textContent = user.role + ' — ניהול כתבות';
-        document.querySelector('.page-subtitle').textContent = user.name;
+        document.querySelector('.page-title').textContent = user.role + ' - ניהול כתבות';
     }
 
     setRole(role)
@@ -29,10 +28,7 @@ export class ArticlesManagementView
         this.newArticleBtn.hidden = role !== 'reporter';
     }
 
-    showMessage(message)
-    {
-        document.querySelector('.management-message').textContent = message;
-    }
+    
 
     setCategories(categories)
     {

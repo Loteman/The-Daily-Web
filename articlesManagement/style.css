@@ -186,7 +186,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    flex-wrap:wrap;
+
 }
 
 .btn-new-article {
@@ -203,26 +204,30 @@
     gap: 8px;
 }
 
-.filter-controls {
+.filter-bar {
     display: flex;
-    gap: 12px;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 20px;
 }
 
-.custom-select {
-    position: relative;
+.filter-group {
     display: flex;
     align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #475569;
 }
 
-.custom-select select {
-    padding: 10px 40px 10px 30px;
-    border: 1px solid #cbd5e1;
-    border-radius: 10px;
+.filter-group select {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
     background-color: #ffffff;
+    font-family: inherit;
     font-size: 14px;
-    color: #334155;
+    color: #1e293b;
     outline: none;
-    appearance: none;
     cursor: pointer;
 }
 
@@ -240,26 +245,36 @@
     font-size: 11px;
 }
 
-.search-box {
-    position: relative;
-}
 
-.search-box input {
-    padding: 10px 16px 10px 38px;
-    border: 1px solid #cbd5e1;
-    border-radius: 10px;
-    font-size: 14px;
-    width: 280px;
-    outline: none;
+.search-bar {
+    flex: 1; 
+    max-width: 300px; 
+    display: flex;
+    align-items: center;
 }
 
 .search-icon {
     position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #94a3b8;
+    right: 14px;
     font-size: 14px;
+    color: #94a3b8;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 9px 40px 9px 15px;
+    border: 1px solid #cbd5e1;
+    border-radius: 20px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    background-color: #f8fafc;
+    transition: all 0.2s;
+}
+
+.search-bar input:focus {
+    border-color: #2563eb;
+    background-color: #ffffff;
 }
 
 /* עיצוב הטבלה */
@@ -441,6 +456,5 @@
 .dialog-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .dialog-message { color: #b91c1c; }
 .editor-note { white-space: pre-wrap; color: #92400e; }
-.management-message { margin-bottom: 12px; }
 .action-group { flex-wrap: wrap; }
 [hidden] { display: none !important; }
