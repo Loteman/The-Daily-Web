@@ -13,5 +13,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         view.setCategories(model.categories);
         const controller = new ArticlesManagementController(model, view);
         await controller.ready;
-    } catch (error) { view.showMessage(error.message); }
+    } catch (error) { console.log(error); }
 });

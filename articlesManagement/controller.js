@@ -60,7 +60,6 @@ export class ArticlesManagementController
         this.currentPage = Math.min(this.currentPage, Math.max(1, Math.ceil(filteredArticles.length / this.itemsPerPage)));
         this.view.renderArticles(filteredArticles, this.currentPage, this.itemsPerPage);
         this.view.renderStats(await this.model.calculateStats());
-        this.view.renderAnalytics(await this.model.getStatistics());
     }
 
     async handleSearch(searchTerm) 
