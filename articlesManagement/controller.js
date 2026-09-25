@@ -1,7 +1,6 @@
-
-export class ArticlesManagementController 
+export class ArticlesManagementController
 {
-    constructor(model, view) 
+    constructor(model, view)
     {
         this.model = model;
         this.view = view;
@@ -16,19 +15,21 @@ export class ArticlesManagementController
     }
 
 
-    async init() 
+    async init()
     {
+        // The remote database round-trips (stats + first page) take a couple of seconds - without this
+        // message the stat cards just sit on their static "?" placeholders and look broken/stuck.
+        this.view.showMessage('טוען נתונים...');
         const user = await this.model.getUserProfile();
         this.view.renderUserProfile(user);
         this.view.setRole(this.model.role);
 
-        const stats = await this.model.calculateStats();
-        this.view.renderStats(stats);
-
-        const filterOptions = await this.model.getFilterOptions();
+        const filterOptions = this.model.getFilterOptions();
         this.view.renderFilters(filterOptions);
 
-        await this.updateView();
+        await this.refreshStats();
+        await this.loadPage(1);
+        this.view.showMessage('');
 
         this.view.bindSearchEvent(this.handleSearch.bind(this));
         this.view.bindFilterEvents(this.handleCategoryChange.bind(this), this.handleStatusChange.bind(this));
@@ -38,55 +39,52 @@ export class ArticlesManagementController
         this.view.bindEditor(this.handleSave.bind(this), this.handleReview.bind(this), this.model.getPublished.bind(this.model));
     }
 
-    async getFilteredArticles() 
+    async refreshStats()
     {
-        const articles = await this.model.getArticles();
-        
-        return articles.filter(article => {
-            const matchesSearch = article.title.toLowerCase().includes(this.currentSearch.toLowerCase()) || 
-                                  article.category.toLowerCase().includes(this.currentSearch.toLowerCase());
-            
-            const matchesCategory = this.selectedCategory === "כל הקטגוריות" || article.category === this.selectedCategory;
-            
-            const matchesStatus = this.selectedStatus === "כל הסטטוסים" || article.statusText === this.selectedStatus;
-
-            return matchesSearch && matchesCategory && matchesStatus;
-        });
-    }
-
-    async updateView() 
-    {
-        const filteredArticles = await this.getFilteredArticles();
-        this.currentPage = Math.min(this.currentPage, Math.max(1, Math.ceil(filteredArticles.length / this.itemsPerPage)));
-        this.view.renderArticles(filteredArticles, this.currentPage, this.itemsPerPage);
         this.view.renderStats(await this.model.calculateStats());
     }
 
-    async handleSearch(searchTerm) 
+    // Search/filter/sort/paging all run server-side - only the current page's articles are ever fetched.
+    async loadPage(page)
+    {
+        this.currentPage = page;
+        const skip = (page - 1) * this.itemsPerPage;
+        const filters = {
+            search: this.currentSearch,
+            category: this.selectedCategory === "כל הקטגוריות" ? '' : this.selectedCategory,
+            status: this.selectedStatus === "כל הסטטוסים" ? '' : this.selectedStatus
+        };
+        const result = await this.model.search(filters, skip, this.itemsPerPage);
+        this.view.renderArticles(result.articles, this.currentPage, this.itemsPerPage, result.total);
+    }
+
+    async updateView()
+    {
+        await this.loadPage(this.currentPage);
+        await this.refreshStats();
+    }
+
+    async handleSearch(searchTerm)
     {
         this.currentSearch = searchTerm;
-        this.currentPage = 1;
-        await this.updateView();
+        await this.loadPage(1);
     }
 
-    async handleCategoryChange(category) 
+    async handleCategoryChange(category)
     {
         this.selectedCategory = category;
-        this.currentPage = 1;
-        await this.updateView();
+        await this.loadPage(1);
     }
 
-    async handleStatusChange(status) 
+    async handleStatusChange(status)
     {
         this.selectedStatus = status;
-        this.currentPage = 1;
-        await this.updateView();
+        await this.loadPage(1);
     }
 
-    async handlePageChange(newPage) 
+    async handlePageChange(newPage)
     {
-        this.currentPage = newPage;
-        await this.updateView();
+        await this.loadPage(newPage);
     }
 
     handleNewArticle()

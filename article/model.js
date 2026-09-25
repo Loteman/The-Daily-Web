@@ -29,10 +29,7 @@ export class ArticleModel
 
     async loadRelatedPosts(id)
     {
-        const articles = await this.repository.getAll();
-        this.relatedPosts = articles
-            .filter(article => String(article.id) !== String(id) && article.category === this.articleData.category)
-            .slice(0, 3);
+        this.relatedPosts = await this.repository.getRelated(id, this.articleData.category, 3);
         return this.relatedPosts;
     }
 

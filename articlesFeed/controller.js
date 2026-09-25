@@ -1,48 +1,60 @@
-export class ArticlesFeedController 
+export class ArticlesFeedController
 {
-    constructor(model, view) 
+    constructor(model, view)
     {
         this.model = model;
         this.view = view;
-        this.displayCount = 8; // Initial count shown on the page
+        this.pageSize = 8;      // כמות התחלתית שמוצגת בעמוד
+        this.loadMoreSize = 20; // כתבות נוספות בכל טעינה בגלילה
 
         this.ready = this.init();
     }
 
-    async init() 
+    async init()
     {
         this.view.renderFeaturedArticle(null);
         try
         {
-            const [catalog, categories] = await Promise.all([
-                this.model.getArticles({}, this.displayCount),
-                this.model.getCategories()
+            const [categories, featured] = await Promise.all([
+                this.model.getCategories(),
+                this.model.getArticles({}, 0, 1) // הכתבה המובילה קבועה, לא תלויה בסינון
             ]);
             this.view.renderCategoryOptions(categories.map(category => category.name));
-            this.view.renderFeaturedArticle(catalog.articles[0]);
+            this.view.renderFeaturedArticle(featured.articles[0] || null);
         }
         catch (error)
         {
             this.view.showLoadError();
             return;
         }
-        await this.updateView();
+        await this.resetAndLoad();
 
         this.view.bindFilterChange(() => this.handleFilterChange());
         this.view.bindArticleClick((id) => this.handleArticleClick(id));
         this.view.bindLoadMore(() => this.handleLoadMore());
     }
 
-    async updateView() 
+    async resetAndLoad()
+    {
+        this.articles = [];
+        this.skip = 0;
+        this.hasMore = true;
+        await this.loadPage(this.pageSize);
+    }
+
+    async loadPage(limit)
     {
         const filters = this.view.getFilterValues();
         const requestId = this.requestId = (this.requestId || 0) + 1;
         try
         {
-            const result = await this.model.getArticles(filters, this.displayCount);
+            const result = await this.model.getArticles(filters, this.skip, limit);
             if (requestId !== this.requestId) return;
-            this.view.renderArticles(result.articles);
-            this.view.updateLoadMoreVisibility(result.hasMore);
+            this.skip += result.articles.length;
+            this.hasMore = result.hasMore;
+            this.articles = [...this.articles, ...result.articles];
+            this.view.renderArticles(this.articles);
+            this.view.updateLoadMoreVisibility(this.hasMore);
         }
         catch (error)
         {
@@ -50,20 +62,18 @@ export class ArticlesFeedController
         }
     }
 
-    async handleFilterChange() 
+    async handleFilterChange()
     {
-        this.displayCount = 8; // Reset the load count when filters change
-        await this.updateView();
+        await this.resetAndLoad();
     }
 
-    async handleArticleClick(id) 
+    async handleArticleClick(id)
     {
         window.location.href = `../article/index.html?id=${encodeURIComponent(id)}`;
     }
 
-    async handleLoadMore() 
+    async handleLoadMore()
     {
-        this.displayCount += 20; // Load more articles to display
-        await this.updateView();
+        await this.loadPage(this.loadMoreSize);
     }
 }

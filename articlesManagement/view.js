@@ -279,27 +279,24 @@ export class ArticlesManagementView
         }
     }
 
-    renderArticles(articles, currentPage, itemsPerPage) 
+    // articles is already just the current page's rows (server-side paging); total is the full matching count.
+    renderArticles(articles, currentPage, itemsPerPage, total)
     {
-        if (!this.tableBody) 
+        if (!this.tableBody)
             return;
         this.tableBody.innerHTML = '';
 
-        if (articles.length === 0) 
+        if (articles.length === 0)
         {
             this.tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; padding: 20px;">לא נמצאו כתבות</td></tr>`;
-            if (this.paginationSummary) 
+            if (this.paginationSummary)
                 this.paginationSummary.textContent = `מציג 0 מתוך 0 כתבות`;
-            if (this.paginationContainer) 
+            if (this.paginationContainer)
                 this.paginationContainer.innerHTML = '';
             return;
         }
 
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        const endIndex = startIndex + itemsPerPage;
-        const paginatedArticles = articles.slice(startIndex, endIndex);
-
-        paginatedArticles.forEach(article => {
+        articles.forEach(article => {
             const tr = document.createElement('tr');
             
             tr.innerHTML = `
@@ -328,10 +325,10 @@ export class ArticlesManagementView
             showImage(tr.querySelector('.article-img'), article.mainImage, article.title);
         });
 
-        if (this.paginationSummary) 
-            this.paginationSummary.textContent = `מציג ${paginatedArticles.length} מתוך ${articles.length} כתבות`;
+        if (this.paginationSummary)
+            this.paginationSummary.textContent = `מציג ${articles.length} מתוך ${total} כתבות`;
 
-        this.renderPaginationControls(articles.length, itemsPerPage, currentPage);
+        this.renderPaginationControls(total, itemsPerPage, currentPage);
     }
 
     renderPaginationControls(totalItems, itemsPerPage, currentPage) 

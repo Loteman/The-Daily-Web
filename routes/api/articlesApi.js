@@ -1,10 +1,19 @@
 ﻿const router = require('express').Router();
 const { randomUUID } = require('node:crypto');
-const { getPublishedArticles } = require('../../services/articleService');
+const { getPublishedArticles, getArticles, getRelatedArticles } = require('../../services/articleService');
 const { database, httpError } = require('../../services/schemaService');
 
 router.get('/', async (req, res) => {
-  res.json(await getPublishedArticles(undefined, req.user, req.session.readArticleIds || []));
+  const { search = '', category = '', status = '', sort } = req.query;
+  const readArticleIds = req.session.readArticleIds || [];
+  // limit is opt-in: pass it to get { articles, hasMore } paging, omit it for the full list (tests, etc.).
+  const limit = req.query.limit === undefined ? undefined : Math.min(Math.max(parseInt(req.query.limit, 10) || 20, 1), 50);
+  const skip = Math.max(parseInt(req.query.skip, 10) || 0, 0);
+  res.json(await getArticles({ user: req.user, readArticleIds, search, category, status, sortBy: sort, skip, limit }));
+});
+router.get('/:id/related', async (req, res) => {
+  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 3, 1), 10);
+  res.json(await getRelatedArticles(req.params.id, req.query.category || '', limit));
 });
 router.use('/:id/comments', require('./commentsApi'));
 router.post('/:id/views', async (req, res) => {
