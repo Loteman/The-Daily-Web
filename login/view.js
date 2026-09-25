@@ -11,7 +11,7 @@ export class LoginView
         this.initFormPosition();
     }
 
-    // לוודא שהטופס תומך בהודעות absolute
+    // Make sure the form supports absolutely positioned messages
     initFormPosition() 
     {
         this.loginForm.style.position = 'relative';
@@ -56,10 +56,10 @@ export class LoginView
         const messageDiv = document.createElement('div');
         messageDiv.className = `form-message ${type}`;
         
-        // הצגת הודעה כטקסט בלבד
+        // Show the message as plain text only
         messageDiv.textContent = text;
         
-        // עיצוב הודעה
+        // Message styling
         messageDiv.style.position = 'absolute';
         messageDiv.style.bottom = '-55px';
         messageDiv.style.left = '0';
@@ -86,7 +86,7 @@ export class LoginView
         this.loginForm.appendChild(messageDiv);
     }
 
-    // הוספת מאזינים לאירועים ושליחתם הלאה ל-Controller
+    // Wire up event listeners and forward them to the Controller
     bindTogglePassword(handler) 
     {
         this.togglePasswordBtn.addEventListener('click', handler);

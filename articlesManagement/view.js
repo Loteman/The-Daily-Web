@@ -188,10 +188,10 @@ export class ArticlesManagementView
     {
         if (this.statNumbers.length >= 4) 
         {
-            this.statNumbers[0].textContent = stats.draft;     // בהכנה
-            this.statNumbers[1].textContent = stats.pending;   // ממתינות לאישור
-            this.statNumbers[2].textContent = stats.published; // פורסמו
-            this.statNumbers[3].textContent = stats.returned;  // הוחזרה לתיקונים
+            this.statNumbers[0].textContent = stats.draft;     // draft
+            this.statNumbers[1].textContent = stats.pending;   // pending
+            this.statNumbers[2].textContent = stats.published; // published
+            this.statNumbers[3].textContent = stats.returned;  // returned
         }
     }
 

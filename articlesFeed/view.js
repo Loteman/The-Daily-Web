@@ -161,7 +161,7 @@ export class ArticlesFeedView
     {
         if (this.articlesGrid) 
         {
-            // מאזין ישירות לחיצות על כרטיסיות הכתבות מבלי לדרוס את הרשת
+            // Listens directly for clicks on article cards without re-rendering the grid
             this.articlesGrid.addEventListener('click', (event) => {
                 const card = event.target.closest('.article-card');
                 if (card && handler) 

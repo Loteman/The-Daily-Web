@@ -1,4 +1,4 @@
-/* איפוס הגדרות ברירת מחדל */
+/* Reset default settings */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -13,7 +13,7 @@ body {
 }
 
 /* ---------------------------------------------------- */
-/* כותרת עליונה אחידה לכל העמודים (Unified Header) */
+/* Unified Header for all pages */
 /* ---------------------------------------------------- */
 .header {
     background-color: #ffffff;

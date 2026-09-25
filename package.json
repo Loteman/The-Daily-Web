@@ -6,7 +6,6 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "seed": "node scripts/seed.js",
     "test:integration": "node --test tests/articles.integration.cjs",
     "test": "node --test tests/workflows.test.cjs tests/feed.test.cjs tests/article-loading.test.cjs",
     "audit:schema": "node scripts/audit-schema.cjs"
@@ -16,9 +15,7 @@
     "bcrypt": "",
     "connect-mongo": "",
     "dotenv": "^18.0.1",
-    "ejs": "",
     "express": "",
-    "express-ejs-layouts": "",
     "express-rate-limit": "",
     "express-session": "",
     "mongoose": "^9.10.1"

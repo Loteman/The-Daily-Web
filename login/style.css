@@ -1,11 +1,11 @@
-/* איפוס הגדרות ברירת מחדל */
+/* Reset default settings */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
-/* הגדרות גוף העמוד - שימוש בפונטים מובנים במערכת בלבד */
+/* Page body settings - system fonts only */
 body {
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: #f4f7f9;
@@ -16,7 +16,7 @@ body {
     color: #333;
 }
 
-/* הכרטיסייה הראשית */
+/* Main card */
 .card-container {
     display: flex;
     background-color: #ffffff;
@@ -28,7 +28,7 @@ body {
 }
 
 /* -------------------------------- */
-/* צד ימין - אזור הטופס (ראשון ב-RTL) */
+/* Right side - form area (first in RTL) */
 /* -------------------------------- */
 .form-section {
     flex: 1;
@@ -67,7 +67,7 @@ body {
 
 .input-group input {
     width: 100%;
-    padding: 14px 42px 14px 14px; /* ריווח מצד ימין לאייקון */
+    padding: 14px 42px 14px 14px; /* space on the right for the icon */
     border: 1px solid #d1d5db;
     border-radius: 8px;
     font-size: 15px;
@@ -80,12 +80,12 @@ body {
     border-color: #2563eb;
 }
 
-/* ריווח משמאל בשדה סיסמה עבור אייקון העין */
+/* Left spacing in the password field for the eye icon */
 .input-group input[type="password"] {
     padding-left: 42px; 
 }
 
-/* מיקום האייקונים בתוך השדות */
+/* Icon positioning inside the fields */
 .icon-right {
     position: absolute;
     right: 14px;
@@ -140,7 +140,7 @@ body {
 
 
 /* -------------------------------- */
-/* צד שמאל - אזור המיתוג */
+/* Left side - branding area */
 /* -------------------------------- */
 .brand-section {
     flex: 1;
@@ -155,7 +155,7 @@ body {
 .brand-header {
     width: 100%;
     text-align: left;
-    direction: ltr; /* אנגלית משמאל לימין */
+    direction: ltr; /* English, left to right */
 }
 
 .brand-title {
@@ -188,7 +188,7 @@ body {
 
 
 
-/* התאמה למסכים קטנים */
+/* Small screens */
 @media (max-width: 768px) {
     .card-container {
         flex-direction: column-reverse;

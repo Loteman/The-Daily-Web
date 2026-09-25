@@ -2,8 +2,8 @@
 
 async function loadHeader() {
     try {
-        // נשלף במקביל: כך שם המשתמש והרשאות התפריט כבר ידועים לפני שההדר מצטייר בכלל,
-        // במקום להציג רגע אחד מצב "אורח"/תפריט קודם ואז להחליף אותו (הבהוב בעת מעבר בין משתמשים).
+        // Fetched in parallel so the username and menu permissions are already known before the header
+        // renders, instead of briefly showing a stale guest/previous state and then swapping it (a flash when switching users).
         const [response, user] = await Promise.all([fetch('/header/index.html'), currentUser()]);
         if (!response.ok) throw new Error('Could not load the header.');
         const header = document.querySelector('.header');

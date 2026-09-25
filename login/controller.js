@@ -5,7 +5,7 @@ export class LoginController
         this.model = model;
         this.view = view;
 
-        // חיבור האירועים מה-View לפונקציות ב-Controller
+        // Wire up events from the View to Controller functions
         this.view.bindTogglePassword(this.handleTogglePassword.bind(this));
         this.view.bindLoginSubmit(this.handleLoginSubmit.bind(this));
     }
@@ -31,7 +31,7 @@ export class LoginController
         const rawUsername = this.view.getUsername();
         const rawPassword = this.view.getPassword();
 
-        // בדיקת הקלט מול המודל
+        // Validate input before passing to the Model
         const cleanUsername = rawUsername.trim();
         const cleanPassword = rawPassword;
 
@@ -41,10 +41,10 @@ export class LoginController
             return;
         }
 
-        // פנייה ל-Model לבדיקת הנתונים
+        // Ask the Model to validate the data
         const result = await this.model.validateCredentials(cleanUsername, cleanPassword);
 
-        // עדכון ה-View בהתאם לתשובה מה-Model
+        // Update the View according to the Model's response
         if (result.success) 
         {
             sessionStorage.removeItem('username');

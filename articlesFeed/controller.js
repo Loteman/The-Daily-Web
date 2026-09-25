@@ -4,7 +4,7 @@ export class ArticlesFeedController
     {
         this.model = model;
         this.view = view;
-        this.displayCount = 8; // כמות התחלתית שמוצגת בעמוד
+        this.displayCount = 8; // Initial count shown on the page
 
         this.ready = this.init();
     }
@@ -52,7 +52,7 @@ export class ArticlesFeedController
 
     async handleFilterChange() 
     {
-        this.displayCount = 8; // איפוס ספירת הטעינה בשינוי סינון
+        this.displayCount = 8; // Reset the load count when filters change
         await this.updateView();
     }
 
@@ -63,7 +63,7 @@ export class ArticlesFeedController
 
     async handleLoadMore() 
     {
-        this.displayCount += 20; // מוסיף עוד כתבות להצגה
+        this.displayCount += 20; // Load more articles to display
         await this.updateView();
     }
 }

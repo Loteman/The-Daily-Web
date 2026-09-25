@@ -1,4 +1,4 @@
-/* איפוס הגדרות ברירת מחדל */
+/* Reset default settings */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -12,7 +12,7 @@ body {
     line-height: 1.5;
 }
 
-/* קונטיינרים ראשיים */
+/* Main containers */
 .header-container, .main-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -20,7 +20,7 @@ body {
 }
 
 /* -------------------------------- */
-/* כותרת עליונה (Header) */
+/* Header */
 /* -------------------------------- */
 .header {
     background-color: #ffffff;
@@ -105,14 +105,14 @@ body {
 }
 
 /* -------------------------------- */
-/* תוכן מרכזי (Main Content) */
+/* Main Content */
 /* -------------------------------- */
 .main-container {
     margin-top: 30px;
     margin-bottom: 50px;
 }
 
-/* כתבה ראשית (Hero Card) */
+/* Hero Card */
 .hero-card {
     display: flex;
     background-color: #ffffff;
@@ -175,7 +175,7 @@ body {
 }
 
 /* -------------------------------- */
-/* סרגל סינון (Filter Bar) */
+/* Filter Bar */
 /* -------------------------------- */
 .articles-view-settings{
     display: flex;
@@ -219,7 +219,7 @@ body {
 }
 
 /* -------------------------------- */
-/* תגיות קטגוריה (Badges) */
+/* Category Badges */
 /* -------------------------------- */
 .category {
     font-size: 12px;
@@ -240,7 +240,7 @@ body {
 .tag-coral { background-color: #dc2626; }
 
 /* -------------------------------- */
-/* גריד כתבות (Articles Grid) */
+/* Articles Grid */
 /* -------------------------------- */
 .articles-grid {
     display: grid;
@@ -299,7 +299,7 @@ body {
 }
 
 /* -------------------------------- */
-/* כפתור טעינת עוד */
+/* Load more button */
 /* -------------------------------- */
 .load-more-container {
     min-height: 1px;
@@ -308,7 +308,7 @@ body {
 }
 
 /* -------------------------------- */
-/* התאמה לרשת/מובייל (Responsive) */
+/* Responsive */
 /* -------------------------------- */
 @media (max-width: 1024px) {
     .articles-grid {

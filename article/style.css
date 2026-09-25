@@ -1,11 +1,11 @@
-/* איפוס הגדרות ברירת מחדל */
+/* Reset default settings */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
-/* הגדרות גוף העמוד - שימוש בפונטים מובנים במערכת בלבד */
+/* Page body settings - system fonts only */
 body {
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     background-color: #f4f7f9;
@@ -13,7 +13,7 @@ body {
     line-height: 1.6;
 }
 
-/* קונטיינרים ראשיים */
+/* Main containers */
 .header-container, .main-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -21,7 +21,7 @@ body {
 }
 
 /* -------------------------------- */
-/* כותרת עליונה (Header) */
+/* Header */
 /* -------------------------------- */
 .header {
     background-color: #ffffff;
@@ -49,7 +49,7 @@ body {
 .logo-subtitle {
     font-size: 12px;
     color: #64748b;
-    direction: ltr; /* אנגלית */
+    direction: ltr; /* English */
 }
 
 .header-center {
@@ -103,7 +103,7 @@ body {
 }
 
 /* -------------------------------- */
-/* התוכן הראשי (Main content layout) */
+/* Main content layout */
 /* -------------------------------- */
 .main-container {
     display: flex;
@@ -112,10 +112,10 @@ body {
 }
 
 /* -------------------------------- */
-/* סרגל צד (Sidebar) */
+/* Sidebar */
 /* -------------------------------- */
 .sidebar {
-    flex: 0 0 300px; /* רוחב קבוע */
+    flex: 0 0 300px; /* fixed width */
     margin-left: 30px;
 }
 
@@ -149,7 +149,7 @@ body {
     text-decoration: underline;
 }
 
-/* מזג אוויר */
+/* Weather */
 .weather-header {
     display: flex;
     justify-content: space-between;
@@ -193,7 +193,7 @@ body {
 
 
 
-/* כתבות נוספות */
+/* Related posts */
 .related-post {
     display: flex;
     justify-content: space-between;
@@ -237,7 +237,7 @@ body {
 }
 
 /* -------------------------------- */
-/* אזור הכתבה המרכזית (Article section) */
+/* Article section */
 /* -------------------------------- */
 .article-section {
     flex: 1;
@@ -277,7 +277,7 @@ body {
     margin-bottom: 25px;
 }
 
-/* איור העיתון (SVG) */
+/* Newspaper illustration (SVG) */
 .illustration-placeholder {
     width: 260px;
     height: 220px;
@@ -297,7 +297,7 @@ body {
     margin-bottom: 15px;
 }
 
-/* תגובות */
+/* Comments */
 .comments-section, .add-comment {
     margin-top: 30px;
 }
@@ -352,7 +352,7 @@ body {
     color: #111827;
 }
 
-/* טופס הוספת תגובה */
+/* Add comment form */
 .add-comment form {
     display: flex;
     flex-direction: column;
@@ -411,7 +411,7 @@ body {
     background-color: #1e40af;
 }
 
-/* התאמה למסכים קטנים */
+/* Small screens */
 @media (max-width: 992px) {
     .main-container {
         flex-direction: column;

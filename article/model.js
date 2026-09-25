@@ -12,7 +12,7 @@ export class ArticleModel
             condition: "לא ידוע",
             icon: "☀️",
         };
-        // נופלים לראשון לציון רק אם הדפדפן לא הצליח לאתר את המיקום האמיתי (או שהמשתמש סירב).
+        // Falls back to Rishon LeZion only if the browser couldn't detect the real location (or the user declined).
         this.fallbackCoordinates = { lat: 31.9730, lon: 34.8066, name: 'ראשון לציון' };
         this.repository = repository;
         this.getUser = getUser;
@@ -71,7 +71,7 @@ export class ArticleModel
         return this.comments;
     }
 
-    // מנסה לקבל את המיקום האמיתי מהדפדפן (GPS/Wi-Fi); אם אין תמיכה, המשתמש סירב, או שהאיתור נכשל/נתקע - נופל לראשון לציון.
+    // Tries to get the real location from the browser (GPS/Wi-Fi); if unsupported, denied, or it fails/times out, falls back to Rishon LeZion.
     getUserCoordinates()
     {
         return new Promise(resolve => {
