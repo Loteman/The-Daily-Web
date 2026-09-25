@@ -1,6 +1,7 @@
 const $ = selector => document.querySelector(selector);
 const number = value => new Intl.NumberFormat('he-IL', { maximumFractionDigits: 1 }).format(value);
 const dateLabel = value => new Date(value).toLocaleDateString('he-IL', { timeZone: 'Asia/Jerusalem' });
+const timeLabel = value => new Date(value).toLocaleTimeString('he-IL', { timeZone: 'Asia/Jerusalem', hour: '2-digit', minute: '2-digit' });
 
 function cellRow(values) {
     const row = document.createElement('tr');
@@ -8,20 +9,19 @@ function cellRow(values) {
     return row;
 }
 
-const dayKey = value => new Intl.DateTimeFormat('en-CA', {
-    timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit', day: '2-digit'
-}).format(new Date(value));
-
-function drawChart(days, versionChanges) {
+// Publish markers (green) and edit/submission markers (orange) both sit on the same cumulative-views line,
+// bucketed by day or - when a single day is selected - by hour, so their effect on views is visible either way.
+function drawChart(days, versionChanges, publications, isSingleDay, keyOf) {
     const container = $('#chart');
     container.replaceChildren();
     if (!days.length) { container.textContent = 'אין צפיות בתקופה שנבחרה.'; container.className = 'empty'; return; }
     container.className = '';
+    const label = isSingleDay ? timeLabel : dateLabel;
     const ns = 'http://www.w3.org/2000/svg';
     const svg = document.createElementNS(ns, 'svg');
     svg.setAttribute('viewBox', '0 0 720 260');
     svg.setAttribute('role', 'img');
-    svg.setAttribute('aria-label', 'סך צפיות מצטבר לאורך זמן. הנקודות מציינות גרסאות שנשלחו לאישור.');
+    svg.setAttribute('aria-label', 'סך צפיות מצטבר לאורך זמן. נקודות ירוקות מסמנות פרסום, נקודות כתומות מסמנות שליחה לבדיקה.');
     const add = (tag, attrs, text) => {
         const element = document.createElementNS(ns, tag);
         Object.entries(attrs).forEach(([key, value]) => element.setAttribute(key, value));
@@ -41,19 +41,27 @@ function drawChart(days, versionChanges) {
     days.forEach(day => {
         const point = add('circle', { cx: x(day), cy: y(day.totalViews), r: 3, fill: '#2563eb', tabindex: 0 });
         const title = document.createElementNS(ns, 'title');
-        title.textContent = `${dateLabel(day.date)}: ${number(day.totalViews)} צפיות מצטברות`;
+        title.textContent = `${label(day.date)}: ${number(day.totalViews)} צפיות מצטברות`;
+        point.setAttribute('aria-label', title.textContent); point.append(title);
+    });
+    publications.forEach(item => {
+        const day = days.find(entry => entry.date === keyOf(item.publishedAt));
+        if (!day) return;
+        const point = add('circle', { cx: x(day), cy: y(day.totalViews), r: 5, fill: '#10b981', stroke: '#fff', 'stroke-width': 2, tabindex: 0 });
+        const title = document.createElementNS(ns, 'title');
+        title.textContent = `${label(item.publishedAt)}: גרסה ${item.version} פורסמה — ${number(day.totalViews)} צפיות מצטברות`;
         point.setAttribute('aria-label', title.textContent); point.append(title);
     });
     versionChanges.forEach(change => {
-        const day = days.find(item => item.date === dayKey(change.updatedAt));
+        const day = days.find(item => item.date === keyOf(change.updatedAt));
         if (!day) return;
         const point = add('circle', { cx: x(day), cy: y(day.totalViews), r: 5, fill: '#f59e0b', stroke: '#fff', 'stroke-width': 2, tabindex: 0 });
         const title = document.createElementNS(ns, 'title');
-        title.textContent = `${dateLabel(change.updatedAt)}: גרסה ${change.version} נשלחה לאישור — ${number(day.totalViews)} צפיות מצטברות`;
+        title.textContent = `${label(change.updatedAt)}: גרסה ${change.version} נשלחה לאישור — ${number(day.totalViews)} צפיות מצטברות`;
         point.setAttribute('aria-label', title.textContent); point.append(title);
     });
-    add('text', { x: 48, y: 244, fill: '#64748b', 'font-size': 12 }, dateLabel(days[0].date));
-    if (days.length > 1) add('text', { x: 696, y: 244, 'text-anchor': 'end', fill: '#64748b', 'font-size': 12 }, dateLabel(days.at(-1).date));
+    add('text', { x: 48, y: 244, fill: '#64748b', 'font-size': 12 }, label(days[0].date));
+    if (days.length > 1) add('text', { x: 696, y: 244, 'text-anchor': 'end', fill: '#64748b', 'font-size': 12 }, label(days.at(-1).date));
     container.append(svg);
 }
 
@@ -93,13 +101,16 @@ export class StatisticsView {
     bindPeriodChange(handler) { $('#period-filter').addEventListener('change', handler); }
     bindRefresh(handler) { $('#refresh').addEventListener('click', handler); }
     bindRetry(handler) { this.onRetry = handler; }
-    render({ totalViews, articleCount, publications, averageViews, chartDays, versionChanges, statuses, ranking }) {
+    render({ totalViews, articleCount, publications, averageViews, chartDays, versionChanges, statuses, ranking, isSingleDay, keyOf }) {
         $('#total-views').textContent = number(totalViews);
         $('#article-count').textContent = number(articleCount);
         $('#publication-count').textContent = number(publications.length);
         $('#average-views').textContent = number(averageViews);
-        drawChart(chartDays, versionChanges || []);
-        $('#daily-table').replaceChildren(...(chartDays.length ? chartDays.map(day => cellRow([dateLabel(day.date), number(day.totalViews)])) : [cellRow(['אין נתוני צפייה', '—'])]));
+        drawChart(chartDays, versionChanges || [], publications || [], isSingleDay, keyOf);
+        const label = isSingleDay ? timeLabel : dateLabel;
+        const dailyTableHeading = document.querySelector('#daily-table')?.closest('table')?.querySelector('thead th');
+        if (dailyTableHeading) dailyTableHeading.textContent = isSingleDay ? 'שעה' : 'תאריך';
+        $('#daily-table').replaceChildren(...(chartDays.length ? chartDays.map(day => cellRow([label(day.date), number(day.totalViews)])) : [cellRow(['אין נתוני צפייה', '—'])]));
         $('#statuses').replaceChildren();
         for (const [status, label, color] of [['draft', 'בהכנה', '#3b82f6'], ['pending', 'ממתינות לאישור', '#f59e0b'], ['published', 'פורסמו', '#10b981'], ['returned', 'הוחזרו לתיקונים', '#f43f5e']]) {
             const count = statuses[status] || 0;
