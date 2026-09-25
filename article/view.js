@@ -117,7 +117,20 @@ export class ArticleView
         this.relatedPostsWidgetEl.innerHTML = postsHtml;
     }
 
-    renderComments(comments) 
+    setCommentsLoading(loading)
+    {
+        this.commentFormEl.querySelectorAll('input, textarea, button').forEach(element => {
+            element.disabled = loading;
+        });
+        if (loading) this.commentsSectionEl.textContent = 'טוען תגובות…';
+    }
+
+    showCommentsLoadError()
+    {
+        this.commentsSectionEl.textContent = 'לא ניתן לטעון תגובות. רעננו את העמוד כדי לנסות שוב.';
+    }
+
+    renderComments(comments)
     {
         if (!this.commentsSectionEl) 
             return;

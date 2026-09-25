@@ -3,7 +3,7 @@ import { currentUser } from '../data/api.js';
 
 export class ArticleModel 
 {
-    constructor(repository = new ArticleRepository())
+    constructor(repository = new ArticleRepository(), getUser = currentUser)
     {
         this.weatherApiKey = 'ca7e198fa478ce43e107cc122973e064';
         this.mockWeatherData = {
@@ -13,6 +13,7 @@ export class ArticleModel
             icon: "☀️",
         };
         this.repository = repository;
+        this.getUser = getUser;
         this.articleData = null;
         this.relatedPosts = [];
         this.comments = [];
@@ -21,16 +22,28 @@ export class ArticleModel
     async loadArticle(id)
     {
         this.articleData = await this.repository.getById(id);
-        if (!this.articleData)
-            return null;
+        return this.articleData;
+    }
 
+    async loadRelatedPosts(id)
+    {
         const articles = await this.repository.getAll();
         this.relatedPosts = articles
             .filter(article => String(article.id) !== String(id) && article.category === this.articleData.category)
             .slice(0, 3);
-            this.comments = await this.repository.getComments(id);
-        this.user = await currentUser();
-        return this.articleData;
+        return this.relatedPosts;
+    }
+
+    async loadComments(id)
+    {
+        this.comments = await this.repository.getComments(id);
+        return this.comments;
+    }
+
+    async loadUser()
+    {
+        this.user = await this.getUser();
+        return this.user;
     }
 
     getWeatherIcon(iconCode) 
@@ -47,40 +60,35 @@ export class ArticleModel
         }
     }
 
+    async addComment(commentObj)
+    {
+         const comment = await this.repository.addComment(this.articleData.id, {
+            fullName: commentObj.name, content: commentObj.text
+        });
+        this.comments.unshift(comment);
+        return this.comments;
+    }
+
     async fetchWeather() 
     {
         try {
-            const ipResponse = await fetch('https://ipinfo.io/json');
-            if (!ipResponse.ok) 
-                throw new Error('שגיאה באיתור המיקום האוטומטי');
-            
-            const ipData = await ipResponse.json();
-            const cityName = ipData.city || 'Tel Aviv';
+            if (!globalThis.navigator?.geolocation)
+                throw new Error('הדפדפן אינו תומך באיתור מיקום.');
 
-            // שלב 1: המרת שם העיר שחזר מה-IP לקואורדינטות מדויקות דרך ה-Geocoding API
-            const geoUrl = `https://api.openweathermap.org/geo/1.0/direct?q=${encodeURIComponent(cityName)}&limit=1&appid=${this.weatherApiKey}`;
-            const geoResponse = await fetch(geoUrl);
-        
-            if (!geoResponse.ok)
-                throw new Error('שגיאה באיתור קואורדינטות לעיר');
+            // ניסיון לקבל מיקום מדויק מהדפדפן (GPS)
+            const position = await new Promise((resolve, reject) => {
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                    timeout: 10000,
+                    maximumAge: 60000
+                });
+            });
 
-            const geoData = await geoResponse.json();
-        
-            // אם העיר לא נמצאה ב-Geo, ניפול לערך ברירת מחדל או ניקח את Petah Tikva
-            let lat, lon;
-            if (geoData && geoData.length > 0) 
-            {
-                lat = geoData[0].lat;
-                lon = geoData[0].lon;
-            } 
-            else 
-            {
-            // ברירת מחדל במקרה שהעיר מה-IP לא זוהתה (ת"א)
-                lat = 32.0853;
-                lon = 34.7818;
-            }
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
 
-            const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=he&appid=${this.weatherApiKey}`;            const weatherResponse = await fetch(weatherUrl);
+            const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=he&appid=${this.weatherApiKey}`;
+            const weatherResponse = await fetch(weatherUrl);
+
             if (!weatherResponse.ok) 
                 throw new Error('שגיאה בטעינת מזג האוויר');
 
@@ -97,14 +105,5 @@ export class ArticleModel
             console.error('תקלה בזיהוי המיקום:', error);
             return this.mockWeatherData;
         }
-    }
-
-    async addComment(commentObj)
-    {
-         const comment = await this.repository.addComment(this.articleData.id, {
-            fullName: commentObj.name, content: commentObj.text
-        });
-        this.comments.unshift(comment);
-        return this.comments;
     }
 }
