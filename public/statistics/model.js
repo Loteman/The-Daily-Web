@@ -28,6 +28,8 @@ export class StatisticsModel {
             .filter(item => item.publishedAt && (!cutoff || dayKey(item.publishedAt) >= cutoff) && dayKey(item.publishedAt) <= today)
             .map(item => ({ ...item, title: titles.get(item.articleId) || item.articleId }))
             .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+        const versionChanges = (this.statistics.versionChanges || [])
+            .filter(item => item.updatedAt && (!cutoff || dayKey(item.updatedAt) >= cutoff) && dayKey(item.updatedAt) <= today);
         const totalViews = days.reduce((sum, day) => sum + day.views, 0);
         const activeDays = days.filter(day => day.views > 0).length;
         const chartDays = [];
@@ -36,13 +38,15 @@ export class StatisticsModel {
             // Include zero-view days so gaps are not shown as continuous activity.
             for (let date = Date.parse(cutoff || days[0].date); date <= Date.parse(today); date += 86400000) {
                 const key = new Date(date).toISOString().slice(0, 10);
-                chartDays.push({ date: key, views: byDate.get(key) || 0 });
+                const views = byDate.get(key) || 0;
+                const previous = chartDays.at(-1)?.totalViews || 0;
+                chartDays.push({ date: key, views, totalViews: previous + views });
             }
         }
         return {
             totalViews, articleCount: selected.length, publications,
             averageViews: activeDays ? totalViews / activeDays : 0,
-            chartDays, statuses: this.statistics.statuses,
+            chartDays, versionChanges, statuses: this.statistics.statuses,
             ranking: [...selected].sort((a, b) => b.views - a.views).slice(0, 10)
         };
     }
