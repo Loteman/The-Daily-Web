@@ -13,12 +13,12 @@ const SEED_PREFIX = 'seed_';
 const DAY = 24 * 60 * 60 * 1000;
 
 const REPORTERS = [
-  { username: 'seed_reporter_1', fullName: 'נועה כהן' },
-  { username: 'seed_reporter_2', fullName: 'איתי לוי' },
-  { username: 'seed_reporter_3', fullName: 'מאיה ברק' },
-  { username: 'seed_reporter_4', fullName: 'דניאל אזולאי' },
+  { username: 'seed_reporter_1', fullName: 'לוטם הלפרין' },
+  { username: 'seed_reporter_2', fullName: 'ירדן רוזן' },
+  { username: 'seed_reporter_3', fullName: 'חן בכר' },
+  { username: 'seed_reporter_4', fullName: 'מאי רביאל' },
 ];
-const EDITOR = { username: 'seed_editor_1', fullName: 'רון שגיא' };
+const EDITOR = { username: 'seed_editor_1', fullName: 'ישראל ישראלי' };
 const SEED_PASSWORD = 'Seed1234!';
 
 const NEW_CATEGORIES = ['טכנולוגיה', 'בריאות', 'ספורט'];
