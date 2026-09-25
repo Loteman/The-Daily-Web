@@ -6,7 +6,7 @@ export class ArticlesManagementController
         this.view = view;
 
         this.currentPage = 1;
-        this.itemsPerPage = 5;
+        this.itemsPerPage = 10;
         this.currentSearch = "";
         this.selectedCategory = "כל הקטגוריות";
         this.selectedStatus = "כל הסטטוסים";
@@ -18,8 +18,8 @@ export class ArticlesManagementController
     async init()
     {
         // The remote database round-trips (stats + first page) take a couple of seconds - without this
-        // message the stat cards just sit on their static "?" placeholders and look broken/stuck.
-        this.view.showMessage('טוען נתונים...');
+        // spinner the stat cards just sit on their static "…" placeholders and look broken/stuck.
+        this.view.setLoading(true);
         const user = await this.model.getUserProfile();
         this.view.renderUserProfile(user);
         this.view.setRole(this.model.role);
@@ -29,7 +29,7 @@ export class ArticlesManagementController
 
         await this.refreshStats();
         await this.loadPage(1);
-        this.view.showMessage('');
+        this.view.setLoading(false);
 
         this.view.bindSearchEvent(this.handleSearch.bind(this));
         this.view.bindFilterEvents(this.handleCategoryChange.bind(this), this.handleStatusChange.bind(this));

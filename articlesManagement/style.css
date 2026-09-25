@@ -509,6 +509,16 @@
     border-color: #0055ff;
 }
 
+.p-ellipsis {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
 .version-toggle {
     display: flex;
     gap: 8px;

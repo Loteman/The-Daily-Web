@@ -234,6 +234,12 @@ export class ArticlesManagementView
         document.querySelector('.article-dialog').close();
     }
 
+    setLoading(loading)
+    {
+        const el = document.querySelector('.loading-spinner');
+        if (el) el.hidden = !loading;
+    }
+
     showMessage(text)
     {
         const el = document.querySelector('.management-message');
@@ -348,13 +354,26 @@ export class ArticlesManagementView
         prevBtn.dataset.page = currentPage - 1;
         this.paginationContainer.appendChild(prevBtn);
 
-        for (let i = 1; i <= totalPages; i++) 
+        // With hundreds of pages, listing every number would flood the bar - show the ends and a
+        // window around the current page instead, with an ellipsis for the gaps.
+        let lastRendered = 0;
+        for (let i = 1; i <= totalPages; i++)
         {
+            if (i !== 1 && i !== totalPages && Math.abs(i - currentPage) > 2)
+                continue;
+            if (i - lastRendered > 1)
+            {
+                const ellipsis = document.createElement('span');
+                ellipsis.className = 'p-ellipsis';
+                ellipsis.textContent = '…';
+                this.paginationContainer.appendChild(ellipsis);
+            }
             const pageBtn = document.createElement('button');
             pageBtn.className = `p-btn ${i === currentPage ? 'active' : ''}`;
             pageBtn.textContent = i;
             pageBtn.dataset.page = i;
             this.paginationContainer.appendChild(pageBtn);
+            lastRendered = i;
         }
 
         const nextBtn = document.createElement('button');
