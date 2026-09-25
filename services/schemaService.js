@@ -8,12 +8,17 @@ function text(value, max, label, required = false) {
   }
   return value.trim();
 }
+let categoriesCache = { db: null, at: 0, data: null };
 async function getCategories(db = database()) {
+  // Categories rarely change; skip the round-trip to Atlas on every article request.
+  if (categoriesCache.db === db && Date.now() - categoriesCache.at < 30000) return categoriesCache.data;
   const rows = await db.collection('Categories').find({}).toArray();
-  return rows.flatMap(row => row.categoryId !== undefined
+  const data = rows.flatMap(row => row.categoryId !== undefined
     ? [{ id: row.categoryId, name: row.name || row.categoryName || '' }]
     : Object.entries(row).filter(([key, value]) => key !== '_id' && ['number', 'string'].includes(typeof value))
       .map(([name, id]) => ({ id, name })));
+  categoriesCache = { db, at: Date.now(), data };
+  return data;
 }
 async function roleFor(user, db = database()) {
   const rows = await db.collection('User_type').find({}).toArray();

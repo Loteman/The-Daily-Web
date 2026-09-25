@@ -8,7 +8,7 @@ export class ArticlesManagementView
         this.userNameEl = document.querySelector('.user-name');
         this.userRoleEl = document.querySelector('.user-role');
         this.tableBody = document.querySelector('.data-table tbody');
-        this.searchInput = document.querySelector('.search-box input');
+        this.searchInput = document.querySelector('#article-search');
         this.newArticleBtn = document.querySelector('.btn-new-article');
         this.selectElements = document.querySelectorAll('.filter-group select');
         this.paginationContainer = document.querySelector('.pagination-buttons');
@@ -160,6 +160,16 @@ export class ArticlesManagementView
     closeEditor()
     {
         document.querySelector('.article-dialog').close();
+    }
+
+    showMessage(text)
+    {
+        const el = document.querySelector('.management-message');
+        if (!el)
+            return;
+        el.textContent = text;
+        clearTimeout(this.messageTimer);
+        if (text) this.messageTimer = setTimeout(() => { el.textContent = ''; }, 4000);
     }
 
     showEditorError(message)

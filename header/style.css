@@ -135,6 +135,20 @@ body {
     overflow-wrap: anywhere;
 }
 
+.header .user-profile .logout-link {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    border-inline-start: 1px solid #e2e8f0;
+    padding-inline-start: 10px;
+    white-space: nowrap;
+}
+
+.header .user-profile .logout-link:hover {
+    color: #dc2626;
+}
+
 .header .header-container {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);

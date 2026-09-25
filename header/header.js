@@ -2,11 +2,12 @@
 
 async function loadHeader() {
     try {
-        const response = await fetch('/header/index.html');
+        // נשלף במקביל: כך שם המשתמש והרשאות התפריט כבר ידועים לפני שההדר מצטייר בכלל,
+        // במקום להציג רגע אחד מצב "אורח"/תפריט קודם ואז להחליף אותו (הבהוב בעת מעבר בין משתמשים).
+        const [response, user] = await Promise.all([fetch('/header/index.html'), currentUser()]);
         if (!response.ok) throw new Error('Could not load the header.');
         const header = document.querySelector('.header');
         header.innerHTML = await response.text();
-        const user = await currentUser();
         header.querySelector('.user-name').textContent = user?.fullName || user?.username || 'Guest';
         header.querySelector('.login-link').parentElement.hidden = Boolean(user);
         header.querySelectorAll('[data-logged-in]').forEach(item => { item.hidden = !user; });

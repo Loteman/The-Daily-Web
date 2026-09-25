@@ -12,6 +12,8 @@ export class ArticleModel
             condition: "לא ידוע",
             icon: "☀️",
         };
+        // נופלים לראשון לציון רק אם הדפדפן לא הצליח לאתר את המיקום האמיתי (או שהמשתמש סירב).
+        this.fallbackCoordinates = { lat: 31.9730, lon: 34.8066, name: 'ראשון לציון' };
         this.repository = repository;
         this.getUser = getUser;
         this.articleData = null;
@@ -69,40 +71,45 @@ export class ArticleModel
         return this.comments;
     }
 
-    async fetchWeather() 
+    // מנסה לקבל את המיקום האמיתי מהדפדפן (GPS/Wi-Fi); אם אין תמיכה, המשתמש סירב, או שהאיתור נכשל/נתקע - נופל לראשון לציון.
+    getUserCoordinates()
     {
-        try {
+        return new Promise(resolve => {
             if (!globalThis.navigator?.geolocation)
-                throw new Error('הדפדפן אינו תומך באיתור מיקום.');
+            {
+                resolve(this.fallbackCoordinates);
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                position => resolve({ lat: position.coords.latitude, lon: position.coords.longitude }),
+                () => resolve(this.fallbackCoordinates),
+                { timeout: 10000, maximumAge: 60000 }
+            );
+        });
+    }
 
-            // ניסיון לקבל מיקום מדויק מהדפדפן (GPS)
-            const position = await new Promise((resolve, reject) => {
-                navigator.geolocation.getCurrentPosition(resolve, reject, {
-                    timeout: 10000,
-                    maximumAge: 60000
-                });
-            });
-
-            const lat = position.coords.latitude;
-            const lon = position.coords.longitude;
-
+    async fetchWeather()
+    {
+        try
+        {
+            const { lat, lon, name } = await this.getUserCoordinates();
             const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=he&appid=${this.weatherApiKey}`;
             const weatherResponse = await fetch(weatherUrl);
 
-            if (!weatherResponse.ok) 
+            if (!weatherResponse.ok)
                 throw new Error('שגיאה בטעינת מזג האוויר');
 
             const data = await weatherResponse.json();
             return {
-                location: `👤 ${data.name}`,
+                location: `👤 ${name || data.name}`,
                 currentTemp: Math.round(data.main.temp) + '°',
                 condition: data.weather[0].description,
                 icon: this.getWeatherIcon(data.weather[0].icon)
             };
-        } 
-        catch (error) 
+        }
+        catch (error)
         {
-            console.error('תקלה בזיהוי המיקום:', error);
+            console.error('תקלה בטעינת מזג האוויר:', error);
             return this.mockWeatherData;
         }
     }

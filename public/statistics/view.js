@@ -38,6 +38,12 @@ function drawChart(days, versionChanges) {
         add('text', { x: 38, y: y(value) + 4, 'text-anchor': 'end', fill: '#64748b', 'font-size': 11 }, number(value));
     }
     add('polyline', { points: days.map(day => `${x(day)},${y(day.totalViews)}`).join(' '), fill: 'none', stroke: '#2563eb', 'stroke-width': 3 });
+    days.forEach(day => {
+        const point = add('circle', { cx: x(day), cy: y(day.totalViews), r: 3, fill: '#2563eb', tabindex: 0 });
+        const title = document.createElementNS(ns, 'title');
+        title.textContent = `${dateLabel(day.date)}: ${number(day.totalViews)} צפיות מצטברות`;
+        point.setAttribute('aria-label', title.textContent); point.append(title);
+    });
     versionChanges.forEach(change => {
         const day = days.find(item => item.date === dayKey(change.updatedAt));
         if (!day) return;
