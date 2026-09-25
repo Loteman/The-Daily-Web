@@ -28,6 +28,7 @@ export class ArticleController
         }
         this.view.setCommentsLoading(true);
         this.view.bindCommentSubmit(this.handleCommentSubmit.bind(this));
+        this.view.bindCommentActions(this.handleCommentEdit.bind(this), this.handleCommentDelete.bind(this));
 
         // None of these secondary requests blocks rendering the article itself.
         this.secondaryReady = Promise.allSettled([
@@ -90,6 +91,37 @@ export class ArticleController
 
             console.error("שגיאה בשמירת התגובה:", err);
             this.view.showFormError("אירעה שגיאה בשליחת התגובה. נסה שוב שנית.", 'text');
+        }
+    }
+
+    async handleCommentEdit(commentId, text)
+    {
+        if (text.length < 3)
+        {
+            this.view.showCommentEditError(commentId, "תוכן התגובה קצר מדי (לפחות 3 תווים).");
+            return;
+        }
+        try
+        {
+            const updatedComments = await this.model.editComment(commentId, text);
+            this.view.renderComments(updatedComments);
+        }
+        catch (err)
+        {
+            this.view.showCommentEditError(commentId, err.message || "לא ניתן היה לשמור את השינוי.");
+        }
+    }
+
+    async handleCommentDelete(commentId)
+    {
+        try
+        {
+            const updatedComments = await this.model.deleteComment(commentId);
+            this.view.renderComments(updatedComments);
+        }
+        catch (err)
+        {
+            console.error("שגיאה במחיקת התגובה:", err);
         }
     }
 }

@@ -132,10 +132,11 @@ export class ArticleView
 
     renderComments(comments)
     {
-        if (!this.commentsSectionEl) 
+        if (!this.commentsSectionEl)
             return;
+        this.lastComments = comments;
         let commentsHtml = `<h2>תגובות (${comments.length})</h2>`;
-        
+
         comments.forEach(comment => {
             commentsHtml += `
                 <div class="comment" data-id="${this.sanitizeInput(String(comment.id)).replaceAll('"', '&quot;')}">
@@ -143,14 +144,82 @@ export class ArticleView
                     <div class="comment-content">
                         <div class="comment-details">
                             <span class="user-name">${this.sanitizeInput(comment.name)}</span>
-                            <span class="comment-date">${this.sanitizeInput(new Date(comment.date).toLocaleString('he-IL'))}</span>
+                            <span class="comment-date">${this.sanitizeInput(new Date(comment.date).toLocaleString('he-IL'))}${comment.edited ? ' <span class="comment-edited">(נערך)</span>' : ''}</span>
                         </div>
                         <p class="comment-text">${this.sanitizeInput(comment.text)}</p>
+                        ${comment.mine ? `
+                        <div class="comment-actions">
+                            <button type="button" class="comment-edit-btn" data-id="${this.sanitizeInput(String(comment.id))}">עריכה</button>
+                            <button type="button" class="comment-delete-btn" data-id="${this.sanitizeInput(String(comment.id))}">מחיקה</button>
+                        </div>` : ''}
+                        <p class="comment-edit-error" role="alert"></p>
                     </div>
                 </div>
             `;
         });
         this.commentsSectionEl.innerHTML = commentsHtml;
+    }
+
+    getCommentEl(commentId)
+    {
+        return [...this.commentsSectionEl.querySelectorAll('.comment')]
+            .find(el => el.dataset.id === String(commentId));
+    }
+
+    startEditComment(commentId)
+    {
+        const comment = this.lastComments?.find(item => String(item.id) === String(commentId));
+        const wrapper = this.getCommentEl(commentId);
+        if (!comment || !wrapper)
+            return;
+        const textEl = wrapper.querySelector('.comment-text');
+        const actionsEl = wrapper.querySelector('.comment-actions');
+        if (actionsEl) actionsEl.hidden = true;
+        textEl.outerHTML = `
+            <div class="comment-edit-form">
+                <textarea class="comment-edit-textarea" rows="3">${this.sanitizeInput(comment.text)}</textarea>
+                <div class="comment-edit-actions">
+                    <button type="button" class="comment-save-btn" data-id="${this.sanitizeInput(String(commentId))}">שמירה</button>
+                    <button type="button" class="comment-cancel-btn">ביטול</button>
+                </div>
+            </div>
+        `;
+        wrapper.querySelector('.comment-edit-textarea').focus();
+    }
+
+    showCommentEditError(commentId, message)
+    {
+        const wrapper = this.getCommentEl(commentId);
+        const errorEl = wrapper?.querySelector('.comment-edit-error');
+        if (errorEl) errorEl.textContent = message;
+    }
+
+    bindCommentActions(onEdit, onDelete)
+    {
+        if (!this.commentsSectionEl)
+            return;
+        this.commentsSectionEl.addEventListener('click', event => {
+            const editBtn = event.target.closest('.comment-edit-btn');
+            const deleteBtn = event.target.closest('.comment-delete-btn');
+            const saveBtn = event.target.closest('.comment-save-btn');
+            const cancelBtn = event.target.closest('.comment-cancel-btn');
+
+            if (editBtn)
+                this.startEditComment(editBtn.dataset.id);
+            else if (cancelBtn)
+                this.renderComments(this.lastComments || []);
+            else if (saveBtn)
+            {
+                const wrapper = saveBtn.closest('.comment');
+                const text = wrapper.querySelector('.comment-edit-textarea').value.trim();
+                onEdit(saveBtn.dataset.id, text);
+            }
+            else if (deleteBtn)
+            {
+                if (window.confirm('למחוק את התגובה? הפעולה בלתי הפיכה.'))
+                    onDelete(deleteBtn.dataset.id);
+            }
+        });
     }
 
     setCommentUser(user)

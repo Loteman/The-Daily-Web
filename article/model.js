@@ -71,6 +71,20 @@ export class ArticleModel
         return this.comments;
     }
 
+    async editComment(commentId, text)
+    {
+        const updated = await this.repository.editComment(this.articleData.id, commentId, { content: text });
+        this.comments = this.comments.map(comment => comment.id === commentId ? updated : comment);
+        return this.comments;
+    }
+
+    async deleteComment(commentId)
+    {
+        await this.repository.deleteComment(this.articleData.id, commentId);
+        this.comments = this.comments.filter(comment => comment.id !== commentId);
+        return this.comments;
+    }
+
     // Tries to get the real location from the browser (GPS/Wi-Fi); if unsupported, denied, or it fails/times out, falls back to Rishon LeZion.
     getUserCoordinates()
     {

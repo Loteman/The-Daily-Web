@@ -35,7 +35,7 @@ export class ArticlesManagementController
         this.view.bindPaginationEvent(this.handlePageChange.bind(this));
         this.view.bindNewArticleEvent(this.handleNewArticle.bind(this));
         this.view.bindTableActions(this.handleArticleAction.bind(this));
-        this.view.bindEditor(this.handleSave.bind(this), this.handleReview.bind(this));
+        this.view.bindEditor(this.handleSave.bind(this), this.handleReview.bind(this), this.model.getPublished.bind(this.model));
     }
 
     async getFilteredArticles() 
@@ -109,6 +109,14 @@ export class ArticlesManagementController
             }
             else if (actionType === 'revise')
                 this.view.openArticle(await this.model.startRevision(articleId), 'edit');
+            else if (actionType === 'delete')
+            {
+                if (!window.confirm(`למחוק את הכתבה "${article.title || 'טיוטה ללא כותרת'}"? הפעולה בלתי הפיכה.`))
+                    return;
+                await this.model.deleteArticle(articleId);
+                await this.updateView();
+                this.view.showMessage('הכתבה נמחקה.');
+            }
             else
                 this.view.openArticle(article, actionType === 'edit' ? 'edit' : actionType === 'review' ? 'review' : 'preview');
         }

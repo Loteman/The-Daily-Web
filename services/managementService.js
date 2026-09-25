@@ -53,18 +53,33 @@ async function createDraft(user, input) {
   return (await getArticles({ articleId, user, management: true }))[0];
 }
 async function saveDraft(articleId, user, input) {
-  requireReporter(user);
   const fields = await draftFields(input);
   await transaction(async session => {
     await ownedArticle(articleId, user, session);
     const update = await latest(articleId, session);
     checkRevision(update, input);
-    if (!['draft', 'returned'].includes(update.status)) throw httpError(409, 'יש לפתוח טיוטה חדשה כדי לערוך גרסה שפורסמה.');
+    // Reporter edits their own draft/returned version; editor may tweak content while a version is pending
+    // review, without kicking it back to draft (that would undo the submit-for-review step).
+    const reporterEdit = user.role === 'reporter' && ['draft', 'returned'].includes(update.status);
+    const editorEdit = user.role === 'editor' && update.status === 'pending';
+    if (!reporterEdit && !editorEdit) throw httpError(409, 'יש לפתוח טיוטה חדשה כדי לערוך גרסה שפורסמה.');
     await database().collection('Updates').updateOne({ _id: update._id }, {
-      $set: { ...fields, status: 'draft', updatedAt: new Date(Math.max(Date.now(), new Date(update.updatedAt).getTime() + 1)).toISOString() }
+      $set: { ...fields, ...(reporterEdit ? { status: 'draft' } : {}),
+        updatedAt: new Date(Math.max(Date.now(), new Date(update.updatedAt).getTime() + 1)).toISOString() }
     }, { session });
   });
   return (await getArticles({ articleId, user, management: true }))[0];
+}
+async function deleteArticle(articleId, user) {
+  if (user?.role !== 'editor') throw httpError(403, 'רק עורך יכול למחוק כתבה.');
+  await transaction(async session => {
+    const article = await database().collection('Articles').findOne({ articleId }, { session });
+    if (!article) throw httpError(404, 'הכתבה לא נמצאה.');
+    await database().collection('Updates').deleteMany({ articleId }, { session });
+    await database().collection('Commnents').deleteMany({ articleId }, { session });
+    await database().collection('Views').deleteMany({ articleId }, { session });
+    await database().collection('Articles').deleteOne({ articleId }, { session });
+  });
 }
 async function startRevision(articleId, user, input) {
   requireReporter(user);
@@ -113,4 +128,4 @@ async function changeStatus(articleId, user, input) {
   });
   return (await getArticles({ articleId, user, management: true }))[0];
 }
-module.exports = { createDraft, saveDraft, startRevision, changeStatus, draftFields, checkRevision };
+module.exports = { createDraft, saveDraft, startRevision, changeStatus, deleteArticle, draftFields, checkRevision };

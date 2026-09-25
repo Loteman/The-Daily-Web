@@ -11,6 +11,14 @@ export class ArticleRepository {
     async addComment(id, fields) {
         return api('/api/articles/' + encodeURIComponent(id) + '/comments', { method: 'POST', body: fields });
     }
+    async editComment(articleId, commentId, fields) {
+        return api('/api/articles/' + encodeURIComponent(articleId) + '/comments/' + encodeURIComponent(commentId),
+            { method: 'PUT', body: fields });
+    }
+    async deleteComment(articleId, commentId) {
+        return api('/api/articles/' + encodeURIComponent(articleId) + '/comments/' + encodeURIComponent(commentId),
+            { method: 'DELETE', body: {} });
+    }
     async recordView(id) {
         return api('/api/articles/' + encodeURIComponent(id) + '/views', { method: 'POST', body: {} });
     }

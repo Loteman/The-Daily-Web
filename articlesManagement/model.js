@@ -29,13 +29,17 @@ export class ArticlesManagementModel {
     getActions(article) {
         if (this.role === 'reporter' && ['draft', 'returned'].includes(article.status)) return [{ type: 'edit', label: 'עריכה' }, { type: 'send', label: 'שליחה לאישור' }];
         if (this.role === 'reporter' && article.status === 'published') return [{ type: 'view', label: 'צפייה' }, { type: 'revise', label: 'גרסה חדשה' }];
-        if (this.role === 'editor' && article.status === 'pending') return [{ type: 'review', label: 'בדיקה' }];
+        if (this.role === 'editor' && article.status === 'pending') return [{ type: 'review', label: 'בדיקה' }, { type: 'delete', label: 'מחיקה' }];
+        if (this.role === 'editor') return [{ type: article.status === 'published' ? 'view' : 'preview', label: 'צפייה' }, { type: 'delete', label: 'מחיקה' }];
         return [{ type: article.status === 'published' ? 'view' : 'preview', label: 'צפייה' }];
     }
     async getArticle(id) { const article = (await this.getArticles()).find(item => item.id === id); if (!article) throw new Error('הכתבה לא נמצאה או שאין לך הרשאה.'); return this.remember(article); }
     async saveDraft(id, fields) { return this.remember(await this.repository.saveDraft(id, { title: fields.title, summary: fields.summary, categoryId: fields.categoryId, mainImage: fields.mainImage, content: fields.content, ...(id ? this.revisions.get(id) : {}) })); }
     async changeStatus(id, status, note = '') { return this.remember(await this.repository.changeStatus(id, { status, editorNote: note, ...this.revisions.get(id) })); }
     async startRevision(id) { return this.remember(await this.repository.startRevision(id, this.revisions.get(id))); }
+    async deleteArticle(id) { await this.repository.deleteArticle(id); this.revisions.delete(id); }
+    // The currently published version of the same article, for the "old vs. new" comparison while reviewing.
+    getPublished(id) { return this.repository.getPublished(id); }
     async calculateStats() { const stats = { draft: 0, pending: 0, published: 0, returned: 0 }; (await this.getArticles()).forEach(article => { if (article.status in stats) stats[article.status]++; }); return stats; }
     getStatistics() { return this.repository.getStatistics(); }
 }

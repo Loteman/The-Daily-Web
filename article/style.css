@@ -352,6 +352,74 @@ body {
     color: #111827;
 }
 
+.comment-edited {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+.comment-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 6px;
+}
+
+.comment-actions[hidden] {
+    display: none;
+}
+
+.comment-actions button {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: #2563eb;
+    cursor: pointer;
+}
+
+.comment-delete-btn {
+    color: #dc2626 !important;
+}
+
+.comment-edit-form {
+    margin-top: 4px;
+}
+
+.comment-edit-textarea {
+    width: 100%;
+    font: inherit;
+    padding: 6px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    resize: vertical;
+}
+
+.comment-edit-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.comment-edit-actions button {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    cursor: pointer;
+}
+
+.comment-edit-error {
+    font-size: 12px;
+    color: #dc2626;
+    margin-top: 4px;
+}
+
+.comment-edit-error:empty {
+    display: none;
+}
+
 /* Add comment form */
 .add-comment form {
     display: flex;

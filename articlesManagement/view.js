@@ -43,6 +43,52 @@ export class ArticlesManagementView
     }
 
     
+    // editable = "not read-only": both reporter drafting (edit) and editor reviewing (review) can type here now.
+    fillForm(data, editable)
+    {
+        const form = document.querySelector('.article-dialog form');
+        for (const field of ['title', 'summary', 'mainImage'])
+        {
+            form.elements[field].value = data?.[field] || '';
+            form.elements[field].readOnly = !editable;
+        }
+        form.elements.categoryId.value = data?.categoryId ?? this.categories[0]?.id ?? '';
+        form.elements.categoryId.disabled = !editable;
+        form.elements.content.value = (data?.paragraphs || []).join('\n\n');
+        form.elements.content.readOnly = !editable;
+    }
+
+    setActiveToggle(which)
+    {
+        const dialog = document.querySelector('.article-dialog');
+        dialog.querySelector('.toggle-old')?.classList.toggle('active', which === 'old');
+        dialog.querySelector('.toggle-new')?.classList.toggle('active', which === 'new');
+    }
+
+    // Switches the dialog between the currently published content and the pending edit under review,
+    // preserving any in-progress edits to the pending version while doing so.
+    showVersion(which)
+    {
+        const goingOld = which === 'old';
+        if (goingOld === this.viewingOld)
+            return;
+        const form = document.querySelector('.article-dialog form');
+        if (!this.viewingOld)
+        {
+            const fields = Object.fromEntries(new FormData(form));
+            this.currentArticleData = {
+                ...this.currentArticleData, ...fields,
+                paragraphs: (fields.content || '').split(/\n\s*\n/).map(text => text.trim()).filter(Boolean)
+            };
+        }
+        this.viewingOld = goingOld;
+        const isEditableMode = this.dialogMode === 'edit' || this.dialogMode === 'review';
+        this.fillForm(goingOld ? this.oldArticleData : this.currentArticleData, isEditableMode && !goingOld);
+        this.setActiveToggle(goingOld ? 'old' : 'new');
+        document.querySelector('.publish-article').disabled = goingOld;
+        document.querySelector('.return-article').disabled = goingOld;
+    }
+
     openArticle(article, mode)
     {
         const dialog = document.querySelector('.article-dialog');
@@ -53,33 +99,49 @@ export class ArticlesManagementView
         this.savePromise = null;
         clearTimeout(this.autosaveTimer);
         this.dialogMode = mode;
-        for (const field of ['title', 'summary', 'mainImage'])
-        {
-            form.elements[field].value = article?.[field] || '';
-            form.elements[field].readOnly = mode !== 'edit';
-        }
-        form.elements.categoryId.value = article?.categoryId ?? this.categories[0]?.id ?? '';
-        form.elements.categoryId.disabled = mode !== 'edit';
-        form.elements.content.value = (article?.paragraphs || []).join('\n\n');
-        form.elements.content.readOnly = mode !== 'edit';
+        this.currentArticleData = article ? { ...article } : null;
+        this.oldArticleData = null;
+        this.viewingOld = false;
+
+        const editable = mode === 'edit' || mode === 'review';
+        this.fillForm(this.currentArticleData, editable);
         dialog.querySelector('.dialog-title').textContent = mode === 'edit' ? 'עריכת כתבה' : 'בדיקת כתבה';
         dialog.querySelector('.editor-note').textContent = article?.editorNote || '';
         dialog.querySelector('.review-note-label').hidden = mode !== 'review';
-        dialog.querySelector('.autosave-status').textContent = mode === 'edit' ? 'השינויים נשמרים אוטומטית' : '';
+        dialog.querySelector('.autosave-status').textContent = editable ? 'השינויים נשמרים אוטומטית' : '';
         dialog.querySelector('.publish-article').hidden = mode !== 'review';
+        dialog.querySelector('.publish-article').disabled = false;
         dialog.querySelector('.return-article').hidden = mode !== 'review';
+        dialog.querySelector('.return-article').disabled = false;
         dialog.querySelector('.dialog-message').textContent = '';
+
+        const toggle = dialog.querySelector('.version-toggle');
+        const showToggle = mode === 'review' && article?.version > 1 && typeof this.onLoadPublished === 'function';
+        if (toggle)
+        {
+            toggle.hidden = !showToggle;
+            this.setActiveToggle('new');
+            const oldBtn = toggle.querySelector('.toggle-old');
+            if (showToggle)
+            {
+                oldBtn.disabled = true;
+                this.onLoadPublished(article.id)
+                    .then(published => { this.oldArticleData = published; oldBtn.disabled = false; })
+                    .catch(() => { this.oldArticleData = null; });
+            }
+        }
         dialog.showModal();
     }
 
-    bindEditor(onSave, onReview)
+    bindEditor(onSave, onReview, onLoadPublished)
     {
         const dialog = document.querySelector('.article-dialog');
         const form = dialog.querySelector('form');
         this.onDraftSave = onSave;
+        this.onLoadPublished = onLoadPublished;
         form.addEventListener('submit', event => event.preventDefault());
         form.addEventListener('input', () => {
-            if (this.dialogMode !== 'edit')
+            if (this.viewingOld || (this.dialogMode !== 'edit' && this.dialogMode !== 'review'))
                 return;
             this.draftDirty = true;
             dialog.querySelector('.autosave-status').textContent = 'שינויים ממתינים לשמירה...';
@@ -103,8 +165,17 @@ export class ArticlesManagementView
                 event.returnValue = '';
             }
         });
-        dialog.querySelector('.publish-article').addEventListener('click', () => onReview(this.editingId, 'published', ''));
-        dialog.querySelector('.return-article').addEventListener('click', () => onReview(this.editingId, 'returned', form.elements.editorNote.value));
+        const publishOrReturn = async (status, note) => {
+            if (this.viewingOld || !(await this.saveDraftAutomatically()))
+                return;
+            onReview(this.editingId, status, note);
+        };
+        dialog.querySelector('.publish-article').addEventListener('click', () => publishOrReturn('published', ''));
+        dialog.querySelector('.return-article').addEventListener('click', () => publishOrReturn('returned', form.elements.editorNote.value));
+        dialog.querySelector('.version-toggle')?.addEventListener('click', event => {
+            const btn = event.target.closest('button[data-version]');
+            if (btn && !btn.disabled) this.showVersion(btn.dataset.version);
+        });
     }
 
     async saveDraftAutomatically()
@@ -112,7 +183,7 @@ export class ArticlesManagementView
         clearTimeout(this.autosaveTimer);
         if (this.savePromise)
             return this.savePromise;
-        if (this.dialogMode !== 'edit' || !this.draftDirty)
+        if ((this.dialogMode !== 'edit' && this.dialogMode !== 'review') || !this.draftDirty)
             return true;
 
         const dialog = document.querySelector('.article-dialog');
@@ -133,6 +204,7 @@ export class ArticlesManagementView
                     status.textContent = 'שומר טיוטה...';
                     const article = await this.onDraftSave(this.editingId, fields);
                     this.editingId = article.id;
+                    this.currentArticleData = article;
                 }
                 dialog.querySelector('.dialog-message').textContent = '';
                 status.textContent = this.editingId ? 'הטיוטה נשמרה אוטומטית' : '';

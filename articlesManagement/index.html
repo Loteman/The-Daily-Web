@@ -126,6 +126,10 @@
         <form id="article-form">
             <h2 class="dialog-title"></h2>
             <p class="editor-note"></p>
+            <div class="version-toggle" hidden>
+                <button type="button" class="btn-outline toggle-old" data-version="old">גרסה שפורסמה</button>
+                <button type="button" class="btn-outline toggle-new active" data-version="new">גרסה חדשה לבדיקה</button>
+            </div>
             <label>כותרת<input name="title" required maxlength="200"></label>
             <label>תקציר<textarea name="summary" required rows="3"></textarea></label>
             <label>קטגוריה<select name="categoryId" required></select></label>

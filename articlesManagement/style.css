@@ -509,6 +509,23 @@
     border-color: #0055ff;
 }
 
+.version-toggle {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.version-toggle button.active {
+    background-color: #0055ff;
+    color: #ffffff;
+    border-color: #0055ff;
+}
+
+.version-toggle button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 .article-dialog {
     width: min(700px, 94vw);
     max-height: 90vh;

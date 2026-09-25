@@ -3,6 +3,7 @@
         method, cache: 'no-store', credentials: 'same-origin',
         ...(body === undefined ? {} : { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
     });
+    if (response.status === 204) return null;
     let data;
     try { data = await response.json(); }
     catch { throw new Error('יש לפתוח את האתר דרך שרת Node באמצעות npm start.'); }

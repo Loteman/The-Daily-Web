@@ -14,5 +14,12 @@ export class ManagementRepository {
     startRevision(id, fields) {
         return api('/api/management/articles/' + encodeURIComponent(id) + '/revisions', { method: 'POST', body: fields });
     }
+    deleteArticle(id) {
+        return api('/api/management/articles/' + encodeURIComponent(id), { method: 'DELETE', body: {} });
+    }
+    // The publicly published version of an article, used to compare it against a pending edit under review.
+    getPublished(id) {
+        return api('/api/articles/' + encodeURIComponent(id));
+    }
     getStatistics() { return api('/api/statistics'); }
 }
