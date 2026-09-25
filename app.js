@@ -3,6 +3,7 @@ const path = require('node:path');
 const createSession = require('./config/session');
 const { loadUser } = require('./middlewares/auth');
 const { getCategories, httpError } = require('./services/schemaService');
+const { logError } = require('./utils/logger');
 
 function createApp({ sessionStore } = {}) {
   const app = express();
@@ -25,14 +26,18 @@ function createApp({ sessionStore } = {}) {
   app.use('/api/articles', require('./routes/api/articlesApi'));
   app.use('/api/management/articles', require('./routes/reporterRoutes'));
   app.use('/api/statistics', require('./routes/api/statsApi'));
+  app.use('/api/users', require('./routes/usersRoutes'));
   app.get('/', (req, res) => res.redirect('/articlesFeed/index.html'));
-  for (const directory of ['articlesFeed', 'article', 'header', 'login', 'articlesManagement', 'data', 'public']) {
+  for (const directory of ['articlesFeed', 'article', 'header', 'login', 'articlesManagement', 'users', 'data', 'public']) {
     app.use('/' + directory, express.static(path.join(__dirname, directory)));
   }
   app.use('/api', (req, res) => res.status(404).json({ error: 'הנתיב לא נמצא.' }));
   app.use((error, req, res, next) => {
     const status = error.code === 11000 ? 409 : error.status || 500;
-    if (status >= 500) console.error('Request failed:', error.name, error.code || '');
+    if (status >= 500) {
+      console.error('Request failed:', error.name, error.code || '');
+      logError(error, { method: req.method, path: req.originalUrl });
+    }
     res.status(status).json({
       error: error.code === 11000 ? 'הגרסה כבר השתנתה. יש לרענן.' :
         status < 500 ? error.message : 'לא ניתן להשלים את הפעולה. נסו שוב.'

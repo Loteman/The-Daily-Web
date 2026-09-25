@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ניהול משתמשים — The Web Daily</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/header/style.css">
+</head>
+<body>
+  <header class="header"></header>
+  <main>
+    <div class="page-heading"><div><p class="eyebrow">הרשאות וגישה</p><h1>ניהול משתמשים</h1><p id="scope">טוען משתמשים…</p></div><a class="back-link" href="/articlesManagement/index.html">ניהול כתבות ←</a></div>
+    <div id="message" role="status" aria-live="polite"></div>
+    <div id="dashboard" hidden>
+      <section class="filters" aria-label="סינון וחיפוש">
+        <label>חיפוש<input id="search" type="search" placeholder="שם משתמש או שם מלא..."></label>
+        <button id="new-user" type="button">משתמש חדש +</button>
+      </section>
+      <section class="panel">
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>שם משתמש</th><th>שם מלא</th><th>תפקיד</th><th>פעולות</th></tr></thead>
+            <tbody id="users-table"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <dialog class="user-dialog">
+    <form id="user-form">
+      <h2 class="dialog-title"></h2>
+      <label>שם משתמש<input name="username" required maxlength="100"></label>
+      <label>שם מלא<input name="fullName" required maxlength="100"></label>
+      <label>תפקיד<select name="role" required>
+        <option value="reporter">כתב</option>
+        <option value="editor">עורך</option>
+      </select></label>
+      <label>סיסמה<input name="password" type="password" autocomplete="new-password"><small class="password-hint"></small></label>
+      <p class="dialog-message" role="alert"></p>
+      <div class="dialog-actions">
+        <button type="submit" class="btn-primary">שמירה</button>
+        <button type="button" class="close-dialog">ביטול</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="/header/header.js"></script>
+  <script type="module" src="users.js"></script>
+</body>
+</html>

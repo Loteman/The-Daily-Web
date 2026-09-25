@@ -2,6 +2,7 @@
 const mongoose = require('mongoose');
 const { database, getCategories, text, httpError } = require('./schemaService');
 const { getArticles } = require('./articleService');
+const { logEvent } = require('../utils/logger');
 
 function requireReporter(user) {
   if (user?.role !== 'reporter') throw httpError(403, 'רק כתב יכול לערוך כתבות.');
@@ -50,6 +51,7 @@ async function createDraft(user, input) {
       status: 'draft', editorNote: '', updatedAt: now, publishedAt: null
     }, { session });
   });
+  logEvent('article_created', { articleId, idNumber: user.idNumber });
   return (await getArticles({ articleId, user, management: true }))[0];
 }
 async function saveDraft(articleId, user, input) {
@@ -80,6 +82,7 @@ async function deleteArticle(articleId, user) {
     await database().collection('Views').deleteMany({ articleId }, { session });
     await database().collection('Articles').deleteOne({ articleId }, { session });
   });
+  logEvent('article_deleted', { articleId, idNumber: user.idNumber });
 }
 async function startRevision(articleId, user, input) {
   requireReporter(user);
@@ -126,6 +129,7 @@ async function changeStatus(articleId, user, input) {
         publishedAt: status === 'published' ? now : null }
     }, { session });
   });
+  logEvent('article_status_changed', { articleId, status, idNumber: user.idNumber, role: user.role });
   return (await getArticles({ articleId, user, management: true }))[0];
 }
 module.exports = { createDraft, saveDraft, startRevision, changeStatus, deleteArticle, draftFields, checkRevision };

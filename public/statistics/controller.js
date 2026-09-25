@@ -3,22 +3,37 @@ export class StatisticsController {
         this.model = model;
         this.view = view;
         this.requestId = 0;
+        this.currentUser = null;
         this.view.bindArticleChange(() => this.load());
         this.view.bindPeriodChange(() => this.render());
         this.view.bindRefresh(() => this.load(true));
         this.view.bindRetry(() => this.load(true));
+        this.view.bindResetViews(() => this.handleResetViews());
         this.ready = this.init();
     }
 
     async init() {
         const scope = this.model.getCurrentUser()
-            .then(user => this.view.renderScope(user))
+            .then(user => { this.currentUser = user; this.view.renderScope(user); })
             .catch(() => this.view.showScopeFallback());
         await Promise.all([scope, this.load(true)]);
     }
 
     render() {
         if (this.model.statistics) this.view.render(this.model.getDashboard(this.view.getFilters()));
+        this.view.setResetVisibility(this.currentUser?.role === 'editor' && Boolean(this.view.getFilters().articleId));
+    }
+
+    async handleResetViews() {
+        const { articleId } = this.view.getFilters();
+        if (!articleId) return;
+        if (!window.confirm('לאפס את כל נתוני הצפייה של הכתבה הזו? הפעולה בלתי הפיכה.')) return;
+        try {
+            await this.model.resetViews(articleId);
+            await this.load(true);
+        } catch (error) {
+            this.view.showError(error);
+        }
     }
 
     async load(refreshArticles = false) {

@@ -11,6 +11,7 @@ async function loadHeader() {
         header.querySelector('.user-name').textContent = user?.fullName || user?.username || 'Guest';
         header.querySelector('.login-link').parentElement.hidden = Boolean(user);
         header.querySelectorAll('[data-logged-in]').forEach(item => { item.hidden = !user; });
+        header.querySelectorAll('[data-editor-only]').forEach(item => { item.hidden = user?.role !== 'editor'; });
         header.querySelector('.logout-link').addEventListener('click', async event => {
             event.preventDefault();
             try {

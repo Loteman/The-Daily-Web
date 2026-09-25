@@ -101,6 +101,8 @@ export class StatisticsView {
     bindPeriodChange(handler) { $('#period-filter').addEventListener('change', handler); }
     bindRefresh(handler) { $('#refresh').addEventListener('click', handler); }
     bindRetry(handler) { this.onRetry = handler; }
+    bindResetViews(handler) { $('#reset-views').addEventListener('click', handler); }
+    setResetVisibility(visible) { $('#reset-views').hidden = !visible; }
     render({ totalViews, articleCount, publications, averageViews, chartDays, versionChanges, statuses, ranking, isSingleDay, keyOf }) {
         $('#total-views').textContent = number(totalViews);
         $('#article-count').textContent = number(articleCount);

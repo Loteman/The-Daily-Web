@@ -28,4 +28,12 @@ async function getStatistics(user, articleId) {
   ).sort({ updatedAt: 1, version: 1 }).toArray();
   return { statuses, totalViews: hourlyViews.reduce((total, hour) => total + hour.views, 0), hourlyViews, publications, versionChanges };
 }
-module.exports = { getStatistics };
+
+// Delete on the view-events model: lets an editor clear an article's recorded view history (e.g. test/demo data).
+async function deleteViews(articleId, user) {
+  if (user?.role !== 'editor') throw httpError(403, 'רק עורך יכול לאפס נתוני צפייה.');
+  const result = await database().collection('Views').deleteMany({ articleId });
+  return { deletedCount: result.deletedCount };
+}
+
+module.exports = { getStatistics, deleteViews };

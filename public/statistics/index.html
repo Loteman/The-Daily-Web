@@ -16,7 +16,9 @@
       <section class="filters" aria-label="סינון נתונים">
         <label>כתבה<select id="article-filter"><option value="">כל הכתבות</option></select></label>
         <label>תקופת פעילות<select id="period-filter"><option value="all">כל התקופה</option><option value="30">30 ימים אחרונים</option><option value="7">7 ימים אחרונים</option><option value="today">היום (לפי שעות)</option></select></label>
-        <button id="refresh" type="button">רענון נתונים ↻</button><span id="updated"></span>
+        <button id="refresh" type="button">רענון נתונים ↻</button>
+        <button id="reset-views" type="button" hidden>איפוס נתוני צפייה לכתבה 🗑</button>
+        <span id="updated"></span>
       </section>
       <section class="metrics" aria-label="סיכום פעילות">
         <article class="metric"><span>צפיות בתקופה</span><strong id="total-views">—</strong><small>ביקורים שנרשמו בכתבות</small></article>

@@ -26,6 +26,9 @@ export class StatisticsModel {
     fetchStatistics(articleId) {
         return this.request('/api/statistics' + (articleId ? '?articleId=' + encodeURIComponent(articleId) : ''));
     }
+    resetViews(articleId) {
+        return this.request('/api/statistics/' + encodeURIComponent(articleId), { method: 'DELETE', body: {} });
+    }
 
     // Sums the server's hourly buckets back up into daily ones, for every period except a single day.
     dailyViewsFrom(hourlyViews) {
