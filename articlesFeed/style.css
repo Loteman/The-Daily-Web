@@ -177,6 +177,20 @@ body {
 /* -------------------------------- */
 /* סרגל סינון (Filter Bar) */
 /* -------------------------------- */
+.articles-view-settings{
+    display: flex;
+    align-items: center; 
+    gap: 16px; 
+    flex-wrap: wrap;
+    justify-content: space-between; 
+    width: 100%; 
+}
+
+.search-bar{
+    min-width: 160px;
+    flex: 1;
+}
+
 .filter-bar {
     display: flex;
     justify-content: flex-end;
