@@ -98,18 +98,36 @@
 /* Content wrapper */
 .dashboard-container {
     max-width: 1300px;
-    margin: 0 auto;
+    margin: 40px auto 0;
     padding: 0 20px;
 }
 
-.page-title-section {
-    text-align: right;
+/* Same page-heading pattern used on the statistics and users pages: an eyebrow label, title and
+   subtitle on the right, a back-link to the left, so all three "secondary" pages start the same way. */
+.page-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
     margin-bottom: 24px;
+}
+
+.eyebrow {
+    color: #2563eb;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.back-link {
+    color: #2563eb;
+    text-decoration: none;
+    font-weight: 600;
 }
 
 .page-title {
     font-size: 34px;
-    font-weight: 800;
+    font-weight: 700;
+    letter-spacing: -1px;
     color: #0f172a;
 }
 
@@ -117,6 +135,16 @@
     font-size: 15px;
     color: #64748b;
     margin-top: 4px;
+}
+
+.management-message {
+    color: #64748b;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+.management-message:empty {
+    display: none;
 }
 
 /* Stat cards grid */
@@ -562,3 +590,11 @@
 .editor-note { white-space: pre-wrap; color: #92400e; }
 .action-group { flex-wrap: wrap; }
 [hidden] { display: none !important; }
+
+@media (max-width: 540px) {
+    .page-heading {
+        align-items: start;
+        flex-direction: column;
+        gap: 12px;
+    }
+}

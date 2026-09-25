@@ -11,8 +11,30 @@
 <body>
 
     <header class="header">
-       
+
     </header>
+    <script>
+        // Paints the cached header markup + last-known login state immediately, before the deferred
+        // module script even runs, so returning to a page already visited this tab doesn't flash the
+        // "guest" defaults before the real nav items for the logged-in user pop in a moment later.
+        try {
+            var cachedHeader = sessionStorage.getItem('header-html-v1');
+            if (cachedHeader) {
+                var headerEl = document.querySelector('.header');
+                headerEl.innerHTML = cachedHeader;
+                var cachedUserRaw = sessionStorage.getItem('header-user-v1');
+                if (cachedUserRaw) {
+                    var cachedUser = JSON.parse(cachedUserRaw);
+                    headerEl.querySelector('.user-name').textContent = cachedUser ? (cachedUser.fullName || cachedUser.username) : 'Guest';
+                    headerEl.querySelector('.login-link').hidden = Boolean(cachedUser);
+                    var loggedInEls = headerEl.querySelectorAll('[data-logged-in]');
+                    for (var i = 0; i < loggedInEls.length; i++) loggedInEls[i].hidden = !cachedUser;
+                    var editorEls = headerEl.querySelectorAll('[data-editor-only]');
+                    for (var j = 0; j < editorEls.length; j++) editorEls[j].hidden = !cachedUser || cachedUser.role !== 'editor';
+                }
+            }
+        } catch (error) { /* sessionStorage unavailable - header.js will fill it in as normal */ }
+    </script>
 
     <main class="main-container">
 
