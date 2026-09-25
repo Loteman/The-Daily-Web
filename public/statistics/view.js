@@ -51,30 +51,30 @@ export class StatisticsView {
     }
     renderArticleOptions(articles) {
         const selected = $('#article-filter').value;
-        $('#article-filter').replaceChildren(new Option('?? ??????', ''), ...articles.map(article => new Option(article.title || '????? ??? ?????', article.id)));
+        $('#article-filter').replaceChildren(new Option('כל הכתבות', ''), ...articles.map(article => new Option(article.title || 'טיוטה ללא כותרת', article.id)));
         if (articles.some(article => article.id === selected)) $('#article-filter').value = selected;
     }
     renderScope(user) {
-        $('#scope').textContent = user?.role === 'editor' ? '????? ??? ?? ??? ?????? ??????' : '????? ??? ?? ?????? ???';
+        $('#scope').textContent = user?.role === 'editor' ? 'תמונת מצב של כלל הכתבות במערכת' : 'תמונת מצב של הכתבות שלך';
     }
-    showScopeFallback() { $('#scope').textContent = '?????? ?????? ??????'; }
+    showScopeFallback() { $('#scope').textContent = 'פעילות הכתבות במערכת'; }
     setLoading(loading) {
         for (const selector of ['#refresh', '#article-filter', '#period-filter']) $(selector).disabled = loading;
         $('#dashboard').setAttribute('aria-busy', String(loading));
-        if (loading) $('#message').textContent = '???? ???????';
+        if (loading) $('#message').textContent = 'טוען נתונים…';
     }
     showLoaded() {
         $('#dashboard').hidden = false;
         $('#message').textContent = '';
-        $('#updated').textContent = '????? ??' + new Date().toLocaleTimeString('he-IL');
+        $('#updated').textContent = 'עודכן ב־' + new Date().toLocaleTimeString('he-IL');
     }
     showError(error) {
         $('#dashboard').hidden = true;
-        $('#message').textContent = error.status === 401 ? '?? ?????? ??? ????? ??????????. ' : '?? ???? ????? ?? ???????. ';
+        $('#message').textContent = error.status === 401 ? 'יש להתחבר כדי לצפות בסטטיסטיקה. ' : 'לא ניתן לטעון את הנתונים. ';
         if (error.status === 401) {
-            const link = document.createElement('a'); link.href = '/login/index.html'; link.textContent = '????? ????????'; $('#message').append(link);
+            const link = document.createElement('a'); link.href = '/login/index.html'; link.textContent = 'לעמוד ההתחברות'; $('#message').append(link);
         } else {
-            const retry = document.createElement('button'); retry.textContent = '??? ???'; retry.onclick = () => this.onRetry(); $('#message').append(retry);
+            const retry = document.createElement('button'); retry.textContent = 'נסו שוב'; retry.onclick = () => this.onRetry(); $('#message').append(retry);
         }
     }
     bindArticleChange(handler) { $('#article-filter').addEventListener('change', handler); }
