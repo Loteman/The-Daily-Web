@@ -135,7 +135,7 @@ body {
     overflow-wrap: anywhere;
 }
 
-.header .user-profile .logout-link {
+.header .user-profile .logout-link, .header .user-profile .login-link {
     color: #64748b;
     font-size: 13px;
     font-weight: 600;
@@ -145,8 +145,8 @@ body {
     white-space: nowrap;
 }
 
-.header .user-profile .logout-link:hover {
-    color: #dc2626;
+.header .user-profile .logout-link:hover, .header .user-profile .login-link:hover {
+    color: #2563eb;
 }
 
 .header .header-container {
