@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ניהול כתבות - The Web Daily</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../header/style.css">
+</head>
+<body class="dashboard-body">
+        
+    <!-- הדר עליון -->
+    <header class="header"></header>
+
+    <!-- תוכן מרכזי -->
+    <div class="dashboard-container">
+
+        <!-- כותרת העמוד -->
+        <div class="page-title-section">
+            <p class="management-message" role="status"></p>
+            <h1 class="page-title">ניהול כתבות</h1>
+            <p class="page-subtitle">כאן ניתן לנהל את הכתבות שלך</p>
+        </div>
+
+        <!-- 4 כרטיסי סטטיסטיקה -->
+        <div class="stats-grid" id="statistics">
+            <!-- כרטיס 1 -->
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-number color-blue">?</div>
+                    <div class="stat-label">בהכנה</div>
+                </div>
+                <div class="stat-icon-box bg-blue-light">📄</div>
+            </div>
+
+            <!-- כרטיס 2 -->
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-number color-orange">?</div>
+                    <div class="stat-label">ממתינות לאישור</div>
+                </div>
+                <div class="stat-icon-box bg-orange-light">🕒</div>
+            </div>
+
+            <!-- כרטיס 3 -->
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-number color-green">?</div>
+                    <div class="stat-label">פורסמו</div>
+                </div>
+                <div class="stat-icon-box bg-green-light">☑️</div>
+            </div>
+
+            <!-- כרטיס 4 -->
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-number color-red">?</div>
+                    <div class="stat-label">הוחזרה לתיקונים</div>
+                </div>
+                <div class="stat-icon-box bg-red-light">📝</div>
+            </div>
+        </div>
+
+        <!-- כרטיס הטבלה הראשי -->
+        <div class="main-card">
+
+            <!-- סרגל כלים וסינון -->
+            <div class="toolbar-section">
+                <button class="btn-new-article" hidden>
+                    <span class="plus-icon">+</span> כתבה חדשה
+                </button>
+
+                 <div class="feed-search search-bar">
+                        <span class="search-icon" aria-hidden="true">&#128269;</span>
+                        <input id="article-search" type="search" placeholder="חיפוש כתבות..." aria-label="חיפוש כתבות...">
+                    </div>
+
+                <section class="filter-bar">
+                    <div class="filter-group">
+                        <label>קטגוריה:</label>
+                        <select>
+                    
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>סטטוס צפייה:</label>
+                        <select>
+                    
+                        </select>
+                    </div>
+                </section>
+                    
+                   
+            </div>
+        </div>
+
+            <!-- טבלת הנתונים -->
+           <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                        <th class="th-title">כותרת הכתבה</th>
+                        <th class="th-category">קטגוריה</th>
+                        <th class="th-status">סטטוס</th>
+                        <th class="th-date">עדכון אחרון</th>
+                        <th class="th-actions">פעולות</th>
+                        </tr>
+                    </thead>
+                <tbody>
+                    
+        </tbody>
+    </table>
+</div>
+
+            <!-- סרגל דפדוף בתחתית -->
+            <div class="pagination-bar">
+                <div class="pagination-summary"></div>
+                <div class="pagination-buttons"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <dialog class="article-dialog">
+        <form id="article-form">
+            <h2 class="dialog-title"></h2>
+            <p class="editor-note"></p>
+            <label>כותרת<input name="title" required maxlength="200"></label>
+            <label>תקציר<textarea name="summary" required rows="3"></textarea></label>
+            <label>קטגוריה<select name="categoryId" required></select></label>
+            <label>כתובת תמונה<input name="mainImage" type="url" maxlength="2000"></label>
+            <label>תוכן הכתבה<textarea name="content" required rows="10"></textarea></label>
+            <label class="review-note-label">הערה ליוצר<textarea name="editorNote" rows="3"></textarea></label>
+            <p class="autosave-status" role="status" aria-live="polite"></p>
+            <p class="dialog-message" role="alert"></p>
+            <div class="dialog-actions">
+                <button type="button" class="btn-outline publish-article">אישור ופרסום</button>
+                <button type="button" class="btn-outline return-article">החזרה לתיקונים</button>
+                <button type="button" class="btn-outline close-dialog">סגירה</button>
+            </div>
+        </form>
+    </dialog>
+    <script type="module" src="../header/header.js"></script>
+
+<script type="module" src="articlesManagement.js"></script>
+
+</body>
+</html>

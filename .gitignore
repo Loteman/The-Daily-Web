@@ -1,0 +1,10 @@
+# תלויות וחבילות מותקנות
+node_modules/
+
+# קובצי סביבה וסיסמאות
+.env
+.env.local
+
+# לוגים ומערכת
+npm-debug.log*
+.DS_Store

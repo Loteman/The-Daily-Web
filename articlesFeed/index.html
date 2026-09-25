@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>קטלוג כתבות - The Web Daily</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/header/style.css">
+
+</head>
+<body>
+
+    <header class="header">
+       
+    </header>
+
+    <main class="main-container">
+
+        <section class="hero-card">
+            <div class="hero-image">
+                <svg width="100" height="70" viewBox="0 0 100 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="100" height="70" rx="6" fill="#cbd5e1"/>
+                    <path d="M20 52 L40 28 L60 48 L72 36 L85 52 Z" fill="#94a3b8"/>
+                    <circle cx="70" cy="24" r="6" fill="#94a3b8"/>
+                </svg>
+            </div>
+            <div class="hero-content">
+                <span class="category tag-blue"></span>
+                <h1 class="hero-title"></h1>
+                <p class="hero-summary"></p>
+                <div class="hero-meta"></div>
+                <a href="#" class="btn-read-more">קראו עוד ←</a>
+            </div>
+        </section>
+        <section class = "articles-view-settings">
+         <div class="feed-search search-bar">
+                <span class="search-icon" aria-hidden="true">&#128269;</span>
+                <input id="article-search" type="search" placeholder="חיפוש כתבות..." aria-label="חיפוש כתבות...">
+        </div>
+
+        <section class="filter-bar">
+
+            <div class="filter-group">
+                <label>קטגוריה:</label>
+                <select>
+                    
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>סטטוס צפייה:</label>
+                <select>
+                    <option>הכל</option>
+                    <option>נקראו</option>
+                    <option>לא נקראו</option>
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <label>מיון לפי:</label>
+                <select>
+                    <option>תאריך פרסום</option>
+                    <option>פופולריות</option>
+                </select>
+            </div>
+        </section>
+        </section>
+
+        <section class="articles-grid">
+
+            <article class="article-card">
+                <div class="card-image">
+                    <svg width="60" height="40" viewBox="0 0 60 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10 32 L25 16 L38 28 L46 20 L52 32 Z" fill="#94a3b8"/>
+                        <circle cx="43" cy="14" r="4" fill="#94a3b8"/>
+                    </svg>
+                </div>
+                <div class="card-body">
+                    <span class="category tag-blue"></span>
+                    <h3 class="card-title"></h3>
+                    <p class="card-summary"></p>
+                    <div class="card-meta"></div>
+                </div>
+            </article>
+
+        </section>
+
+        <div class="load-more-container" role="status" aria-live="polite"></div>
+
+    </main>
+
+<script type="module" src="../header/header.js"></script>
+<script type="module" src="articlesFeed.js"></script>
+
+</body>
+</html>

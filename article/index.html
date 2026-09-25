@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>כתבה ראשית - The Web Daily</title>
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/header/style.css">
+
+</head>
+<body>
+
+    <header class="header">
+        
+    </header>
+
+    <main class="main-container">
+        
+        <aside class="sidebar">
+            
+            <div class="widget weather-widget">
+                <div class="weather-header">
+                    <h3>מזג אוויר</h3>
+                    <span class="weather-location">👤</span>
+                </div>
+                <div class="weather-main">
+                    <span class="weather-icon"></span>
+                    <div class="weather-details">
+                        <span class="temperature"></span>
+                        <span class="condition"></span>
+                    </div>
+                </div>
+                
+            </div>
+
+            <div class="widget related-posts-widget">
+                <div class="widget-header">
+                    <h3>כתבות נוספות</h3>
+                        <a href="../articlesFeed/index.html" class="see-all"> הצג הכל←</a>
+                </div>
+                
+                <div class="related-post">
+                    <div class="post-meta">
+                        <span class="category tag-blue"></span>
+                        <p class="post-title"</p>
+                        <span class="post-date"></span>
+                    </div>
+                    <div class="post-thumb-placeholder"></div>
+                </div>
+
+                <div class="related-post">
+                    <div class="post-meta">
+                        <span class="category tag-green"></span>
+                        <p class="post-title"></p>
+                        <span class="post-date"></span>
+                    </div>
+                    <div class="post-thumb-placeholder"></div>
+                </div>
+
+                <div class="related-post">
+                    <div class="post-meta">
+                        <span class="category tag-purple"></span>
+                        <p class="post-title"></p>
+                        <span class="post-date"></span>
+                    </div>
+                    <div class="post-thumb-placeholder"></div>
+                </div>
+            </div>
+        </aside>
+
+        <article class="article-section">
+            <span class="category tag-blue-big"></span>
+            <h1 class="article-title"></h1>
+            <p class="article-summary"></p>
+            
+            <div class="article-details">
+                <div class="author">👤 <span></span></div>
+                <div class="date">🕒 <span></span></div>
+                <div class="category-detail">👤 <span></span></div>
+            </div>
+
+            <div class="illustration-placeholder">
+                <svg width="260" height="220" viewBox="0 0 260 220" xmlns="[http://www.w3.org/2000/svg](http://www.w3.org/2000/svg)">
+                    <path d="M20 140 C 0 110, 40 80, 50 100 C 60 120, 20 160, 20 140 Z" fill="#cbd5e1" opacity="0.6"/>
+                    <path d="M40 180 C 10 160, 30 110, 60 130 C 80 140, 50 190, 40 180 Z" fill="#94a3b8" opacity="0.4"/>
+                    <circle cx="150" cy="120" r="85" fill="#e2e8f0" opacity="0.4" />
+                    
+                    <rect x="70" y="40" width="140" height="130" rx="6" fill="#ffffff" stroke="#e2e8f0" stroke-width="4" />
+                    
+                    <text x="85" y="75" font-family="sans-serif" font-weight="900" font-size="22" fill="#94a3b8" letter-spacing="1">NEWS</text>
+                    
+                    <rect x="85" y="90" width="55" height="45" rx="3" fill="#cbd5e1" />
+                    <path d="M85 135 L100 110 L115 130 L130 105 L140 135 Z" fill="#94a3b8" />
+                    <circle cx="125" cy="100" r="4" fill="#f1f5f9" />
+                    
+                    <rect x="150" y="90" width="45" height="5" rx="2" fill="#cbd5e1" />
+                    <rect x="150" y="102" width="45" height="5" rx="2" fill="#cbd5e1" />
+                    <rect x="150" y="114" width="35" height="5" rx="2" fill="#cbd5e1" />
+                    <rect x="150" y="126" width="40" height="5" rx="2" fill="#cbd5e1" />
+                    
+                    <rect x="85" y="150" width="110" height="5" rx="2" fill="#e2e8f0" />
+                </svg>
+            </div>
+
+            <div class="article-body"></div>
+
+            <div class="comments-section">
+                <h2></h2>
+                
+                <div class="comment">
+                    <div class="avatar">👤</div>
+                    <div class="comment-content">
+                        <div class="comment-details">
+                            <span class="user-name"></span>
+                            <span class="comment-date"></span>
+                        </div>
+                        <p class="comment-text"></p>
+                    </div>
+                </div>
+
+                <div class="comment">
+                    <div class="avatar">👤</div>
+                    <div class="comment-content">
+                        <div class="comment-details">
+                            <span class="user-name"></span>
+                            <span class="comment-date"></span>
+                        </div>
+                        <p class="comment-text"></p>
+                    </div>
+                </div>
+
+                <div class="comment">
+                    <div class="avatar">👤</div>
+                    <div class="comment-content">
+                        <div class="comment-details">
+                            <span class="user-name"></span>
+                            <span class="comment-date"></span>
+                        </div>
+                        <p class="comment-text"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="add-comment">
+                <h2>הוסף תגובה</h2>
+                <form>
+                    <textarea placeholder="כתבו את התגובה שלכם כאן..." rows="5"></textarea>
+                    <div class="input-row">
+                        <input type="text" placeholder="שם מלא">
+                    </div>
+                    <button type="submit" class="submit-comment">שלח תגובה</button>
+                </form>
+            </div>
+        </article>
+
+    </main>
+
+<script type="module" src="../header/header.js"></script>
+
+<script type="module" src="article.js"></script>
+
+</body>
+</html>
