@@ -5,12 +5,23 @@ export class ArticlesFeedModel
     constructor(repository = new ArticleRepository())
     {
         this.repository = repository;
-        
+        this.catalogPromise = null;
+    }
+
+    getCatalog()
+    {
+        // Share the in-flight request and its result for this page instance only.
+        if (!this.catalogPromise)
+            this.catalogPromise = this.repository.getAll().catch(error => {
+                this.catalogPromise = null;
+                throw error;
+            });
+        return this.catalogPromise;
     }
 
     async getArticles(filters = {}, displayCount = 8) 
     {
-        let result = [...await this.repository.getAll()];
+        let result = [...await this.getCatalog()];
         const search = (filters.search || '').trim().toLowerCase();
 
         if (search)
@@ -52,6 +63,12 @@ export class ArticlesFeedModel
 
     async toggleReadStatus(id) 
     {
-        return this.repository.recordView(id);
+        const result = await this.repository.recordView(id);
+        if (this.catalogPromise)
+        {
+            const article = (await this.catalogPromise).find(article => String(article.id) === String(id));
+            if (article) article.isRead = result.isRead;
+        }
+        return result;
     }
 }

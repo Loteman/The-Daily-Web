@@ -6,7 +6,7 @@ export class ArticlesFeedController
         this.view = view;
         this.displayCount = 8; // כמות התחלתית שמוצגת בעמוד
 
-        this.init();
+        this.ready = this.init();
     }
 
     async init() 
@@ -14,8 +14,11 @@ export class ArticlesFeedController
         this.view.renderFeaturedArticle(null);
         try
         {
-            const catalog = await this.model.getArticles({}, Infinity);
-            this.view.renderCategoryOptions((await this.model.getCategories()).map(category => category.name));
+            const [catalog, categories] = await Promise.all([
+                this.model.getArticles({}, this.displayCount),
+                this.model.getCategories()
+            ]);
+            this.view.renderCategoryOptions(categories.map(category => category.name));
             this.view.renderFeaturedArticle(catalog.articles[0]);
         }
         catch (error)

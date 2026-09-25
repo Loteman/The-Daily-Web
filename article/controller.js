@@ -5,7 +5,7 @@ export class ArticleController
         this.model = model;
         this.view = view;
 
-        this.init();
+        this.ready = this.init();
     }
 
     async init() 
@@ -26,15 +26,25 @@ export class ArticleController
             this.view.showArticleError('שגיאה בטעינת הכתבה');
             return;
         }
-        this.view.renderRelatedPosts(this.model.relatedPosts);
-        this.view.renderComments(this.model.comments);
-        this.view.setCommentUser(this.model.user);
-        this.model.repository.recordView(id).catch(error => console.error('View tracking failed:', error.message));
-
+        this.view.setCommentsLoading(true);
         this.view.bindCommentSubmit(this.handleCommentSubmit.bind(this));
 
-        const weatherData = await this.model.fetchWeather();
-        this.view.renderWeatherData(weatherData);
+        // None of these secondary requests blocks rendering the article itself.
+        this.secondaryReady = Promise.allSettled([
+            this.model.loadRelatedPosts(id)
+                .then(posts => this.view.renderRelatedPosts(posts))
+                .catch(() => this.view.renderRelatedPosts([])),
+            Promise.all([this.model.loadComments(id), this.model.loadUser()])
+                .then(([comments, user]) => {
+                    this.view.renderComments(comments);
+                    this.view.setCommentUser(user);
+                    this.view.setCommentsLoading(false);
+                })
+                .catch(() => this.view.showCommentsLoadError()),
+            this.model.repository.recordView(id)
+                .catch(error => console.error('View tracking failed:', error.message)),
+            this.model.fetchWeather().then(data => this.view.renderWeatherData(data))
+        ]);
     }
 
     async handleCommentSubmit(author, text) 

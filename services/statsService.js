@@ -19,6 +19,10 @@ async function getStatistics(user, articleId) {
     { articleId: { $in: ids }, status: 'published' },
     { projection: { _id: 0, articleId: 1, version: 1, publishedAt: 1 } }
   ).sort({ publishedAt: 1 }).toArray();
-  return { statuses, totalViews: dailyViews.reduce((total, day) => total + day.views, 0), dailyViews, publications };
+  const versionChanges = await database().collection('Updates').find(
+    { articleId: { $in: ids }, status: { $in: ['pending', 'submitted'] } },
+    { projection: { _id: 0, articleId: 1, version: 1, status: 1, updatedAt: 1 } }
+  ).sort({ updatedAt: 1, version: 1 }).toArray();
+  return { statuses, totalViews: dailyViews.reduce((total, day) => total + day.views, 0), dailyViews, publications, versionChanges };
 }
 module.exports = { getStatistics };
