@@ -1,5 +1,5 @@
-import { submitGuestComment } from '../data/guestCommentLimiter.js';
 import { ArticleRepository } from '../data/articleRepository.js';
+import { currentUser } from '../data/api.js';
 
 export class ArticleModel 
 {
@@ -28,7 +28,8 @@ export class ArticleModel
         this.relatedPosts = articles
             .filter(article => String(article.id) !== String(id) && article.category === this.articleData.category)
             .slice(0, 3);
-        this.comments = this.articleData.comments || [];
+            this.comments = await this.repository.getComments(id);
+        this.user = await currentUser();
         return this.articleData;
     }
 
@@ -100,14 +101,10 @@ export class ArticleModel
 
     async addComment(commentObj)
     {
-        const saveComment = () => {
-            this.comments.unshift(commentObj);
-            return this.comments;
-        };
-
-        if (sessionStorage.getItem('username'))
-            return saveComment();
-
-        return submitGuestComment(saveComment);
+         const comment = await this.repository.addComment(this.articleData.id, {
+            fullName: commentObj.name, content: commentObj.text
+        });
+        this.comments.unshift(comment);
+        return this.comments;
     }
 }

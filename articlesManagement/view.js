@@ -42,30 +42,7 @@ export class ArticlesManagementView
         }));
     }
 
-    renderAnalytics(statistics)
-    {
-        const container = document.querySelector('.view-statistics');
-        container.innerHTML = `<h2>צפיות בכתבות — ${statistics.totalViews}</h2>
-            <table class="data-table"><thead><tr><th>תאריך</th><th>צפיות</th><th>גרסאות שפורסמו</th></tr></thead><tbody></tbody></table>`;
-        const dates = new Set(statistics.dailyViews.map(day => day.date));
-        const publicationDay = value => new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(value));
-        statistics.publications.filter(item => item.publishedAt).forEach(item => dates.add(publicationDay(item.publishedAt)));
-        for (const date of [...dates].sort())
-        {
-            const row = document.createElement('tr');
-            const publications = statistics.publications.filter(item => item.publishedAt && publicationDay(item.publishedAt) === date);
-            for (const value of [date, statistics.dailyViews.find(day => day.date === date)?.views || 0,
-                publications.map(item => item.articleId + ' v' + item.version).join(', ') || '—'])
-            {
-                const cell = document.createElement('td');
-                cell.textContent = value;
-                row.appendChild(cell);
-            }
-            container.querySelector('tbody').appendChild(row);
-        }
-        if (!dates.size) container.append('אין נתוני צפייה עדיין.');
-    }
-
+    
     openArticle(article, mode)
     {
         const dialog = document.querySelector('.article-dialog');
