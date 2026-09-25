@@ -31,9 +31,9 @@ export class LoginController
         const rawUsername = this.view.getUsername();
         const rawPassword = this.view.getPassword();
 
-        // ניקוי קלטים באמצעות DOMPurify עוד לפני בדיקה מול המודל
-        const cleanUsername = DOMPurify.sanitize(rawUsername);
-        const cleanPassword = DOMPurify.sanitize(rawPassword);
+        // בדיקת הקלט מול המודל
+        const cleanUsername = rawUsername.trim();
+        const cleanPassword = rawPassword;
 
         if (!cleanUsername || !cleanPassword) 
         {
@@ -46,7 +46,11 @@ export class LoginController
 
         // עדכון ה-View בהתאם לתשובה מה-Model
         if (result.success) 
-            this.view.showMessage(result.message, 'success');
+        {
+            sessionStorage.removeItem('username');
+            sessionStorage.removeItem('role');
+            window.location.href = '../articlesFeed/index.html';
+        }
         else 
             this.view.showMessage(result.message, 'error');
         

@@ -1,3 +1,5 @@
+import { formatDate, showImage } from '../data/presentation.js';
+
 const classes = {
             "עולם": "tag-blue",
             "כלכלה": "tag-orange",
@@ -8,7 +10,6 @@ const classes = {
             "תרבות": "tag-amber",
             "בריאות": "tag-coral"
         };
-const allCategories = ['הכל', 'עולם', 'כלכלה', 'טכנולוגיה', 'ספורט', 'סביבה', 'מדע', 'תרבות', 'בריאות'];
 
 export class ArticlesFeedView 
 {
@@ -35,15 +36,40 @@ export class ArticlesFeedView
         return classes[category] || "tag-blue";
     }
 
-    renderCategoryOptions() 
+    renderCategoryOptions(categories = [])
     {
         if (!this.categorySelect) 
             return;
         const currentVal = this.categorySelect.value;
         
-        this.categorySelect.innerHTML = allCategories.map(cat => 
-            `<option value="${cat}" ${cat === currentVal ? 'selected' : ''}>${cat}</option>`
-        ).join('');
+        const allCategories = ['הכל', ...new Set(categories.filter(Boolean))];
+        this.categorySelect.replaceChildren(...allCategories.map(cat => {
+            const option = document.createElement('option');
+            option.value = cat;
+            option.textContent = cat;
+            option.selected = cat === currentVal;
+            return option;
+        }));
+    }
+
+    renderFeaturedArticle(article)
+    {
+        const hero = document.querySelector('.hero-card');
+        if (!article)
+        {
+            hero.style.display = 'none';
+            return;
+        }
+
+        hero.style.display = '';
+        const category = hero.querySelector('.category');
+        category.textContent = article.category;
+        category.className = `category ${this.getCategoryClass(article.category)}`;
+        hero.querySelector('.hero-title').textContent = article.title;
+        hero.querySelector('.hero-summary').textContent = article.summary;
+        hero.querySelector('.hero-meta').textContent = `${article.author} | ${formatDate(article.date)}`;
+        showImage(hero.querySelector('.hero-image'), article.mainImage, article.title);
+        hero.querySelector('.btn-read-more').href = `../article/index.html?id=${encodeURIComponent(article.id)}`;
     }
 
     renderArticles(articles) 
@@ -58,7 +84,7 @@ export class ArticlesFeedView
         }
 
         this.articlesGrid.innerHTML = articles.map(article => `
-            <article class="article-card" data-id="${article.id}" style="cursor: pointer; border: ${article.isRead ? '2px solid #2563eb' : '2px solid transparent'}; transition: border 0.2s;">
+            <article class="article-card" data-id="${this.sanitizeHTML(String(article.id)).replace(/"/g, '&quot;')}" style="cursor: pointer; border: ${article.isRead ? '2px solid #2563eb' : '2px solid transparent'}; transition: border 0.2s;">
                 <div class="card-image">
                     <svg width="60" height="40" viewBox="0 0 60 40" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M10 32 L25 16 L38 28 L46 20 L52 32 Z" fill="#94a3b8"/>
@@ -70,12 +96,22 @@ export class ArticlesFeedView
                     <h3 class="card-title">${this.sanitizeHTML(article.title)}</h3>
                     <p class="card-summary">${this.sanitizeHTML(article.summary)}</p>
                     <div class="card-meta">
-                        מאת ${this.sanitizeHTML(article.author)} &nbsp;|&nbsp; ${this.sanitizeHTML(article.date)} 
-                        <span style="float: left;">${article.isRead ? '✅ נבחרה' : ''}</span>
+                        מאת ${this.sanitizeHTML(article.author)} &nbsp;|&nbsp; ${formatDate(article.date)}
+                        <span style="float: left;">${article.isRead ? '✅ נקראה' : ''}</span>
                     </div>
                 </div>
             </article>
         `).join('');
+        this.articlesGrid.querySelectorAll('.article-card').forEach((card, index) =>
+            showImage(card.querySelector('.card-image'), articles[index].mainImage, articles[index].title));
+    }
+
+    showLoadError()
+    {
+        this.renderFeaturedArticle(null);
+        this.articlesGrid.textContent = 'לא ניתן לטעון את הכתבות. נסו לרענן את העמוד.';
+        this.updateLoadMoreVisibility(false);
+        this.loadMoreContainer.textContent = '';
     }
 
     updateLoadMoreVisibility(hasMore) 
@@ -83,36 +119,24 @@ export class ArticlesFeedView
         if (!this.loadMoreContainer) 
             return;
 
-        this.loadMoreContainer.innerHTML = '';
-        this.loadMoreContainer.style.display = 'flex';
-        this.loadMoreContainer.style.justifyContent = 'center';
-        this.loadMoreContainer.style.alignItems = 'center';
+        this.hasMore = hasMore;
+        this.loadMoreContainer.textContent = hasMore
+            ? ''
+            : 'אין כתבות נוספות להצגה';
 
-        if (hasMore) 
+        if (this.loadMoreObserver)
         {
-            this.loadMoreButton = document.createElement('button');
-            this.loadMoreButton.className = 'btn-load-more';
-            this.loadMoreButton.innerHTML = `
-                <span class="spinner-icon">🔄</span>
-                טעינת כתבות נוספות
-            `;
-            this.loadMoreContainer.appendChild(this.loadMoreButton);
-        } 
-        else 
-        {
-            const noMoreText = document.createElement('p');
-            noMoreText.style.textAlign = 'center';
-            noMoreText.style.color = '#64748b';
-            noMoreText.style.margin = '10px 0';
-            noMoreText.textContent = 'אין כתבות נוספות להצגה';
-            this.loadMoreContainer.appendChild(noMoreText);
-            this.loadMoreButton = null;
+            this.loadMoreObserver.unobserve(this.loadMoreContainer);
+            if (hasMore)
+                this.loadMoreObserver.observe(this.loadMoreContainer);
         }
     }
 
     getFilterValues() 
     {
+        const searchInput = document.querySelector('#article-search');
         return {
+            search: searchInput ? searchInput.value : '',
             category: this.categorySelect ? this.categorySelect.value : 'הכל',
             status: this.statusSelect ? this.statusSelect.value : 'הכל',
             sortBy: this.sortSelect ? this.sortSelect.value : 'תאריך פרסום'
@@ -121,6 +145,10 @@ export class ArticlesFeedView
 
     bindFilterChange(handler) 
     {
+        const searchInput = document.querySelector('#article-search');
+        if (searchInput)
+            searchInput.addEventListener('input', handler);
+
         if (this.categorySelect)
             this.categorySelect.addEventListener('change', handler);
         if (this.statusSelect) 
@@ -145,15 +173,27 @@ export class ArticlesFeedView
         }
     }
 
-    bindLoadMore(handler) 
+    bindLoadMore(handler)
     {
-        if (this.loadMoreContainer) 
-        {
-            this.loadMoreContainer.addEventListener('click', (event) => {
-                const button = event.target.closest('.btn-load-more');
-                if (button && handler) 
-                    handler();
-            });
-        }
+        if (!this.loadMoreContainer)
+            return;
+
+        this.loadMoreObserver = new IntersectionObserver(async (entries) => {
+            if (!entries.some(entry => entry.isIntersecting) || !this.hasMore || this.isLoadingMore)
+                return;
+
+            this.isLoadingMore = true;
+            try
+            {
+                await handler();
+            }
+            finally
+            {
+                this.isLoadingMore = false;
+            }
+        }, { rootMargin: '0px 0px 300px 0px' });
+
+        if (this.hasMore)
+            this.loadMoreObserver.observe(this.loadMoreContainer);
     }
 }

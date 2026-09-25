@@ -1,4 +1,6 @@
-export class ArticleView 
+import { formatDate, showImage } from '../data/presentation.js';
+
+export class ArticleView
 {
     constructor() 
     {
@@ -13,7 +15,7 @@ export class ArticleView
         this.authorSpanEl = document.querySelector('.article-details .author span');
         this.dateSpanEl = document.querySelector('.article-details .date span');
         this.categoryDetailSpanEl = document.querySelector('.article-details .category-detail span');
-        this.articleParagraphsEls = document.querySelectorAll('.article-section .article-text');
+        this.articleBodyEl = document.querySelector('.article-body');
 
         this.relatedPostsWidgetEl = document.querySelector('.related-posts-widget');
         this.commentsSectionEl = document.querySelector('.comments-section');
@@ -65,17 +67,32 @@ export class ArticleView
         if (this.authorSpanEl) 
             this.authorSpanEl.textContent = article.author;
         if (this.dateSpanEl) 
-            this.dateSpanEl.textContent = article.date;
+            this.dateSpanEl.textContent = formatDate(article.date);
         if (this.categoryDetailSpanEl) 
             this.categoryDetailSpanEl.textContent = article.category;
 
-        if (this.articleParagraphsEls.length > 0) {
-            this.articleParagraphsEls.forEach((pEl, index) => {
-                if (article.paragraphs[index]) {
-                    pEl.textContent = article.paragraphs[index];
-                }
-            });
-        }
+        document.title = `${article.title} - The Web Daily`;
+        showImage(document.querySelector('.illustration-placeholder'), article.mainImage, article.title);
+        this.articleBodyEl.replaceChildren();
+        const paragraphs = article.paragraphs || [article.summary];
+        paragraphs.forEach(text => {
+            const paragraph = document.createElement('p');
+            paragraph.className = 'article-text';
+            paragraph.textContent = text;
+            this.articleBodyEl.appendChild(paragraph);
+        });
+    }
+
+    showArticleError(message)
+    {
+        const section = document.querySelector('.article-section');
+        const title = document.createElement('h1');
+        title.textContent = message;
+        const backLink = document.createElement('a');
+        backLink.href = '../articlesFeed/index.html';
+        backLink.textContent = 'חזרה לכתבות';
+        section.replaceChildren(title, backLink);
+        this.relatedPostsWidgetEl.hidden = true;
     }
 
     renderRelatedPosts(posts) 
@@ -87,11 +104,11 @@ export class ArticleView
         
         posts.forEach(post => {
             postsHtml += `
-                <div class="related-post" data-id="${post.id}">
+                <div class="related-post" data-id="${this.sanitizeInput(String(post.id))}">
                     <div class="post-meta">
-                        <span class="category ${post.categoryClass}">${post.category}</span>
-                        <p class="post-title">${post.title}</p>
-                        <span class="post-date">${post.date}</span>
+                        <span class="category tag-blue">${this.sanitizeInput(post.category)}</span>
+                        <p class="post-title"><a href="?id=${encodeURIComponent(post.id)}">${this.sanitizeInput(post.title)}</a></p>
+                        <span class="post-date">${formatDate(post.date)}</span>
                     </div>
                     <div class="post-thumb-placeholder"></div>
                 </div>
@@ -108,12 +125,12 @@ export class ArticleView
         
         comments.forEach(comment => {
             commentsHtml += `
-                <div class="comment" data-id="${comment.id}">
+                <div class="comment" data-id="${this.sanitizeInput(String(comment.id)).replaceAll('"', '&quot;')}">
                     <div class="avatar">👤</div>
                     <div class="comment-content">
                         <div class="comment-details">
                             <span class="user-name">${this.sanitizeInput(comment.name)}</span>
-                            <span class="comment-date">${comment.date}</span>
+                            <span class="comment-date">${this.sanitizeInput(new Date(comment.date).toLocaleString('he-IL'))}</span>
                         </div>
                         <p class="comment-text">${this.sanitizeInput(comment.text)}</p>
                     </div>
@@ -123,7 +140,17 @@ export class ArticleView
         this.commentsSectionEl.innerHTML = commentsHtml;
     }
 
-    showFormError(message, targetField) 
+    setCommentUser(user)
+    {
+        if (user && this.commentAuthorInputEl)
+        {
+            this.commentAuthorInputEl.value = user.fullName || user.username;
+            this.commentAuthorInputEl.defaultValue = this.commentAuthorInputEl.value;
+            this.commentAuthorInputEl.readOnly = true;
+        }
+    }
+
+    showFormError(message, targetField)
     {
         if (!this.formMsgEl) 
             return;

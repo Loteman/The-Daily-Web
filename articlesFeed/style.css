@@ -177,6 +177,20 @@ body {
 /* -------------------------------- */
 /* סרגל סינון (Filter Bar) */
 /* -------------------------------- */
+.articles-view-settings{
+    display: flex;
+    align-items: center; 
+    gap: 16px; 
+    flex-wrap: wrap;
+    justify-content: space-between; 
+    width: 100%; 
+}
+
+.search-bar{
+    min-width: 160px;
+    flex: 1;
+}
+
 .filter-bar {
     display: flex;
     justify-content: flex-end;
@@ -288,33 +302,9 @@ body {
 /* כפתור טעינת עוד */
 /* -------------------------------- */
 .load-more-container {
-    display: flex;
-    justify-content: center;
-}
-
-.btn-load-more {
-    background-color: #ffffff;
-    border: 1px solid #cbd5e1;
-    color: #334155;
-    padding: 10px 24px;
-    border-radius: 20px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-family: inherit;
-    transition: all 0.2s;
-}
-
-.btn-load-more:hover {
-    background-color: #f1f5f9;
-    border-color: #94a3b8;
-}
-
-.spinner-icon {
-    font-size: 14px;
+    min-height: 1px;
+    text-align: center;
+    color: #64748b;
 }
 
 /* -------------------------------- */
@@ -344,4 +334,8 @@ body {
         flex-direction: column;
         gap: 15px;
     }
+}
+.feed-search {
+    max-width: 480px;
+    margin-bottom: 20px;
 }

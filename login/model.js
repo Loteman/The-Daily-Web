@@ -1,18 +1,12 @@
-export class LoginModel 
-{
-    constructor() 
-    {
-        // נתונים מדומים (בעתיד יוחלף בקריאת fetch לשרת / DB)
-        this.validUsername = 'admin';
-        this.validPassword = '123456';
-    }
+﻿import { api } from '../data/api.js';
 
-    async validateCredentials(username, password) 
-    {
-        // סימולציה של בדיקה (יכול להיות גם בקשת API אסינכרונית)
-        if (username === this.validUsername && password === this.validPassword) 
-            return { success: true, message: 'ההתחברות בוצעה בהצלחה!' };
-        
-        return { success: false, message: 'שם המשתמש או הסיסמה שגויים' };
+export class LoginModel {
+    async validateCredentials(username, password) {
+        try {
+            const result = await api('/api/auth/login', { method: 'POST', body: { username, password } });
+            return { success: true, ...result.user };
+        } catch (error) {
+            return { success: false, message: error.message };
+        }
     }
 }

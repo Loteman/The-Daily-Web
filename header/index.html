@@ -1,24 +1,25 @@
 <!-- כותרת עליונה אחידה -->
 
     <div class="header-container">
-        <div class="logo">
-            <a href="/articlesFeed/index.html" style="text-decoration: none;"></a>
+        <div class="user-profile">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="8" r="4"></circle>
+                <path d="M4 21v-2a8 8 0 0 1 16 0v2"></path>
+            </svg>
+            <bdi class="user-name"></bdi>
+        </div>
+        <a class="logo" href="/articlesFeed/index.html" style="text-decoration: none;">
             <span class="logo-title">The Web Daily</span>
             <span class="logo-subtitle">חדשות שמחברות אותך לעולם</span>
-        </div>
+        </a>
         
-        <div class="header-center">
-            <div class="search-bar">
-                <span class="search-icon">🔍</span>
-                <input type="text" placeholder="חיפוש כתבות...">
-            </div>
-        </div>
-
         <nav class="nav">
             <ul>
-                <li><a href="#" class="active">בית</a></li>
-                <li><a href="#">קטגוריות</a></li>
-                <li><a href="#">התחברות</a></li>
+                <li><a href="/articlesFeed/index.html">בית</a></li>
+                <li data-logged-in hidden><a href="/articlesManagement/index.html">כתבות</a></li>
+                <li data-logged-in hidden><a href="/public/statistics/index.html">סטטיסטיקה</a></li>
+                <li><a class="login-link" href="/login/index.html">התחברות</a></li>
+                <li data-logged-in hidden><a class="logout-link" href="#">התנתקות</a></li>
             </ul>
         </nav>
     </div>

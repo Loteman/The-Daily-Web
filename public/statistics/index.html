@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>סטטיסטיקה — The Web Daily</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/header/style.css">
+</head>
+<body>
+  <header class="header"></header>
+  <main>
+    <div class="page-heading"><div><p class="eyebrow">נתונים ותובנות</p><h1>סטטיסטיקה</h1><p id="scope">טוען את נתוני הכתבות…</p></div><a class="back-link" href="/articlesManagement/index.html">ניהול כתבות ←</a></div>
+    <div id="message" role="status" aria-live="polite"></div>
+    <div id="dashboard" hidden>
+      <section class="filters" aria-label="סינון נתונים">
+        <label>כתבה<select id="article-filter"><option value="">כל הכתבות</option></select></label>
+        <label>תקופת פעילות<select id="period-filter"><option value="all">כל התקופה</option><option value="30">30 ימים אחרונים</option><option value="7">7 ימים אחרונים</option></select></label>
+        <button id="refresh" type="button">רענון נתונים ↻</button><span id="updated"></span>
+      </section>
+      <section class="metrics" aria-label="סיכום פעילות">
+        <article class="metric"><span>צפיות בתקופה</span><strong id="total-views">—</strong><small>ביקורים שנרשמו בכתבות</small></article>
+        <article class="metric"><span>כתבות בבחירה</span><strong id="article-count">—</strong><small>כל מצבי הפרסום</small></article>
+        <article class="metric"><span>גרסאות שפורסמו בתקופה</span><strong id="publication-count">—</strong><small>פרסומים ראשונים ועדכונים</small></article>
+        <article class="metric"><span>צפיות ליום פעיל</span><strong id="average-views">—</strong><small>ממוצע בימים עם צפיות</small></article>
+      </section>
+      <div class="overview">
+        <section class="panel chart-panel"><div class="panel-heading"><div><h2>צפיות לאורך זמן</h2><p>צפיות יומיות לפי שעון ישראל</p></div><span class="legend">● צפיות</span></div><div id="chart"></div><details><summary>הצגת הנתונים בטבלה</summary><div class="table-scroll"><table><thead><tr><th>תאריך</th><th>צפיות</th></tr></thead><tbody id="daily-table"></tbody></table></div></details></section>
+        <section class="panel"><h2>מצב הכתבות</h2><p>הגרסה האחרונה של כל כתבה, בכל התקופה</p><div id="statuses"></div></section>
+      </div>
+      <div class="details-grid">
+        <section class="panel"><h2>הכתבות הנצפות ביותר</h2><p>סך הצפיות בכל התקופה · עד 10 כתבות</p><ol id="ranking"></ol></section>
+        <section class="panel"><h2>היסטוריית פרסומים</h2><p>גרסאות שפורסמו בתקופה שנבחרה</p><div class="table-scroll"><table><thead><tr><th>כתבה</th><th>גרסה</th><th>תאריך פרסום</th></tr></thead><tbody id="publications"></tbody></table></div></section>
+      </div>
+    </div>
+  </main>
+  <script type="module" src="/header/header.js"></script>
+  <script type="module" src="statistics.js"></script>
+</body>
+</html>

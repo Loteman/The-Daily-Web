@@ -4,14 +4,25 @@ export class ArticlesFeedController
     {
         this.model = model;
         this.view = view;
-        this.displayCount = 4; // כמות התחלתית שמוצגת בעמוד
+        this.displayCount = 8; // כמות התחלתית שמוצגת בעמוד
 
         this.init();
     }
 
     async init() 
     {
-        this.view.renderCategoryOptions();
+        this.view.renderFeaturedArticle(null);
+        try
+        {
+            const catalog = await this.model.getArticles({}, Infinity);
+            this.view.renderCategoryOptions((await this.model.getCategories()).map(category => category.name));
+            this.view.renderFeaturedArticle(catalog.articles[0]);
+        }
+        catch (error)
+        {
+            this.view.showLoadError();
+            return;
+        }
         await this.updateView();
 
         this.view.bindFilterChange(() => this.handleFilterChange());
@@ -22,10 +33,18 @@ export class ArticlesFeedController
     async updateView() 
     {
         const filters = this.view.getFilterValues();
-        const result = await this.model.getArticles(filters, this.displayCount);
-        
-        this.view.renderArticles(result.articles);
-        this.view.updateLoadMoreVisibility(result.hasMore);
+        const requestId = this.requestId = (this.requestId || 0) + 1;
+        try
+        {
+            const result = await this.model.getArticles(filters, this.displayCount);
+            if (requestId !== this.requestId) return;
+            this.view.renderArticles(result.articles);
+            this.view.updateLoadMoreVisibility(result.hasMore);
+        }
+        catch (error)
+        {
+            if (requestId === this.requestId) this.view.showLoadError();
+        }
     }
 
     async handleFilterChange() 
@@ -36,13 +55,12 @@ export class ArticlesFeedController
 
     async handleArticleClick(id) 
     {
-        await this.model.toggleReadStatus(id);
-        await this.updateView();
+        window.location.href = `../article/index.html?id=${encodeURIComponent(id)}`;
     }
 
     async handleLoadMore() 
     {
-        this.displayCount += 4; // מוסיף עוד כתבות להצגה
+        this.displayCount += 20; // מוסיף עוד כתבות להצגה
         await this.updateView();
     }
 }

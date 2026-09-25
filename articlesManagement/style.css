@@ -186,7 +186,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    flex-wrap:wrap;
+
 }
 
 .btn-new-article {
@@ -203,26 +204,30 @@
     gap: 8px;
 }
 
-.filter-controls {
+.filter-bar {
     display: flex;
-    gap: 12px;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 20px;
 }
 
-.custom-select {
-    position: relative;
+.filter-group {
     display: flex;
     align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #475569;
 }
 
-.custom-select select {
-    padding: 10px 40px 10px 30px;
-    border: 1px solid #cbd5e1;
-    border-radius: 10px;
+.filter-group select {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
     background-color: #ffffff;
+    font-family: inherit;
     font-size: 14px;
-    color: #334155;
+    color: #1e293b;
     outline: none;
-    appearance: none;
     cursor: pointer;
 }
 
@@ -240,31 +245,44 @@
     font-size: 11px;
 }
 
-.search-box {
-    position: relative;
-}
 
-.search-box input {
-    padding: 10px 16px 10px 38px;
-    border: 1px solid #cbd5e1;
-    border-radius: 10px;
-    font-size: 14px;
-    width: 280px;
-    outline: none;
+.search-bar {
+    flex: 1; 
+    max-width: 300px; 
+    display: flex;
+    align-items: center;
 }
 
 .search-icon {
     position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #94a3b8;
+    right: 14px;
     font-size: 14px;
+    color: #94a3b8;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 9px 40px 9px 15px;
+    border: 1px solid #cbd5e1;
+    border-radius: 20px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    background-color: #f8fafc;
+    transition: all 0.2s;
+}
+
+.search-bar input:focus {
+    border-color: #2563eb;
+    background-color: #ffffff;
 }
 
 /* עיצוב הטבלה */
 .table-responsive {
     overflow-x: auto;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
 }
 
 .data-table {
@@ -275,10 +293,11 @@
 
 .data-table th {
     padding: 16px 12px;
-    color: #1e293b;
-    font-weight: 700;
-    font-size: 14px;
-    border-bottom: 1px solid #f1f5f9;
+    color: #64748b; 
+    font-weight: 600;
+    font-size: 16px;
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .data-table td {
@@ -286,6 +305,79 @@
     border-bottom: 1px solid #f1f5f9;
     vertical-align: middle;
     font-size: 14px;
+    color: #1e293b;
+}
+
+/* עיצוב עמודת כותרת הכתבה והתמונה */
+.article-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.article-thumb {
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.article-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.article-name {
+    font-weight: 700;
+    color: #1e3a8a; /* כחול כהה כמו בתמונה */
+    font-size: 14px;
+}
+
+.article-desc {
+    font-size: 12px;
+    color: #64748b;
+}
+
+/* עיצוב תגיות הסטטוס (Badges) */
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+/* דוגמה לסטטוס "בהכנה" */
+.status-badge.status-draft {
+    background-color: #e0f2fe;
+    color: #0369a1;
+}
+
+/* עיצוב כפתורי פעולות */
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-action {
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: #334155;
+    cursor: pointer;
+}
+
+.btn-icon {
+    background: transparent;
+    border: 1px solid #cbd5e1;
+    padding: 4px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #334155;
 }
 
 /* פרטי כתבה */
@@ -416,3 +508,30 @@
     color: #ffffff;
     border-color: #0055ff;
 }
+
+.article-dialog {
+    width: min(700px, 94vw);
+    max-height: 90vh;
+    margin: auto;
+    padding: 24px;
+    border: 0;
+    border-radius: 12px;
+    overflow-y: auto;
+}
+
+.article-dialog::backdrop { background: rgb(15 23 42 / 50%); }
+.article-dialog form, .article-dialog label { display: flex; flex-direction: column; gap: 8px; }
+.article-dialog form { gap: 16px; }
+.article-dialog input, .article-dialog textarea, .article-dialog select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font: inherit;
+}
+.article-dialog textarea { resize: vertical; }
+.dialog-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.dialog-message { color: #b91c1c; }
+.editor-note { white-space: pre-wrap; color: #92400e; }
+.action-group { flex-wrap: wrap; }
+[hidden] { display: none !important; }

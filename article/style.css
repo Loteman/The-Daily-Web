@@ -417,8 +417,9 @@ body {
         flex-direction: column;
     }
     .sidebar {
+        order: 1;
         margin-left: 0;
-        margin-bottom: 30px;
+        margin-top: 30px;
         flex: 1;
     }
     .header-container {

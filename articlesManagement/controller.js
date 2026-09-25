@@ -12,7 +12,7 @@ export class ArticlesManagementController
         this.selectedCategory = "כל הקטגוריות";
         this.selectedStatus = "כל הסטטוסים";
 
-        this.init();
+        this.ready = this.init();
     }
 
 
@@ -20,6 +20,7 @@ export class ArticlesManagementController
     {
         const user = await this.model.getUserProfile();
         this.view.renderUserProfile(user);
+        this.view.setRole(this.model.role);
 
         const stats = await this.model.calculateStats();
         this.view.renderStats(stats);
@@ -33,7 +34,8 @@ export class ArticlesManagementController
         this.view.bindFilterEvents(this.handleCategoryChange.bind(this), this.handleStatusChange.bind(this));
         this.view.bindPaginationEvent(this.handlePageChange.bind(this));
         this.view.bindNewArticleEvent(this.handleNewArticle.bind(this));
-        this.view.bindTableActions(this.handleArticleAction.bind(this), this.handleOptionsMenu.bind(this));
+        this.view.bindTableActions(this.handleArticleAction.bind(this));
+        this.view.bindEditor(this.handleSave.bind(this), this.handleReview.bind(this));
     }
 
     async getFilteredArticles() 
@@ -55,7 +57,10 @@ export class ArticlesManagementController
     async updateView() 
     {
         const filteredArticles = await this.getFilteredArticles();
+        this.currentPage = Math.min(this.currentPage, Math.max(1, Math.ceil(filteredArticles.length / this.itemsPerPage)));
         this.view.renderArticles(filteredArticles, this.currentPage, this.itemsPerPage);
+        this.view.renderStats(await this.model.calculateStats());
+        this.view.renderAnalytics(await this.model.getStatistics());
     }
 
     async handleSearch(searchTerm) 
@@ -85,44 +90,54 @@ export class ArticlesManagementController
         await this.updateView();
     }
 
-    handleNewArticle() 
+    handleNewArticle()
     {
-        alert("פתיחת טופס ליצירת כתבה חדשה.");
+        this.view.openArticle(null, 'edit');
     }
 
-    async handleArticleAction(articleId, actionType) 
+    async handleArticleAction(articleId, actionType)
     {
-        const articles = await this.model.getArticles();
-        const article = articles.find(a => a.id === Number(articleId));
-        if (!article) return;
-
-        switch (actionType) 
+        try
         {
-            case 'edit':
-                alert(`מעבר למסך עריכת הכתבה: "${article.title}"`);
-                break;
-            case 'send':
-                alert(`הכתבה "${article.title}" נשלחה לאישור המערכת!`);
-                break;
-            case 'view':
-                alert(`פתיחת תצוגה מקדימה לכתבה המפורסמת: "${article.title}"`);
-                break;
-            case 'comment':
-                alert(`הצגת הערות עורך עבור הכתבה: "${article.title}"`);
-                break;
-            default:
-                alert(`בוצעה פעולה כללית על כתבה מס' ${articleId}`);
+            const article = await this.model.getArticle(articleId);
+            if (actionType === 'view')
+                window.location.href = `../article/index.html?id=${encodeURIComponent(articleId)}`;
+            else if (actionType === 'send')
+            {
+                await this.model.changeStatus(articleId, 'pending');
+                await this.updateView();
+                this.view.showMessage('הכתבה נשלחה לאישור.');
+            }
+            else if (actionType === 'revise')
+                this.view.openArticle(await this.model.startRevision(articleId), 'edit');
+            else
+                this.view.openArticle(article, actionType === 'edit' ? 'edit' : actionType === 'review' ? 'review' : 'preview');
+        }
+        catch (error)
+        {
+            this.view.showMessage(error.message);
         }
     }
 
-    handleOptionsMenu(articleId) 
+    async handleSave(id, fields)
     {
-        const actions = prompt(`תפריט אפשרויות מתקדם לכתבה מס' ${articleId}:\n1. שיתוף\n2. שכפול כתבה\n3. העברה לארכיון\n\nהקש את מספר הפעולה המבוקשת:`);
-        if (actions === "1") 
-            alert("הקישור הועתק ללוח!");
-        else if (actions === "2") 
-            alert("הכתבה שוכפלה בהצלחה.");
-        else if (actions === "3") 
-            alert("הכתבה הועברה לארכיון.");
+        const article = await this.model.saveDraft(id, fields);
+        await this.updateView();
+        return article;
+    }
+
+    async handleReview(id, status, note)
+    {
+        try
+        {
+            await this.model.changeStatus(id, status, note);
+            this.view.closeEditor();
+            await this.updateView();
+            this.view.showMessage(status === 'published' ? 'הכתבה פורסמה.' : 'הכתבה הוחזרה לתיקונים.');
+        }
+        catch (error)
+        {
+            this.view.showEditorError(error.message);
+        }
     }
 }

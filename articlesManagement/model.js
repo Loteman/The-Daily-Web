@@ -1,139 +1,76 @@
+﻿import { ManagementRepository } from '../data/managementRepository.js';
+import { currentUser } from '../data/api.js';
 
-export class ArticlesManagementModel 
-{
-    constructor() 
-    {
-        this.currentUser = {
-            name: "דנה כהן",
-            role: "כותבת תוכן",
-            avatar: "👤"
-        };
-
-        this.categories = ["כל הקטגוריות", "טכנולוגיה", "עסקים", "חדשות", "חברה", "בריאות"];
-        this.statuses = ["כל הסטטוסים", "בהכנה", "ממתינה לאישור", "פורסמה", "הוחזרה לתיקונים"];
-
-        this.articles = [
-            {
-                id: 1,
-                title: "העתיד של בינה מלאכותית בעולם העבודה",
-                subtitle: "איך AI משנה את הדרך בה אנחנו עובדים, ומה זה...",
-                category: "טכנולוגיה",
-                status: "draft",
-                statusText: "בהכנה",
-                badgeClass: "badge-blue",
-                thumbClass: "thumb-robot",
-                date: "15 באפר' 2024",
-                time: "10:24",
-                actionType: "edit",
-                actionText: "✏️ עריכה"
-            },
-            {
-                id: 2,
-                title: "5 טיפים לצמיחה עסקית בעידן הדיגיטלי",
-                subtitle: "כלים פרקטיים שיעזרו לעסקים קטנים לגדול...",
-                category: "עסקים",
-                status: "pending",
-                statusText: "ממתינה לאישור",
-                badgeClass: "badge-orange",
-                thumbClass: "thumb-laptop",
-                date: "14 באפר' 2024",
-                time: "16:32",
-                actionType: "send",
-                actionText: "✈️ שליחה לאישור"
-            },
-            {
-                id: 3,
-                title: "שוק העבודה הישראלי: מגמות לשנת 2024",
-                subtitle: "סקירה מקיפה של המגמות המרכזיות בשוק העבודה...",
-                category: "חדשות",
-                status: "published",
-                statusText: "פורסמה",
-                badgeClass: "badge-green",
-                thumbClass: "thumb-city",
-                date: "12 באפר' 2024",
-                time: "09:15",
-                actionType: "view",
-                actionText: "👁️ צפייה"
-            },
-            {
-                id: 4,
-                title: "איך יוצרים איזון בין עבודה לחיים פרטיים",
-                subtitle: "מבט מעמיק על האתגרים והפתרונות בעולם המודרני...",
-                category: "חברה",
-                status: "returned",
-                statusText: "הוחזרה לתיקונים",
-                badgeClass: "badge-red",
-                thumbClass: "thumb-person",
-                date: "10 באפר' 2024",
-                time: "14:20",
-                actionType: "edit",
-                actionText: "✏️ עריכה"
-            },
-            {
-                id: 5,
-                    title: "המדריך המלא לאורח חיים בריא יותר",
-                subtitle: "צעדים קטנים שעושים הבדל גדול – הבריאות מתחילה...",
-                category: "בריאות",
-                status: "draft",
-                statusText: "בהכנה",
-                badgeClass: "badge-blue",
-                thumbClass: "thumb-food",
-                date: "8 באפר' 2024",
-                time: "11:07",
-                actionType: "comment",
-                actionText: "💬 הערת עורך"
-            },
-            {
-                id: 6,
-                title: "המדריך למתחילים בפיתוח תוכנה",
-                subtitle: "צעדים ראשונים בעולם הקוד והתכנות...",
-                category: "טכנולוגיה",
-                status: "draft",
-                statusText: "בהכנה",
-                badgeClass: "badge-blue",
-                thumbClass: "thumb-robot",
-                date: "5 באפר' 2024",
-                time: "12:00",
-                actionType: "edit",
-                actionText: "✏️ עריכה"
-            }
-        ];
+const statuses = {
+    draft: ['בהכנה', 'badge-blue'], pending: ['ממתינה לאישור', 'badge-orange'],
+    published: ['פורסמה', 'badge-green'], returned: ['הוחזרה לתיקונים', 'badge-red']
+};
+export class ArticlesManagementModel {
+    constructor(repository = new ManagementRepository()) {
+        this.repository = repository;
+        this.revisions = new Map();
     }
-
-    async getUserProfile() 
-    {
-        return Promise.resolve(this.currentUser);
+    async initialize() {
+        const user = await currentUser();
+        this.username = user?.username;
+        this.fullName = user?.fullName;
+        this.role = user?.role;
+        this.categories = user ? await this.repository.getCategories() : [];
+        return this.canAccess();
     }
-
-    async getFilterOptions() 
-    {
-        return Promise.resolve({
-            categories: this.categories,
-            statuses: this.statuses
+    canAccess() { return Boolean(this.username) && ['reporter', 'editor'].includes(this.role); }
+    async getUserProfile() { return { name: this.fullName || this.username, role: this.role === 'editor' ? 'עורך' : 'כתב' }; }
+    async getFilterOptions() {
+        return { categories: ['כל הקטגוריות', ...this.categories.map(item => item.name)],
+            statuses: ['כל הסטטוסים', ...Object.values(statuses).map(item => item[0])] };
+    }
+    remember(article) {
+        this.revisions.set(article.id, { updateId: article.updateId, updatedAt: article.updatedAt });
+        return article;
+    }
+    async getArticles() {
+        const articles = await this.repository.getAll();
+        return articles.map(article => {
+            // Do not replace an open editor's revision token during background list refreshes.
+            if (!this.revisions.has(article.id)) this.remember(article);
+            return { ...article, subtitle: article.summary,
+                statusText: statuses[article.status]?.[0] || article.status,
+                badgeClass: statuses[article.status]?.[1] || 'badge-blue',
+                actions: this.getActions(article) };
         });
     }
-
-    async getArticles() 
-    {
-        return Promise.resolve(this.articles);
+    getActions(article) {
+        if (this.role === 'reporter' && ['draft', 'returned'].includes(article.status))
+            return [{ type: 'edit', label: 'עריכה' }, { type: 'send', label: 'שליחה לאישור' }];
+        if (this.role === 'reporter' && article.status === 'published')
+            return [{ type: 'view', label: 'צפייה' }, { type: 'revise', label: 'גרסה חדשה' }];
+        if (this.role === 'editor' && article.status === 'pending') return [{ type: 'review', label: 'בדיקה' }];
+        return [{ type: article.status === 'published' ? 'view' : 'preview', label: 'צפייה' }];
     }
-
-    // חישוב דינמי של סטטיסטיקות מתוך מערך הכתבות
-    async calculateStats() 
-    {
-        const stats = {
-            draft: 0,
-            pending: 0,
-            published: 0,
-            returned: 0
-        };
-
-        this.articles.forEach(article => {
-            if (stats.hasOwnProperty(article.status)) {
-                stats[article.status]++;
-            }
-        });
-
-        return Promise.resolve(stats);
+    async getArticle(id) {
+        const article = (await this.getArticles()).find(item => item.id === id);
+        if (!article) throw new Error('הכתבה לא נמצאה או שאין לך הרשאה.');
+        return this.remember(article);
     }
+    async saveDraft(id, fields) {
+        return this.remember(await this.repository.saveDraft(id, {
+            title: fields.title, summary: fields.summary, categoryId: fields.categoryId,
+            mainImage: fields.mainImage, content: fields.content,
+            ...(id ? this.revisions.get(id) : {})
+        }));
+    }
+    async changeStatus(id, status, note = '') {
+        return this.remember(await this.repository.changeStatus(id, {
+            status, editorNote: note, ...this.revisions.get(id)
+        }));
+    }
+    async startRevision(id) {
+        return this.remember(await this.repository.startRevision(id, this.revisions.get(id)));
+    }
+    async calculateStats() {
+        const stats = { draft: 0, pending: 0, published: 0, returned: 0 };
+        (await this.getArticles()).forEach(article => { if (article.status in stats) stats[article.status]++; });
+        return stats;
+    }
+    getStatistics() { return this.repository.getStatistics(); }
 }
