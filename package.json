@@ -8,7 +8,7 @@
     "dev": "nodemon server.js",
     "seed": "node scripts/seed.js",
     "test:integration": "node --test tests/articles.integration.cjs",
-    "test": "node --test tests/workflows.test.cjs",
+    "test": "node --test tests/workflows.test.cjs tests/feed.test.cjs tests/article-loading.test.cjs",
     "audit:schema": "node scripts/audit-schema.cjs"
   },
   "dependencies": {

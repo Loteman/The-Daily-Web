@@ -3,7 +3,7 @@ import { currentUser } from '../data/api.js';
 
 export class ArticleModel 
 {
-    constructor(repository = new ArticleRepository())
+    constructor(repository = new ArticleRepository(), getUser = currentUser)
     {
         this.weatherApiKey = 'ca7e198fa478ce43e107cc122973e064';
         this.mockWeatherData = {
@@ -13,6 +13,7 @@ export class ArticleModel
             icon: "☀️",
         };
         this.repository = repository;
+        this.getUser = getUser;
         this.articleData = null;
         this.relatedPosts = [];
         this.comments = [];
@@ -21,16 +22,28 @@ export class ArticleModel
     async loadArticle(id)
     {
         this.articleData = await this.repository.getById(id);
-        if (!this.articleData)
-            return null;
+        return this.articleData;
+    }
 
+    async loadRelatedPosts(id)
+    {
         const articles = await this.repository.getAll();
         this.relatedPosts = articles
             .filter(article => String(article.id) !== String(id) && article.category === this.articleData.category)
             .slice(0, 3);
-            this.comments = await this.repository.getComments(id);
-        this.user = await currentUser();
-        return this.articleData;
+        return this.relatedPosts;
+    }
+
+    async loadComments(id)
+    {
+        this.comments = await this.repository.getComments(id);
+        return this.comments;
+    }
+
+    async loadUser()
+    {
+        this.user = await this.getUser();
+        return this.user;
     }
 
     getWeatherIcon(iconCode) 
