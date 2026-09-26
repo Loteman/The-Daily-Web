@@ -10,7 +10,7 @@ News publishing and management system — final project for Web Application Deve
 
 Install Node.js and run `npm install`. Set `MONGO_URI` to your MongoDB connection string and `SESSION_SECRET` to a long random secret in the ignored `.env.local`. This file takes precedence over the existing `.env`. Optionally set `PORT` (default `3000`) and `MONGO_DB_NAME` (default `main_DB`).
 
-Run `npm start` and open `http://localhost:3000/articlesFeed/index.html` (use your configured port). Serve the website through this Node server so the browser can reach `/api/articles`.
+Run `npm start` and open `http://localhost:3000/public/html/articleFeed.html` (use your configured port). Serve the website through this Node server so the browser can reach `/api/articles`.
 
 The feed and article page read `Articles` joined with the highest numbered `Updates` version whose status is `published`. Newer drafts are excluded; articles without a published update are hidden. Category labels, reporter names, and view counts come from `Categories`, `Users`, and `Views`. The database connection does not create collections or indexes.
 

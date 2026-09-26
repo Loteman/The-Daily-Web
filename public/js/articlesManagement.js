@@ -1,13 +1,13 @@
-﻿import { ArticlesManagementModel } from './model.js';
-import { ArticlesManagementView } from './view.js';
-import { ArticlesManagementController } from './controller.js';
+﻿import { ArticlesManagementModel } from 'models/articlesManagement.js';
+import { ArticlesManagementView } from 'views/articlesManagement.js';
+import { ArticlesManagementController } from 'controllers/articlesManagement.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
     const model = new ArticlesManagementModel();
     const view = new ArticlesManagementView();
     try {
         if (!await model.initialize()) {
-            window.location.replace('../login/index.html');
+            window.location.replace('../public/login/index.html');
             return;
         }
         view.setCategories(model.categories);

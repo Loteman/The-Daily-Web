@@ -1,4 +1,4 @@
-import { formatDate, showImage } from '../data/presentation.js';
+import { formatDate, showImage } from '/data/presentation.js';
 
 const classes = {
             "עולם": "tag-blue",

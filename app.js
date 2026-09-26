@@ -20,13 +20,14 @@ function createApp({ sessionStore } = {}) {
     }
     next();
   }, createSession(sessionStore), loadUser);
+  
   app.use('/api/auth', require('./routes/authRoutes'));
   app.get('/api/categories', async (req, res) => res.json(await getCategories()));
   app.use('/api/articles', require('./routes/api/articlesApi'));
   app.use('/api/management/articles', require('./routes/reporterRoutes'));
   app.use('/api/statistics', require('./routes/api/statsApi'));
-  app.get('/', (req, res) => res.redirect('/articlesFeed/index.html'));
-  for (const directory of ['articlesFeed', 'article', 'header', 'login', 'articlesManagement', 'data', 'public']) {
+  app.get('/', (req, res) => res.redirect('./html/articlesFeed/index.html'));
+  for (const directory of ['./html/articlesFeed', './html/article', './html/header', './html/login', './html/articlesManagement', './data', './public']) {
     app.use('/' + directory, express.static(path.join(__dirname, directory)));
   }
   app.use('/api', (req, res) => res.status(404).json({ error: 'הנתיב לא נמצא.' }));
@@ -38,6 +39,8 @@ function createApp({ sessionStore } = {}) {
         status < 500 ? error.message : 'לא ניתן להשלים את הפעולה. נסו שוב.'
     });
   });
+  // במקום הלולאה שמוסיפה ./public עם הנתיב המלא:
+app.use(express.static(path.join(__dirname, 'public')));
   return app;
 }
 module.exports = createApp;
