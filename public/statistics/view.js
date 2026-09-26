@@ -81,18 +81,18 @@ export class StatisticsView {
     setLoading(loading) {
         for (const selector of ['#refresh', '#article-filter', '#period-filter']) $(selector).disabled = loading;
         $('#dashboard').setAttribute('aria-busy', String(loading));
-        $('.loading-spinner').hidden = !loading;
+        $('.loading-overlay').hidden = !loading;
         if (loading) $('#message').textContent = '';
     }
     showLoaded() {
         $('#dashboard').hidden = false;
-        $('.loading-spinner').hidden = true;
+        $('.loading-overlay').hidden = true;
         $('#message').textContent = '';
         $('#updated').textContent = 'עודכן ב־' + new Date().toLocaleTimeString('he-IL');
     }
     showError(error) {
         $('#dashboard').hidden = true;
-        $('.loading-spinner').hidden = true;
+        $('.loading-overlay').hidden = true;
         $('#message').textContent = error.status === 401 ? 'יש להתחבר כדי לצפות בסטטיסטיקה. ' : 'לא ניתן לטעון את הנתונים. ';
         if (error.status === 401) {
             const link = document.createElement('a'); link.href = '/login/index.html'; link.textContent = 'לעמוד ההתחברות'; $('#message').append(link);
@@ -111,6 +111,7 @@ export class StatisticsView {
         $('#article-count').textContent = number(articleCount);
         $('#publication-count').textContent = number(publications.length);
         $('#average-views').textContent = number(averageViews);
+        for (const selector of ['#total-views', '#article-count', '#publication-count', '#average-views']) $(selector).classList.remove('skeleton');
         drawChart(chartDays, versionChanges || [], publications || [], isSingleDay, keyOf);
         const label = isSingleDay ? timeLabel : dateLabel;
         const dailyTableHeading = document.querySelector('#daily-table')?.closest('table')?.querySelector('thead th');

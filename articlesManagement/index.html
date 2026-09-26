@@ -16,13 +16,13 @@
         // module script even runs, so returning to a page already visited this tab doesn't flash the
         // "guest" defaults before the real nav items for the logged-in user pop in a moment later.
         try {
+            var cachedUserRaw = sessionStorage.getItem('header-user-v1');
+            var cachedUser = cachedUserRaw ? JSON.parse(cachedUserRaw) : null;
             var cachedHeader = sessionStorage.getItem('header-html-v1');
             if (cachedHeader) {
                 var headerEl = document.querySelector('.header');
                 headerEl.innerHTML = cachedHeader;
-                var cachedUserRaw = sessionStorage.getItem('header-user-v1');
                 if (cachedUserRaw) {
-                    var cachedUser = JSON.parse(cachedUserRaw);
                     headerEl.querySelector('.user-name').textContent = cachedUser ? (cachedUser.fullName || cachedUser.username) : 'Guest';
                     headerEl.querySelector('.login-link').hidden = Boolean(cachedUser);
                     var loggedInEls = headerEl.querySelectorAll('[data-logged-in]');
@@ -48,14 +48,17 @@
         </div>
         <p class="management-message" role="status"></p>
 
-        <div class="loading-spinner" role="status" aria-label="טוען" hidden></div>
+        <div class="dashboard-content">
+        <div class="loading-overlay" role="status" aria-label="טוען">
+            <div class="loading-spinner"></div>
+        </div>
 
         <!-- 4 stat cards -->
         <div class="stats-grid" id="statistics">
             <!-- Card 1 -->
             <div class="stat-card">
                 <div class="stat-content">
-                    <div class="stat-number color-blue">…</div>
+                    <div class="stat-number skeleton color-blue"></div>
                     <div class="stat-label">בהכנה</div>
                 </div>
                 <div class="stat-icon-box bg-blue-light">📄</div>
@@ -64,7 +67,7 @@
             <!-- Card 2 -->
             <div class="stat-card">
                 <div class="stat-content">
-                    <div class="stat-number color-orange">…</div>
+                    <div class="stat-number skeleton color-orange"></div>
                     <div class="stat-label">ממתינות לאישור</div>
                 </div>
                 <div class="stat-icon-box bg-orange-light">🕒</div>
@@ -73,7 +76,7 @@
             <!-- Card 3 -->
             <div class="stat-card">
                 <div class="stat-content">
-                    <div class="stat-number color-green">…</div>
+                    <div class="stat-number skeleton color-green"></div>
                     <div class="stat-label">פורסמו</div>
                 </div>
                 <div class="stat-icon-box bg-green-light">☑️</div>
@@ -82,7 +85,7 @@
             <!-- Card 4 -->
             <div class="stat-card">
                 <div class="stat-content">
-                    <div class="stat-number color-red">…</div>
+                    <div class="stat-number skeleton color-red"></div>
                     <div class="stat-label">הוחזרה לתיקונים</div>
                 </div>
                 <div class="stat-icon-box bg-red-light">📝</div>
@@ -97,6 +100,15 @@
                 <button class="btn-new-article" hidden>
                     <span class="plus-icon">+</span> כתבה חדשה
                 </button>
+                <script>
+                    // The page title's role prefix and this button's visibility only depend on the
+                    // cached role, so - like the header above - they don't need to wait for the
+                    // /api/auth/me round-trip to appear (these elements didn't exist yet up above).
+                    try { if (typeof cachedUser !== 'undefined' && cachedUser) {
+                        document.querySelector('.page-title').textContent = (cachedUser.role === 'editor' ? 'עורך' : 'כתב') + ' - ניהול כתבות';
+                        document.querySelector('.btn-new-article').hidden = cachedUser.role !== 'reporter';
+                    } } catch (error) { /* articlesManagement.js will fill it in as normal */ }
+                </script>
 
                  <div class="feed-search search-bar">
                         <span class="search-icon" aria-hidden="true">&#128269;</span>
@@ -136,7 +148,9 @@
                         </tr>
                     </thead>
                 <tbody>
-                    
+                    <tr class="skeleton-row"><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td></tr>
+                    <tr class="skeleton-row"><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td></tr>
+                    <tr class="skeleton-row"><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td></tr>
         </tbody>
     </table>
 </div>
@@ -146,6 +160,7 @@
                 <div class="pagination-summary"></div>
                 <div class="pagination-buttons"></div>
             </div>
+        </div>
 
         </div>
     </div>

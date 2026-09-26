@@ -21,7 +21,12 @@ export class ArticlesFeedView
         this.statusSelect = document.querySelector('.filter-bar .filter-group:nth-child(2) select');
         this.sortSelect = document.querySelector('.filter-bar .filter-group:nth-child(3) select');
         this.loadMoreContainer = document.querySelector('.load-more-container');
-        
+        this.loadingOverlay = document.querySelector('.loading-overlay');
+    }
+
+    hideLoadingOverlay()
+    {
+        if (this.loadingOverlay) this.loadingOverlay.hidden = true;
     }
 
     sanitizeHTML(str) 
@@ -108,6 +113,7 @@ export class ArticlesFeedView
 
     showLoadError()
     {
+        this.hideLoadingOverlay();
         this.renderFeaturedArticle(null);
         this.articlesGrid.textContent = 'לא ניתן לטעון את הכתבות. נסו לרענן את העמוד.';
         this.updateLoadMoreVisibility(false);

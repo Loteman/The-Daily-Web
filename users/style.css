@@ -7,6 +7,7 @@ button{cursor:pointer;color:#2563eb;background:#eff6ff;border-color:#bfdbfe}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #60a5fa;outline-offset:3px}
 #new-user{margin-inline-start:auto}
 .panel{background:white;border:1px solid #e2e8f0;border-radius:14px;padding:24px}
+#dashboard{position:relative}
 .table-scroll{overflow:auto}
 table{width:100%;border-collapse:collapse;text-align:right;font-size:14px}
 th{color:#64748b;font-weight:500;background:#f8fafc}

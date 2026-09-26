@@ -17,18 +17,19 @@ export class UsersView {
 
     setLoading(loading) {
         for (const selector of ['#search', '#new-user']) $(selector).disabled = loading;
-        $('.loading-spinner').hidden = !loading;
+        $('.loading-overlay').hidden = !loading;
         if (loading) $('#message').textContent = '';
     }
 
     showLoaded() {
         $('#dashboard').hidden = false;
-        $('.loading-spinner').hidden = true;
+        $('.loading-overlay').hidden = true;
         $('#message').textContent = '';
     }
 
     showError(error) {
-        $('.loading-spinner').hidden = true;
+        $('#dashboard').hidden = true;
+        $('.loading-overlay').hidden = true;
         $('#message').textContent = error.status === 403
             ? 'רק עורך יכול לנהל משתמשים.'
             : (error.message || 'לא ניתן לטעון את הנתונים.');

@@ -14,13 +14,13 @@
     // module script even runs, so returning to a page already visited this tab doesn't flash the
     // "guest" defaults before the real nav items for the logged-in user pop in a moment later.
     try {
+      var cachedUserRaw = sessionStorage.getItem('header-user-v1');
+      var cachedUser = cachedUserRaw ? JSON.parse(cachedUserRaw) : null;
       var cachedHeader = sessionStorage.getItem('header-html-v1');
       if (cachedHeader) {
         var headerEl = document.querySelector('.header');
         headerEl.innerHTML = cachedHeader;
-        var cachedUserRaw = sessionStorage.getItem('header-user-v1');
         if (cachedUserRaw) {
-          var cachedUser = JSON.parse(cachedUserRaw);
           headerEl.querySelector('.user-name').textContent = cachedUser ? (cachedUser.fullName || cachedUser.username) : 'Guest';
           headerEl.querySelector('.login-link').hidden = Boolean(cachedUser);
           var loggedInEls = headerEl.querySelectorAll('[data-logged-in]');
@@ -33,9 +33,18 @@
   </script>
   <main>
     <div class="page-heading"><div><p class="eyebrow">הרשאות וגישה</p><h1>ניהול משתמשים</h1><p id="scope"></p></div><a class="back-link" href="/articlesManagement/index.html">ניהול כתבות ←</a></div>
+    <script>
+      // #scope's text only depends on the cached user, so - like the header above - it doesn't need
+      // to wait for the /api/auth/me round-trip to appear (this element didn't exist yet up above).
+      try { if (typeof cachedUser !== 'undefined' && cachedUser) {
+        document.getElementById('scope').textContent = 'מחובר/ת כ-' + (cachedUser.fullName || cachedUser.username) + ' (עורך)';
+      } } catch (error) { /* users.js will fill it in as normal */ }
+    </script>
     <div id="message" role="status" aria-live="polite"></div>
-    <div class="loading-spinner" role="status" aria-label="טוען" hidden></div>
-    <div id="dashboard" hidden>
+    <div id="dashboard">
+      <div class="loading-overlay" role="status" aria-label="טוען">
+        <div class="loading-spinner"></div>
+      </div>
       <section class="filters" aria-label="סינון וחיפוש">
         <label>חיפוש<input id="search" type="search" placeholder="שם משתמש או שם מלא..."></label>
         <button id="new-user" type="button">משתמש חדש +</button>
@@ -44,7 +53,12 @@
         <div class="table-scroll">
           <table>
             <thead><tr><th>שם משתמש</th><th>שם מלא</th><th>תפקיד</th><th>פעולות</th></tr></thead>
-            <tbody id="users-table"></tbody>
+            <tbody id="users-table">
+              <tr><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td></tr>
+              <tr><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td></tr>
+              <tr><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td></tr>
+              <tr><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td></tr>
+            </tbody>
           </table>
         </div>
       </section>

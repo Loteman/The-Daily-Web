@@ -14,13 +14,13 @@
     // module script even runs, so returning to a page already visited this tab doesn't flash the
     // "guest" defaults before the real nav items for the logged-in user pop in a moment later.
     try {
+      var cachedUserRaw = sessionStorage.getItem('header-user-v1');
+      var cachedUser = cachedUserRaw ? JSON.parse(cachedUserRaw) : null;
       var cachedHeader = sessionStorage.getItem('header-html-v1');
       if (cachedHeader) {
         var headerEl = document.querySelector('.header');
         headerEl.innerHTML = cachedHeader;
-        var cachedUserRaw = sessionStorage.getItem('header-user-v1');
         if (cachedUserRaw) {
-          var cachedUser = JSON.parse(cachedUserRaw);
           headerEl.querySelector('.user-name').textContent = cachedUser ? (cachedUser.fullName || cachedUser.username) : 'Guest';
           headerEl.querySelector('.login-link').hidden = Boolean(cachedUser);
           var loggedInEls = headerEl.querySelectorAll('[data-logged-in]');
@@ -33,9 +33,19 @@
   </script>
   <main>
     <div class="page-heading"><div><p class="eyebrow">נתונים ותובנות</p><h1>סטטיסטיקה</h1><p id="scope"></p></div><a class="back-link" href="/articlesManagement/index.html">ניהול כתבות ←</a></div>
+    <script>
+      // #scope's text only depends on the cached role, so - like the header above - it doesn't need
+      // to wait for the /api/auth/me round-trip to appear (this element didn't exist yet up above).
+      try { if (typeof cachedUser !== 'undefined' && cachedUser) {
+        document.getElementById('scope').textContent = cachedUser.role === 'editor'
+          ? 'תמונת מצב של כלל הכתבות במערכת' : 'תמונת מצב של הכתבות שלך';
+      } } catch (error) { /* statistics.js will fill it in as normal */ }
+    </script>
     <div id="message" role="status" aria-live="polite"></div>
-    <div class="loading-spinner" role="status" aria-label="טוען" hidden></div>
-    <div id="dashboard" hidden>
+    <div id="dashboard">
+      <div class="loading-overlay" role="status" aria-label="טוען">
+        <div class="loading-spinner"></div>
+      </div>
       <section class="filters" aria-label="סינון נתונים">
         <label>כתבה<select id="article-filter"><option value="">כל הכתבות</option></select></label>
         <label>תקופת פעילות<select id="period-filter"><option value="all">כל התקופה</option><option value="30">30 ימים אחרונים</option><option value="7">7 ימים אחרונים</option><option value="today">היום (לפי שעות)</option></select></label>
@@ -44,18 +54,35 @@
         <span id="updated"></span>
       </section>
       <section class="metrics" aria-label="סיכום פעילות">
-        <article class="metric"><span>צפיות בתקופה</span><strong id="total-views">—</strong><small>ביקורים שנרשמו בכתבות</small></article>
-        <article class="metric"><span>כתבות בבחירה</span><strong id="article-count">—</strong><small>כל מצבי הפרסום</small></article>
-        <article class="metric"><span>גרסאות שפורסמו בתקופה</span><strong id="publication-count">—</strong><small>פרסומים ראשונים ועדכונים</small></article>
-        <article class="metric"><span>צפיות ליום פעיל</span><strong id="average-views">—</strong><small>ממוצע בימים עם צפיות</small></article>
+        <article class="metric"><span>צפיות בתקופה</span><strong id="total-views" class="skeleton"></strong><small>ביקורים שנרשמו בכתבות</small></article>
+        <article class="metric"><span>כתבות בבחירה</span><strong id="article-count" class="skeleton"></strong><small>כל מצבי הפרסום</small></article>
+        <article class="metric"><span>גרסאות שפורסמו בתקופה</span><strong id="publication-count" class="skeleton"></strong><small>פרסומים ראשונים ועדכונים</small></article>
+        <article class="metric"><span>צפיות ליום פעיל</span><strong id="average-views" class="skeleton"></strong><small>ממוצע בימים עם צפיות</small></article>
       </section>
       <div class="overview">
-        <section class="panel chart-panel"><div class="panel-heading"><div><h2>צפיות לאורך זמן</h2><p>סך צפיות מצטבר לפי שעון ישראל</p></div><span class="legend">● צפיות　<span style="color:#10b981">● פורסם</span>　<span style="color:#f59e0b">● נשלח לבדיקה</span></span></div><div id="chart"></div><details><summary>הצגת הנתונים בטבלה</summary><div class="table-scroll"><table><thead><tr><th>תאריך</th><th>סך צפיות מצטבר</th></tr></thead><tbody id="daily-table"></tbody></table></div></details></section>
-        <section class="panel"><h2>מצב הכתבות</h2><p>הגרסה האחרונה של כל כתבה, בכל התקופה</p><div id="statuses"></div></section>
+        <section class="panel chart-panel"><div class="panel-heading"><div><h2>צפיות לאורך זמן</h2><p>סך צפיות מצטבר לפי שעון ישראל</p></div><span class="legend">● צפיות　<span style="color:#10b981">● פורסם</span>　<span style="color:#f59e0b">● נשלח לבדיקה</span></span></div><div id="chart"><div class="skeleton" style="height:220px"></div></div><details><summary>הצגת הנתונים בטבלה</summary><div class="table-scroll"><table><thead><tr><th>תאריך</th><th>סך צפיות מצטבר</th></tr></thead><tbody id="daily-table">
+          <tr><td><div class="skeleton" style="height:1.1em"></div></td><td><div class="skeleton" style="height:1.1em"></div></td></tr>
+          <tr><td><div class="skeleton" style="height:1.1em"></div></td><td><div class="skeleton" style="height:1.1em"></div></td></tr>
+          <tr><td><div class="skeleton" style="height:1.1em"></div></td><td><div class="skeleton" style="height:1.1em"></div></td></tr>
+        </tbody></table></div></details></section>
+        <section class="panel"><h2>מצב הכתבות</h2><p>הגרסה האחרונה של כל כתבה, בכל התקופה</p><div id="statuses">
+          <div class="skeleton" style="height:48px;margin-bottom:24px"></div>
+          <div class="skeleton" style="height:48px;margin-bottom:24px"></div>
+          <div class="skeleton" style="height:48px;margin-bottom:24px"></div>
+          <div class="skeleton" style="height:48px"></div>
+        </div></section>
       </div>
       <div class="details-grid">
-        <section class="panel"><h2>הכתבות הנצפות ביותר</h2><p>סך הצפיות בכל התקופה · עד 10 כתבות</p><ol id="ranking"></ol></section>
-        <section class="panel"><h2>היסטוריית פרסומים</h2><p>גרסאות שפורסמו בתקופה שנבחרה</p><div class="table-scroll"><table><thead><tr><th>כתבה</th><th>גרסה</th><th>תאריך פרסום</th></tr></thead><tbody id="publications"></tbody></table></div></section>
+        <section class="panel"><h2>הכתבות הנצפות ביותר</h2><p>סך הצפיות בכל התקופה · עד 10 כתבות</p><ol id="ranking">
+          <li><div class="skeleton" style="height:1.2em"></div></li>
+          <li><div class="skeleton" style="height:1.2em"></div></li>
+          <li><div class="skeleton" style="height:1.2em"></div></li>
+        </ol></section>
+        <section class="panel"><h2>היסטוריית פרסומים</h2><p>גרסאות שפורסמו בתקופה שנבחרה</p><div class="table-scroll"><table><thead><tr><th>כתבה</th><th>גרסה</th><th>תאריך פרסום</th></tr></thead><tbody id="publications">
+          <tr><td><div class="skeleton" style="height:1.1em"></div></td><td><div class="skeleton" style="height:1.1em"></div></td><td><div class="skeleton" style="height:1.1em"></div></td></tr>
+          <tr><td><div class="skeleton" style="height:1.1em"></div></td><td><div class="skeleton" style="height:1.1em"></div></td><td><div class="skeleton" style="height:1.1em"></div></td></tr>
+          <tr><td><div class="skeleton" style="height:1.1em"></div></td><td><div class="skeleton" style="height:1.1em"></div></td><td><div class="skeleton" style="height:1.1em"></div></td></tr>
+        </tbody></table></div></section>
       </div>
     </div>
   </main>

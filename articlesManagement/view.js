@@ -236,7 +236,7 @@ export class ArticlesManagementView
 
     setLoading(loading)
     {
-        const el = document.querySelector('.loading-spinner');
+        const el = document.querySelector('.loading-overlay');
         if (el) el.hidden = !loading;
     }
 
@@ -262,14 +262,15 @@ export class ArticlesManagementView
         return element.innerHTML.replaceAll('"', '&quot;');
     }
 
-    renderStats(stats) 
+    renderStats(stats)
     {
-        if (this.statNumbers.length >= 4) 
+        if (this.statNumbers.length >= 4)
         {
             this.statNumbers[0].textContent = stats.draft;     // draft
             this.statNumbers[1].textContent = stats.pending;   // pending
             this.statNumbers[2].textContent = stats.published; // published
             this.statNumbers[3].textContent = stats.returned;  // returned
+            this.statNumbers.forEach(el => el.classList.remove('skeleton'));
         }
     }
 

@@ -12,7 +12,6 @@ export class ArticlesFeedController
 
     async init()
     {
-        this.view.renderFeaturedArticle(null);
         this.articles = [];
         this.skip = 0;
         this.hasMore = true;
@@ -33,6 +32,7 @@ export class ArticlesFeedController
             this.articles = page.articles;
             this.view.renderArticles(this.articles);
             this.view.updateLoadMoreVisibility(this.hasMore);
+            this.view.hideLoadingOverlay();
         }
         catch (error)
         {

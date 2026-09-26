@@ -137,6 +137,16 @@
     margin-top: 4px;
 }
 
+.dashboard-content {
+    position: relative;
+}
+
+.stat-number.skeleton {
+    display: inline-block;
+    width: 48px;
+    height: 30px;
+}
+
 .management-message {
     color: #64748b;
     font-size: 13px;
