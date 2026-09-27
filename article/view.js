@@ -14,7 +14,6 @@ export class ArticleView
         this.articleSummaryEl = document.querySelector('.article-summary');
         this.authorSpanEl = document.querySelector('.article-details .author span');
         this.dateSpanEl = document.querySelector('.article-details .date span');
-        this.categoryDetailSpanEl = document.querySelector('.article-details .category-detail span');
         this.articleBodyEl = document.querySelector('.article-body');
 
         this.relatedPostsWidgetEl = document.querySelector('.related-posts-widget');
