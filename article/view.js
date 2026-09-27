@@ -37,6 +37,15 @@ export class ArticleView
         }
     }
 
+    setWeatherLoading(loading)
+    {
+        if (loading) {
+            if (this.temperatureEl) this.temperatureEl.textContent = '...';
+            if (this.conditionEl) this.conditionEl.textContent = 'טוען מזג אוויר...';
+            if (this.weatherIconEl) this.weatherIconEl.textContent = '⏳';
+        }
+    }
+
     sanitizeInput(str) 
     {
         const tempDiv = document.createElement('div');
@@ -54,6 +63,7 @@ export class ArticleView
             this.conditionEl.textContent = data.condition;
         if (this.weatherIconEl) 
             this.weatherIconEl.textContent = data.icon;
+        this.setWeatherLoading(false);
     }
 
     renderArticle(article) 

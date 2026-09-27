@@ -25,7 +25,34 @@ function createApp({ sessionStore } = {}) {
     next();
   }, createSession(sessionStore), loadUser);
   app.use('/api/auth', require('./routes/authRoutes'));
-  app.get('/api/categories', async (req, res) => res.json(await getCategories()));
+
+  app.get('/api/categories', async (req, res) => {
+    try {
+      const rawCategories = await getCategories();
+      
+      // אם הנתונים מגיעים כאובייקט אחד שבו המפתחות הם שמות הקטגוריות
+      let categoriesArray = [];
+      if (rawCategories && typeof rawCategories === 'object') {
+        // אם זה כבר מערך, נשאיר אותו; אם זה אובייקט עם מפתחות, נמיר אותו
+        if (Array.isArray(rawCategories)) {
+          categoriesArray = rawCategories;
+        } else {
+          categoriesArray = Object.entries(rawCategories)
+            .filter(([key]) => key !== '_id')
+            .map(([name, data]) => ({
+              name: name,
+              id: data.id,
+              className: data.className
+            }));
+        }
+      }
+      
+      res.json(categoriesArray);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch categories' });
+    }
+  });
+
   app.use('/api/articles', require('./routes/api/articlesApi'));
   app.use('/api/management/articles', require('./routes/reporterRoutes'));
   app.use('/api/statistics', require('./routes/api/statsApi'));

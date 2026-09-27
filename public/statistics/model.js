@@ -82,8 +82,7 @@ export class StatisticsModel {
             for (let date = Date.parse(cutoff || days[0].date); date <= Date.parse(today); date += 86400000) {
                 const key = new Date(date).toISOString().slice(0, 10);
                 const views = byDate.get(key) || 0;
-                const previous = chartDays.at(-1)?.totalViews || 0;
-                chartDays.push({ date: key, views, totalViews: previous + views });
+                chartDays.push({ date: key, views});
             }
         }
         return chartDays;
@@ -96,8 +95,7 @@ export class StatisticsModel {
         for (let hour = 0; hour < 24; hour++) {
             const key = `${today}T${String(hour).padStart(2, '0')}:00`;
             const views = byHour.get(key) || 0;
-            const previous = chartDays.at(-1)?.totalViews || 0;
-            chartDays.push({ date: key, views, totalViews: previous + views });
+            chartDays.push({ date: key, views});
         }
         return chartDays;
     }

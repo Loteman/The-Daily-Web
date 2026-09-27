@@ -28,7 +28,7 @@ function drawChart(days, versionChanges, publications, isSingleDay, keyOf) {
         if (text !== undefined) element.textContent = text;
         svg.append(element); return element;
     };
-    const maximum = Math.max(1, ...days.map(day => day.totalViews));
+    const maximum = Math.max(1, ...days.map(day => day.views));
     const start = Date.parse(days[0].date), end = Date.parse(days.at(-1).date);
     const x = day => end === start ? 380 : 48 + (Date.parse(day.date) - start) / (end - start) * 648;
     const y = value => 214 - value / maximum * 180;
@@ -37,29 +37,42 @@ function drawChart(days, versionChanges, publications, isSingleDay, keyOf) {
         add('line', { x1: 48, x2: 696, y1: y(value), y2: y(value), stroke: '#e2e8f0' });
         add('text', { x: 38, y: y(value) + 4, 'text-anchor': 'end', fill: '#64748b', 'font-size': 11 }, number(value));
     }
-    add('polyline', { points: days.map(day => `${x(day)},${y(day.totalViews)}`).join(' '), fill: 'none', stroke: '#2563eb', 'stroke-width': 3 });
+    add('polyline', { points: days.map(day => `${x(day)},${y(day.views)}`).join(' '), fill: 'none', stroke: '#2563eb', 'stroke-width': 3 });
     days.forEach(day => {
-        const point = add('circle', { cx: x(day), cy: y(day.totalViews), r: 3, fill: '#2563eb', tabindex: 0 });
+        const point = add('circle', { cx: x(day), cy: y(day.views), r: 3, fill: '#2563eb', tabindex: 0 });
         const title = document.createElementNS(ns, 'title');
-        title.textContent = `${label(day.date)}: ${number(day.totalViews)} צפיות מצטברות`;
+        title.textContent = `${label(day.date)}: ${number(day.views)} צפיות `;
         point.setAttribute('aria-label', title.textContent); point.append(title);
     });
-    publications.forEach(item => {
-        const day = days.find(entry => entry.date === keyOf(item.publishedAt));
-        if (!day) return;
-        const point = add('circle', { cx: x(day), cy: y(day.totalViews), r: 5, fill: '#10b981', stroke: '#fff', 'stroke-width': 2, tabindex: 0 });
+    
+    days.forEach(day => {
+        // מציאת כל הפרסומים ששייכים בדיוק ליום (או לשעה) הזה
+        const dayPublications = publications
+            .filter(item => keyOf(item.publishedAt) === day.date)
+            .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt)); // מהחדש לישן
+
+        if (!dayPublications.length) return;
+        const latestPub = dayPublications[0]; // לוקחים את הגרסה האחרונה של אותו יום
+
+        const point = add('circle', { cx: x(day), cy: y(day.views), r: 5, fill: '#10b981', stroke: '#fff', 'stroke-width': 2, tabindex: 0 });
         const title = document.createElementNS(ns, 'title');
-        title.textContent = `${label(item.publishedAt)}: גרסה ${item.version} פורסמה — ${number(day.totalViews)} צפיות מצטברות`;
+        title.textContent = `${label(latestPub.publishedAt)}: גרסה ${latestPub.version} פורסמה — ${number(day.views)} צפיות ביום זה`;
         point.setAttribute('aria-label', title.textContent); point.append(title);
     });
-    versionChanges.forEach(change => {
-        const day = days.find(item => item.date === keyOf(change.updatedAt));
-        if (!day) return;
-        const point = add('circle', { cx: x(day), cy: y(day.totalViews), r: 5, fill: '#f59e0b', stroke: '#fff', 'stroke-width': 2, tabindex: 0 });
-        const title = document.createElementNS(ns, 'title');
-        title.textContent = `${label(change.updatedAt)}: גרסה ${change.version} נשלחה לאישור — ${number(day.totalViews)} צפיות מצטברות`;
-        point.setAttribute('aria-label', title.textContent); point.append(title);
-    });
+    
+    days.forEach(day => {
+    const dayChanges = versionChanges
+        .filter(change => keyOf(change.updatedAt) === day.date)
+        .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)); // מהחדש לישן
+
+    if (!dayChanges.length) return;
+    const latestChange = dayChanges[0]; // לוקחים את העדכון האחרון באותו יום
+
+    const point = add('circle', { cx: x(day), cy: y(day.views), r: 5, fill: '#f59e0b', stroke: '#fff', 'stroke-width': 2, tabindex: 0 });
+    const title = document.createElementNS(ns, 'title');
+    title.textContent = `${label(latestChange.updatedAt)}: גרסה ${latestChange.version} נשלחה לאישור — ${number(day.views)} צפיות ביום זה`;
+    point.setAttribute('aria-label', title.textContent); point.append(title);
+});
     add('text', { x: 48, y: 244, fill: '#64748b', 'font-size': 12 }, label(days[0].date));
     if (days.length > 1) add('text', { x: 696, y: 244, 'text-anchor': 'end', fill: '#64748b', 'font-size': 12 }, label(days.at(-1).date));
     container.append(svg);
@@ -112,7 +125,23 @@ export class StatisticsView {
         $('#publication-count').textContent = number(publications.length);
         $('#average-views').textContent = number(averageViews);
         for (const selector of ['#total-views', '#article-count', '#publication-count', '#average-views']) $(selector).classList.remove('skeleton');
-        drawChart(chartDays, versionChanges || [], publications || [], isSingleDay, keyOf);
+        // בודקים האם נבחרה כתבה ספציפית (אם ערך ה-select ריק, סימן שזה "כל הכתבות")
+        const selectedArticleId = $('#article-filter').value;
+        const hasSpecificArticle = Boolean(selectedArticleId);
+
+        // אם זו הצגה של כל הכתבות, נשלח מערכים ריקים כדי שלא יופיעו נקודות בגרף
+        drawChart(
+            chartDays, 
+            hasSpecificArticle ? (versionChanges || []) : [], 
+            hasSpecificArticle ? (publications || []) : [], 
+            isSingleDay, 
+            keyOf
+        );
+        const legendPublished = $('#legend-published');
+        const legendPending = $('#legend-pending');
+        if (legendPublished) legendPublished.hidden = !hasSpecificArticle;
+        if (legendPending) legendPending.hidden = !hasSpecificArticle;
+
         const label = isSingleDay ? timeLabel : dateLabel;
         const dailyTableHeading = document.querySelector('#daily-table')?.closest('table')?.querySelector('thead th');
         if (dailyTableHeading) dailyTableHeading.textContent = isSingleDay ? 'שעה' : 'תאריך';

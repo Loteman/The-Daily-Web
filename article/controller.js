@@ -29,7 +29,7 @@ export class ArticleController
         this.view.setCommentsLoading(true);
         this.view.bindCommentSubmit(this.handleCommentSubmit.bind(this));
         this.view.bindCommentActions(this.handleCommentEdit.bind(this), this.handleCommentDelete.bind(this));
-
+        this.view.setWeatherLoading(true);
         // None of these secondary requests blocks rendering the article itself.
         this.secondaryReady = Promise.allSettled([
             this.model.loadRelatedPosts(id)
@@ -44,7 +44,14 @@ export class ArticleController
                 .catch(() => this.view.showCommentsLoadError()),
             this.model.repository.recordView(id)
                 .catch(error => console.error('View tracking failed:', error.message)),
-            this.model.fetchWeather().then(data => this.view.renderWeatherData(data))
+            this.model.fetchWeather()
+            .then(data => this.view.renderWeatherData(data))
+            .catch(() => {
+            // טיפול אופציונלי במקרה של שגיאה בטעינת מזג האוויר
+                if (this.conditionEl) 
+                    this.conditionEl.textContent = 'שגיאה בטעינת מזג האוויר';
+                this.view.setWeatherLoading(false);
+            })
         ]);
     }
 

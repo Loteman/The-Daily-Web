@@ -15,6 +15,7 @@ export class ArticlesFeedController
         this.articles = [];
         this.skip = 0;
         this.hasMore = true;
+        let categories = [];
         try
         {
             // All three are independent of each other (the featured article and first page never
@@ -25,6 +26,15 @@ export class ArticlesFeedController
                 this.model.getArticles({}, 0, 1), // הכתבה המובילה קבועה, לא תלויה בסינון
                 this.model.getArticles({}, 0, this.pageSize)
             ]);
+            const categoryClasses = {};
+            categories.forEach(cat => {
+                if (cat.name && cat.className) {
+                    categoryClasses[cat.name] = cat.className;
+                }
+            });
+            if (typeof this.view.setCategoryClasses === 'function') {
+                this.view.setCategoryClasses(categoryClasses);
+            }
             this.view.renderCategoryOptions(categories.map(category => category.name));
             this.view.renderFeaturedArticle(featured.articles[0] || null);
             this.skip = page.articles.length;

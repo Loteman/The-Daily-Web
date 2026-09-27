@@ -16,8 +16,8 @@ export class UsersController {
         await this.load();
     }
 
-    async load() {
-        this.view.setLoading(true);
+    async load(showOverlay = true) {
+        this.view.setLoading(true, showOverlay);
         try {
             const users = await this.model.load(this.searchTerm);
             this.view.renderUsers(users);
@@ -25,13 +25,13 @@ export class UsersController {
         } catch (error) {
             this.view.showError(error);
         } finally {
-            this.view.setLoading(false);
+            this.view.setLoading(false, showOverlay);
         }
     }
 
     async handleSearch(value) {
         this.searchTerm = value;
-        await this.load();
+        await this.load(false);
     }
 
     handleEdit(idNumber) {

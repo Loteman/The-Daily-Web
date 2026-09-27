@@ -8,18 +8,45 @@ function text(value, max, label, required = false) {
   }
   return value.trim();
 }
+
+
 let categoriesCache = { db: null, at: 0, data: null };
 async function getCategories(db = database()) {
-  // Categories rarely change; skip the round-trip to Atlas on every article request.
   if (categoriesCache.db === db && Date.now() - categoriesCache.at < 30000) return categoriesCache.data;
+  
   const rows = await db.collection('Categories').find({}).toArray();
-  const data = rows.flatMap(row => row.categoryId !== undefined
-    ? [{ id: row.categoryId, name: row.name || row.categoryName || '' }]
-    : Object.entries(row).filter(([key, value]) => key !== '_id' && ['number', 'string'].includes(typeof value))
-      .map(([name, id]) => ({ id, name })));
+  
+  const data = rows.flatMap(row => {
+    if (row.categoryId !== undefined) {
+      return [{ 
+        id: row.categoryId, 
+        name: row.name || row.categoryName || '', 
+        className: row.className || '' 
+      }];
+    }
+    
+    return Object.entries(row)
+      .filter(([key]) => key !== '_id' && key !== '__v')
+      .map(([name, value]) => {
+        if (value && typeof value === 'object') {
+          return {
+            name: name,
+            id: value.id,
+            className: value.className || ''
+          };
+        }
+        return {
+          name: name,
+          id: value,
+          className: ''
+        };
+      });
+  });
+
   categoriesCache = { db, at: Date.now(), data };
   return data;
 }
+
 let userTypeCache = { db: null, at: 0, data: null };
 async function getUserTypeRows(db) {
   // Same reasoning as getCategories above: this mapping is effectively static app config, so every

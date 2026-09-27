@@ -15,9 +15,15 @@ export class UsersView {
         $('#scope').textContent = user ? `מחובר/ת כ-${user.fullName || user.username} (עורך)` : 'ניהול משתמשים';
     }
 
-    setLoading(loading) {
-        for (const selector of ['#search', '#new-user']) $(selector).disabled = loading;
-        $('.loading-overlay').hidden = !loading;
+    
+
+    setLoading(loading, showOverlay = true) {
+        $('#new-user').disabled = loading;
+        
+        if (showOverlay) {
+            $('.loading-overlay').hidden = !loading;
+        }
+        
         if (loading) $('#message').textContent = '';
     }
 

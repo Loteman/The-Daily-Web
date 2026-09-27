@@ -17,3 +17,4 @@
 export async function currentUser() {
     return (await api('/api/auth/me')).user;
 }
+

@@ -1,21 +1,13 @@
 import { formatDate, showImage } from '../data/presentation.js';
 
-const classes = {
-            "עולם": "tag-blue",
-            "כלכלה": "tag-orange",
-            "טכנולוגיה": "tag-purple",
-            "ספורט": "tag-green",
-            "סביבה": "tag-dark-green",
-            "מדע": "tag-teal",
-            "תרבות": "tag-amber",
-            "בריאות": "tag-coral"
-        };
+
 
 export class ArticlesFeedView 
 {
     
     constructor() 
     {
+        this.classes = {};
         this.articlesGrid = document.querySelector('.articles-grid');
         this.categorySelect = document.querySelector('.filter-bar .filter-group:nth-child(1) select');
         this.statusSelect = document.querySelector('.filter-bar .filter-group:nth-child(2) select');
@@ -36,10 +28,16 @@ export class ArticlesFeedView
         return temp.innerHTML;
     }
 
+    setCategoryClasses(categoryClasses) {
+        this.classes = categoryClasses;
+    }
+
     getCategoryClass(category) 
     {
-        return classes[category] || "tag-blue";
+        return this.classes[category] || "tag-blue";
     }
+
+    
 
     renderCategoryOptions(categories = [])
     {
