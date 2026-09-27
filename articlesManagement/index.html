@@ -168,7 +168,7 @@
     <dialog class="article-dialog">
         <form id="article-form">
             <h2 class="dialog-title"></h2>
-            <p class="editor-note"></p>
+            
             <div class="version-toggle" hidden>
                 <button type="button" class="btn-outline toggle-old" data-version="old">גרסה שפורסמה</button>
                 <button type="button" class="btn-outline toggle-new active" data-version="new">גרסה חדשה לבדיקה</button>
@@ -178,6 +178,7 @@
             <label>קטגוריה<select name="categoryId" required></select></label>
             <label>כתובת תמונה<input name="mainImage" type="url" maxlength="2000"></label>
             <label>תוכן הכתבה<textarea name="content" required rows="10"></textarea></label>
+            <p class="editor-note">הערות העורך: </p>
             <label class="review-note-label">הערה ליוצר<textarea name="editorNote" rows="3"></textarea></label>
             <p class="autosave-status" role="status" aria-live="polite"></p>
             <p class="dialog-message" role="alert"></p>

@@ -106,7 +106,7 @@ export class ArticlesManagementView
         const editable = mode === 'edit' || mode === 'review';
         this.fillForm(this.currentArticleData, editable);
         dialog.querySelector('.dialog-title').textContent = mode === 'edit' ? 'עריכת כתבה' : 'בדיקת כתבה';
-        dialog.querySelector('.editor-note').textContent = article?.editorNote || '';
+        dialog.querySelector('.editor-note').textContent ="הערות העורך: " + article?.editorNote || '';
         dialog.querySelector('.review-note-label').hidden = mode !== 'review';
         dialog.querySelector('.autosave-status').textContent = editable ? 'השינויים נשמרים אוטומטית' : '';
         dialog.querySelector('.publish-article').hidden = mode !== 'review';
