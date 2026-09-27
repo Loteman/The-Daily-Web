@@ -337,9 +337,8 @@ body {
 }
 
 .user-name {
-    font-size: 14px;
-    color: #111827;
-    font-weight: 600;
+    font-weight: 700;
+    font-size: 15px;
 }
 
 .comment-date {

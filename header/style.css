@@ -182,6 +182,9 @@ body {
 
 .header .user-name {
     overflow-wrap: anywhere;
+    font-weight: 700;
+    font-size: 15px;
+
 }
 
 .header .user-profile .logout-link, .header .user-profile .login-link {
