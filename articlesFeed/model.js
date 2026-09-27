@@ -1,7 +1,7 @@
 import { ArticleRepository } from '../data/articleRepository.js';
 
 // Hebrew UI labels -> API query values.
-const sortMap = { 'פופולריות': 'popularity', 'תאריך פרסום': 'date' };
+const sortMap = { 'פופולריות': '-popularity', 'תאריך פרסום': 'date' };
 const statusMap = { 'נקראו': 'read', 'לא נקראו': 'unread' };
 
 export class ArticlesFeedModel

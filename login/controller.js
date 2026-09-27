@@ -49,7 +49,8 @@ export class LoginController
         {
             sessionStorage.removeItem('username');
             sessionStorage.removeItem('role');
-            window.location.href = '../articlesFeed/index.html';
+            
+            window.location.href = '../articlesManagement/index.html';
         }
         else 
             this.view.showMessage(result.message, 'error');
