@@ -4,7 +4,7 @@ const { httpError } = require('./schemaService');
 // API key stays here and readers in the same area share one cached upstream answer.
 const UPSTREAM = 'https://api.openweathermap.org/data/2.5/weather';
 const FRESH_MS = 10 * 60 * 1000;   // a cached answer this young is served without asking upstream
-const STALE_MS = 30 * 60 * 1000;   // how old a cached answer may be when upstream fails or the call cap is reached
+const STALE_MS = 15 * 60 * 1000;   // how old a cached answer may be when upstream fails or the call cap is reached
 const MAX_POINTS = 1000;
 const CALLS_PER_MINUTE = 50;       // OpenWeatherMap's free plan allows 60
 const TIMEOUT_MS = 5000;
@@ -77,7 +77,7 @@ async function fetchCurrentWeather(point, key) {
     weather: [{ description: text(weather.description), icon: text(weather.icon) }] };
 }
 
-// The cached answer for a point if it is at most 30 minutes old; otherwise the given error.
+// The cached answer for a point if it is at most 15 minutes old; otherwise the given error.
 function recent(current, id, status, message) {
   const cached = current.cache.get(id);
   if (cached && deps.now() - cached.at <= STALE_MS) return cached.data;

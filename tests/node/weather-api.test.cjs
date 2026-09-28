@@ -136,7 +136,7 @@ test('20 simultaneous requests for one point share one upstream call, whether it
     assert.equal(upstream.calls.length, 2);
 });
 
-test('when upstream fails, a cached answer up to 30 minutes old is served, after that 502', async t => {
+test('when upstream fails, a cached answer up to 15 minutes old is served, after that 502', async t => {
     const { upstream, clock } = setup(t);
     const get = await serveRouter(t);
     const yavne = '?lat=31.878&lon=34.739';
@@ -144,7 +144,7 @@ test('when upstream fails, a cached answer up to 30 minutes old is served, after
     upstream.reply = failing(500);
     clock.time += 10 * MINUTE;
     assert.deepEqual(await get(yavne), { status: 200, body: trimmed });
-    clock.time += 20 * MINUTE; // exactly 30 minutes old
+    clock.time += 5 * MINUTE; // exactly 15 minutes old
     assert.deepEqual(await get(yavne), { status: 200, body: trimmed });
     clock.time += 1;
     assert.deepEqual(await get(yavne), { status: 502, body: { error: UNAVAILABLE } });
@@ -231,5 +231,6 @@ test('at most 1,000 points are kept, dropping the oldest', async t => {
     upstream.reply = failing(500);
     clock.time += MINUTE;
     await assert.rejects(weather.getWeather('-50.0', 0), { status: 502 }); // the oldest point was dropped
-    assert.deepEqual(await weather.getWeather('-49.9', 0), trimmed); // the next oldest (21 minutes) is still cached
+    assert.deepEqual(await weather.getWeather('49.9', 0), trimmed); // a recent point (about 1 minute old) is still cached
+
 });

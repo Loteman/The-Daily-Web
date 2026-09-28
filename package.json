@@ -12,7 +12,6 @@
     "db:rebuild": "node scripts/rebuild-derived-data.cjs"
   },
   "dependencies": {
-    "axios": "",
     "bcrypt": "",
     "connect-mongo": "",
     "dotenv": "^18.0.1",
