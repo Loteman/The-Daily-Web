@@ -5,15 +5,17 @@ Project for Web Application Development
 # The Daily Web
 
 News publishing and management system — final project for Web Application Development.
+Readers browse and comment on published articles, reporters write and submit articles, and editors review, publish and track them.
+
 
 ## 1. Installation and running instructions
 
 1. Install Node.js and run `npm install`.
 2. Create `.env.local` from `.env.example` and fill in `MONGO_URI` (your MongoDB connection string), `SESSION_SECRET` (a long random secret), `OPENWEATHER_API_KEY` (the weather widget's key) and `SEED_PASSWORD` (the password the demo accounts get). `PORT` (default `3000`) and `MONGO_DB_NAME` (default `main_DB`) are optional. The server reads `.env.local` before `.env`; keep both out of git. MongoDB must be a replica set because publishing uses transactions: MongoDB Atlas already is one, and a local server has to run with `--replSet`.
-3. To fill an empty database with demo data, run `node scripts/seed.js` to see what it would add, then `node scripts/seed.js --apply`. It adds the `User_type` and `Categories` documents when they are missing (and any category its articles need), the demo accounts, and 500 articles with versions in every status, comments and views. It only ever removes its own data, and only with `--reset --apply`, which regenerates it. Running it again sets the demo accounts' password to the current `SEED_PASSWORD`.
-4. Run `npm start` and open `http://localhost:3000/articlesFeed/index.html` (use your configured port). Serve the website through this Node server so the browser can reach `/api`.
 
-The demo accounts all use the `SEED_PASSWORD` password: `seed_reporter_1` to `seed_reporter_4` are reporters and `seed_editor_1` is the editor. Login checks the accounts stored in MongoDB, so existing accounts keep working.
+3. Run `npm start` and open `http://localhost:3000/articlesFeed/index.html` (use your configured port). Serve the website through this Node server so the browser can reach `/api`.
+
+The demo accounts all use the `123456` password: `User1` is reporter and `User2_admin` is the editor, which can also manage and add more users. Login checks the accounts stored in MongoDB, so existing accounts keep working.
 
 At start the server creates any index the models declare that is missing (it never changes or drops one). It also rebuilds the listing data it stores when that is missing or out of step: each article's published version, latest version and view count in `Articles`, and the hourly view totals in `Statistics`. After changing `Articles`, `Updates` or `Views` directly in the database while the site is running, run `npm run db:rebuild`.
 
@@ -23,7 +25,7 @@ See [DATABASE_MAPPING.md](docs/DATABASE_MAPPING.md) for exact collection/field m
 
 ## 2. Project structure (main folders and files)
 
-The server is organized as MVC. `server/server.js` connects to MongoDB through `server/config/db.js` and starts `server/app.js`. `server/models/` holds the Mongoose schema and model of each collection, with its indexes. `server/services/` holds the logic that uses the models: listings, publishing transactions, comments, statistics and the weather. `server/routes/` are the controllers: they read the request, call a service and answer with JSON or a page, and `server/middlewares/auth.js` checks database-backed sessions and roles. The HTML of the feed, article, users and statistics pages is rendered from `server/views/`, where those pages share their header block (and the feed and article pages their footer) through `server/views/partials/`. Browser pages live in `client/articlesFeed/`, `client/article/`, `client/articlesManagement/`, and `client/login/`; their repositories in `client/data/` call the API. `scripts/` holds the demo data seed and maintenance scripts.
+The server is organized as MVC. `server/server.js` connects to MongoDB through `server/config/db.js` and starts `server/app.js`. `server/models/` holds the Mongoose schema and model of each collection, with its indexes. `server/services/` holds the logic that uses the models: listings, publishing transactions, comments, statistics and the weather. `server/routes/` are the controllers: they read the request, call a service and answer with JSON or a page, and `server/middlewares/auth.js` checks database-backed sessions and roles. Browser pages live in `client/articlesFeed/`, `client/article/`, `client/articlesManagement/`, `client/users/`, `client/statistics/` and `client/login/`; their repositories in `client/data/` call the API. `scripts/` holds the demo data seed and maintenance scripts.
 
 ## 3. Main functionality and implemented features
 
