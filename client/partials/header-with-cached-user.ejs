@@ -1,0 +1,24 @@
+<%# Same header block as header.ejs, but it reads the cached user first so the page's own inline script can use cachedUser. Used by users.ejs and statistics.ejs. -%>
+  <header class="header"></header>
+  <script>
+    // Paints the cached header markup + last-known login state immediately, before the deferred
+    // module script even runs, so returning to a page already visited this tab doesn't flash the
+    // "guest" defaults before the real nav items for the logged-in user pop in a moment later.
+    try {
+      var cachedUserRaw = sessionStorage.getItem('header-user-v1');
+      var cachedUser = cachedUserRaw ? JSON.parse(cachedUserRaw) : null;
+      var cachedHeader = sessionStorage.getItem('header-html-v1');
+      if (cachedHeader) {
+        var headerEl = document.querySelector('.header');
+        headerEl.innerHTML = cachedHeader;
+        if (cachedUserRaw) {
+          headerEl.querySelector('.user-name').textContent = cachedUser ? (cachedUser.fullName || cachedUser.username) : 'Guest';
+          headerEl.querySelector('.login-link').hidden = Boolean(cachedUser);
+          var loggedInEls = headerEl.querySelectorAll('[data-logged-in]');
+          for (var i = 0; i < loggedInEls.length; i++) loggedInEls[i].hidden = !cachedUser;
+          var editorEls = headerEl.querySelectorAll('[data-editor-only]');
+          for (var j = 0; j < editorEls.length; j++) editorEls[j].hidden = !cachedUser || cachedUser.role !== 'editor';
+        }
+      }
+    } catch (error) { /* sessionStorage unavailable - header.js will fill it in as normal */ }
+  </script>

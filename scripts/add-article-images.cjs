@@ -1,6 +1,6 @@
 require('dotenv').config({ path: ['.env.local', '.env'], quiet: true });
 const mongoose = require('mongoose');
-const { getCategories } = require('../services/schemaService');
+const { getCategories } = require('../server/services/schemaService');
 
 // Unsplash photographs served at a size suitable for feed cards and article headers.
 const photos = {
@@ -20,7 +20,7 @@ async function main() {
       throw new Error(`Image unavailable: ${id} (${response.status})`);
     }
   }
-  await require('../config/db')();
+  await require('../server/config/db')({ prepare: process.argv.includes('--apply') }); // a dry run changes nothing
   const db = mongoose.connection.db;
   const categories = new Map((await getCategories()).map(item => [String(item.id), item.name]));
   const articles = await db.collection('Articles').find({}).sort({ articleId: 1 }).toArray();
@@ -59,7 +59,9 @@ async function main() {
       }
     });
   } finally { await session.endSession(); }
-  const feed = await require('../services/articleService').getPublishedArticles();
+  // The feed reads each article's stored published version, which carries the image; bring it up to date.
+  await require('../server/services/derivedDataService').rebuildDerivedData();
+  const feed = await require('../server/services/articleService').getPublishedArticles();
   console.log(JSON.stringify({ articleChanges, updateChanges, publishedArticlesWithImages: feed.filter(article => !missingImage(article.mainImage)).length }));
 }
 main().catch(error => { console.error(error.name, error.message); process.exitCode = 1; }).finally(() => mongoose.disconnect());

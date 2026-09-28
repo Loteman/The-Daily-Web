@@ -2,10 +2,10 @@ require('dotenv').config({ path: ['.env.local', '.env'], quiet: true });
 const mongoose = require('mongoose');
 const { randomUUID } = require('node:crypto');
 const samples = require('./sample-articles.json');
-const { getCategories, roleFor } = require('../services/schemaService');
+const { getCategories, roleFor } = require('../server/services/schemaService');
 
 async function main() {
-  await require('../config/db')();
+  await require('../server/config/db')({ prepare: process.argv.includes('--apply') }); // a dry run changes nothing
   const db = mongoose.connection.db;
   const target = 60;
   const categories = await getCategories();
@@ -45,7 +45,9 @@ async function main() {
       if (await db.collection('Articles').countDocuments({}, { session }) !== target) throw new Error('Target count mismatch');
     });
   } finally { await session.endSession(); }
-  const published = await require('../services/articleService').getPublishedArticles();
+  // The feed reads each article's stored published version; add it for the new articles.
+  await require('../server/services/derivedDataService').rebuildDerivedData();
+  const published = await require('../server/services/articleService').getPublishedArticles();
   console.log(JSON.stringify({ added: needed, totalArticles: await db.collection('Articles').countDocuments(), publishedInFeed: published.length }));
 }
 main().catch(error => { console.error(error.name, error.message); process.exitCode = 1; }).finally(() => mongoose.disconnect());

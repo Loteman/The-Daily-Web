@@ -2,11 +2,15 @@
 // multiple revisions, plus comments and view history so the feed, management screen and Impact
 // Analytics graph all have realistic data to show. Dry-run by default; pass --apply to write.
 // Re-runnable: everything it creates is tagged (articleId/idNumber prefixed "seed_") so --reset
-// only removes its own previous output, never real data.
+// only removes its own previous output, never real data. Works on an empty database too: it adds the
+// User_type and Categories maps if they are missing. The demo accounts' password comes from SEED_PASSWORD
+// (.env.local), never from this file; re-running with --apply also sets existing demo accounts to it.
 require('dotenv').config({ path: ['.env.local', '.env'], quiet: true });
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const { randomUUID } = require('node:crypto');
+const { Article, Update, Comment, View, Statistic, User, UserType, Category } = require('../server/models');
+const { rebuildDerivedData } = require('../server/services/derivedDataService');
 
 const TARGET_ARTICLES = 500;
 const SEED_PREFIX = 'seed_';
@@ -19,9 +23,13 @@ const REPORTERS = [
   { username: 'seed_reporter_4', fullName: 'מאי רביאל' },
 ];
 const EDITOR = { username: 'seed_editor_1', fullName: 'ישראל ישראלי' };
-const SEED_PASSWORD = 'Seed1234!';
+const SEED_PASSWORD = process.env.SEED_PASSWORD;
 
-const NEW_CATEGORIES = ['טכנולוגיה', 'בריאות', 'ספורט'];
+// Names the demo content's categories may already have in the database (the documented map is in English).
+const CATEGORY_ALIASES = {
+  'אוכל': ['food'], 'טיולים': ['travel'], 'פוליטיקה': ['politics'],
+  'טכנולוגיה': ['technology', 'tech'], 'בריאות': ['health'], 'ספורט': ['sport', 'sports'],
+};
 
 const CATEGORY_CONTENT = {
   'אוכל': {
@@ -119,28 +127,56 @@ function buildArticleContent(category, index, random) {
   return { title, summary, content, topic };
 }
 
-async function ensureUser(db, { username, fullName }, userType, apply) {
-  const existing = await db.collection('Users').findOne({ username });
-  if (existing) return existing;
+const validHash = hash => /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/.test(hash || '');
+let passwordsUpdated = 0;
+async function ensureUser({ username, fullName }, userType, apply) {
+  const existing = await User.findOne({ username }).lean();
+  if (existing) {
+    // Older copies of this script had the password in the code (so it is in the Git history): move existing
+    // demo accounts to the current SEED_PASSWORD.
+    if (apply && !(validHash(existing.passwordHash) && await bcrypt.compare(SEED_PASSWORD, existing.passwordHash))) {
+      await User.updateOne({ _id: existing._id }, { $set: { passwordHash: await bcrypt.hash(SEED_PASSWORD, 10) } });
+      passwordsUpdated++;
+    }
+    return existing;
+  }
   const idNumber = SEED_PREFIX + randomUUID();
-  const doc = { idNumber, username, fullName, userType, passwordHash: await bcrypt.hash(SEED_PASSWORD, 10) };
-  if (apply) await db.collection('Users').insertOne(doc);
+  const doc = { idNumber, username, fullName, userType, passwordHash: apply ? await bcrypt.hash(SEED_PASSWORD, 10) : null };
+  if (apply) await User.create(doc);
   return doc;
 }
 
-async function ensureCategories(db, apply) {
-  const doc = await db.collection('Categories').findOne({});
-  const entries = Object.entries(doc).filter(([key]) => key !== '_id');
-  let maxId = Math.max(0, ...entries.map(([, value]) => Number(value)));
-  const toAdd = {};
-  for (const name of NEW_CATEGORIES) {
-    if (!(name in doc)) toAdd[name] = ++maxId;
+// The role map (reporter "1", editor "2"), added if the database has none. Returns the values to store in Users.
+async function ensureUserTypes(apply) {
+  const map = await UserType.findOne({}).lean();
+  if (!map) {
+    console.log('User_type is empty: adding { reporter: "1", editor: "2" }.');
+    if (apply) await UserType.create({ reporter: '1', editor: '2' });
   }
-  if (Object.keys(toAdd).length && apply) {
-    await db.collection('Categories').updateOne({ _id: doc._id }, { $set: toAdd });
+  const value = raw => (typeof raw === 'string' && /^\d+$/.test(raw) ? Number(raw) : raw);
+  return { reporter: value(map?.reporter ?? '1'), editor: value(map?.editor ?? '2') };
+}
+
+// Picks the database category for each kind of demo content: an existing one with the Hebrew or English name,
+// otherwise a new entry in the Categories map (created if the database has none).
+async function ensureCategories(apply) {
+  const doc = await Category.findOne({}).lean();
+  const entries = doc ? Object.entries(doc).filter(([key]) => key !== '_id' && key !== '__v') : [];
+  const idOf = value => (value && typeof value === 'object' ? value.id : value);
+  let maxId = Math.max(0, ...entries.map(([, value]) => Number(idOf(value))).filter(Number.isFinite));
+  const toAdd = {}, chosen = {};
+  for (const name of Object.keys(CATEGORY_CONTENT)) {
+    const names = [name, ...CATEGORY_ALIASES[name]];
+    const found = entries.find(([key]) => names.includes(key.trim().toLowerCase()) || key.trim() === name);
+    if (found) chosen[name] = { id: idOf(found[1]), name: found[0] };
+    else chosen[name] = { id: (toAdd[name] = ++maxId), name };
   }
-  const merged = { ...Object.fromEntries(entries), ...toAdd };
-  return Object.entries(merged).map(([name, id]) => ({ id, name }));
+  if (Object.keys(toAdd).length) {
+    console.log('Adding categories:', JSON.stringify(toAdd));
+    if (apply && doc) await Category.updateOne({ _id: doc._id }, { $set: toAdd });
+    else if (apply) await Category.create(toAdd);
+  }
+  return chosen;
 }
 
 function randomDateWithin(random, daysAgoMax, daysAgoMin = 0) {
@@ -151,33 +187,42 @@ function randomDateWithin(random, daysAgoMax, daysAgoMin = 0) {
 async function main() {
   const apply = process.argv.includes('--apply');
   const reset = process.argv.includes('--reset');
-  await require('../config/db')();
+  if (apply && (typeof SEED_PASSWORD !== 'string' || SEED_PASSWORD.length < 6 || Buffer.byteLength(SEED_PASSWORD) > 72)) {
+    throw new Error('Set SEED_PASSWORD in .env.local (6 to 72 characters) to the password the demo accounts should use.');
+  }
+  await require('../server/config/db')({ prepare: apply }); // a dry run changes nothing, not even indexes
   const db = mongoose.connection.db;
   const random = mulberry32(20260925);
 
   if (reset) {
+    const seedArticles = { articleId: { $regex: '^art_' + SEED_PREFIX } };
     const counts = await Promise.all([
-      db.collection('Views').deleteMany({ articleId: { $regex: '^art_' + SEED_PREFIX } }),
-      db.collection('Commnents').deleteMany({ articleId: { $regex: '^art_' + SEED_PREFIX } }),
-      db.collection('Updates').deleteMany({ articleId: { $regex: '^art_' + SEED_PREFIX } }),
-      db.collection('Articles').deleteMany({ articleId: { $regex: '^art_' + SEED_PREFIX } }),
+      View.deleteMany(seedArticles),
+      Comment.deleteMany(seedArticles),
+      Update.deleteMany(seedArticles),
+      Article.deleteMany(seedArticles),
+      Statistic.deleteMany(seedArticles),
     ].map(p => apply ? p : Promise.resolve({ deletedCount: 'dry-run' })));
     console.log('Reset (previous seed data only):', JSON.stringify(counts.map(c => c.deletedCount)));
     if (!apply) return;
   }
 
-  const existingSeedCount = await db.collection('Articles').countDocuments({ articleId: { $regex: '^art_' + SEED_PREFIX } });
+  // Accounts come first, so re-running on a database that already has the demo articles still updates
+  // the demo accounts' password.
+  const userTypes = await ensureUserTypes(apply);
+  const reporters = [];
+  for (const reporter of REPORTERS) reporters.push(await ensureUser(reporter, userTypes.reporter, apply));
+  const editor = await ensureUser(EDITOR, userTypes.editor, apply);
+  if (passwordsUpdated) console.log(`Set the password of ${passwordsUpdated} existing demo accounts to SEED_PASSWORD.`);
+
+  const existingSeedCount = await Article.countDocuments({ articleId: { $regex: '^art_' + SEED_PREFIX } });
   if (existingSeedCount > 0 && !reset) {
     console.log(`${existingSeedCount} seed articles already exist. Run with --reset --apply to regenerate.`);
     return;
   }
 
-  const categories = await ensureCategories(db, apply);
+  const categories = await ensureCategories(apply);
   const categoryNames = Object.keys(CATEGORY_CONTENT);
-
-  const reporters = [];
-  for (const reporter of REPORTERS) reporters.push(await ensureUser(db, reporter, 1, apply));
-  const editor = await ensureUser(db, EDITOR, 2, apply);
 
   const articles = [], updates = [], comments = [], views = [];
   const statusPlan = ['published', 'published', 'published', 'published', 'published', 'published', 'published', 'pending', 'draft', 'returned'];
@@ -185,7 +230,7 @@ async function main() {
   for (let i = 1; i <= TARGET_ARTICLES; i++) {
     const articleId = `art_${SEED_PREFIX}${String(i).padStart(4, '0')}`;
     const categoryName = pick(categoryNames, random);
-    const category = categories.find(item => item.name === categoryName);
+    const category = categories[categoryName];
     const reporter = pick(reporters, random);
     const image = `https://picsum.photos/seed/${articleId}/1200/800`;
     const createdAt = randomDateWithin(random, 90, 30);
@@ -201,6 +246,7 @@ async function main() {
     const v1Status = primaryStatus === 'returned' ? 'returned' : primaryStatus === 'draft' ? 'draft'
       : primaryStatus === 'pending' ? 'pending' : 'published';
     const v1UpdatedAt = new Date(createdAt.getTime() + random() * 6 * DAY);
+    // Publishing sets both dates to the moment the editor approves, as the site does.
     const v1PublishedAt = v1Status === 'published' ? new Date(v1UpdatedAt.getTime() + random() * DAY) : null;
     articles[articles.length - 1].title = v1.title;
     updates.push({
@@ -208,32 +254,29 @@ async function main() {
       title: v1.title, categoryId: category.id, mainImage: image,
       summary: v1.summary, content: v1.content, status: v1Status,
       editorNote: v1Status === 'returned' ? 'יש להרחיב את התוכן ולהוסיף מקורות.' : '',
-      updatedAt: v1UpdatedAt.toISOString(), publishedAt: v1PublishedAt ? v1PublishedAt.toISOString() : null,
+      updatedAt: (v1PublishedAt || v1UpdatedAt).toISOString(), publishedAt: v1PublishedAt ? v1PublishedAt.toISOString() : null,
     });
 
-    // ~18% of published articles also get a second (and occasionally third) revision in progress,
-    // so the management screen's old/new version toggle has real multi-version articles to show.
+    // ~18% of published articles get later versions: some still in progress (so the management screen's
+    // old/new version toggle has real multi-version articles to show) and some published again, a few of
+    // them two or three times. A version that isn't published is always the newest, as on the site.
     if (v1Status === 'published' && random() < 0.18) {
-      const v2 = buildArticleContent(categoryName, i, random);
-      const v2Status = pick(['draft', 'pending', 'returned', 'published'], random);
-      const v2UpdatedAt = new Date((v1PublishedAt || v1UpdatedAt).getTime() + DAY + random() * 20 * DAY);
-      const v2PublishedAt = v2Status === 'published' ? new Date(v2UpdatedAt.getTime() + random() * DAY) : null;
-      updates.push({
-        updateId: `upd_${SEED_PREFIX}${randomUUID()}`, articleId, version: 2,
-        title: v2.title, categoryId: category.id, mainImage: image,
-        summary: v2.summary, content: v2.content, status: v2Status,
-        editorNote: v2Status === 'returned' ? 'נדרשים תיקונים לפני פרסום מחדש.' : '',
-        updatedAt: v2UpdatedAt.toISOString(), publishedAt: v2PublishedAt ? v2PublishedAt.toISOString() : null,
-      });
-      if (v2Status === 'published' && random() < 0.25) {
-        const v3 = buildArticleContent(categoryName, i, random);
-        const v3UpdatedAt = new Date(v2PublishedAt.getTime() + DAY + random() * 15 * DAY);
+      let previous = v1PublishedAt.getTime();
+      for (let version = 2; version <= 4; version++) {
+        const next = buildArticleContent(categoryName, i, random);
+        const status = pick(version === 2 ? ['draft', 'pending', 'returned', 'published', 'published']
+          : ['draft', 'pending', 'published', 'published', 'published'], random);
+        const updatedAt = Math.min(previous + DAY + random() * 12 * DAY, Date.now() - 60 * 60 * 1000);
+        if (updatedAt <= previous) break;
         updates.push({
-          updateId: `upd_${SEED_PREFIX}${randomUUID()}`, articleId, version: 3,
-          title: v3.title, categoryId: category.id, mainImage: image,
-          summary: v3.summary, content: v3.content, status: 'draft', editorNote: '',
-          updatedAt: v3UpdatedAt.toISOString(), publishedAt: null,
+          updateId: `upd_${SEED_PREFIX}${randomUUID()}`, articleId, version,
+          title: next.title, categoryId: category.id, mainImage: image,
+          summary: next.summary, content: next.content, status,
+          editorNote: status === 'returned' ? 'נדרשים תיקונים לפני פרסום מחדש.' : '',
+          updatedAt: new Date(updatedAt).toISOString(), publishedAt: status === 'published' ? new Date(updatedAt).toISOString() : null,
         });
+        if (status !== 'published' || random() < 0.4) break;
+        previous = updatedAt;
       }
     }
 
@@ -266,24 +309,30 @@ async function main() {
     }
   }
 
+  const publishedVersions = new Map();
+  for (const update of updates) if (update.status === 'published') publishedVersions.set(update.articleId, (publishedVersions.get(update.articleId) || 0) + 1);
   console.log(JSON.stringify({
     database: db.databaseName, articles: articles.length, updates: updates.length,
     comments: comments.length, views: views.length,
-    categories: categories.map(c => c.name), reporters: reporters.map(r => r.username), editor: editor.username,
+    // Articles whose content was published again two or more times after the first publication.
+    republishedTwiceOrMore: [...publishedVersions.values()].filter(count => count >= 3).length,
+    categories: [...new Set(Object.values(categories).map(c => c.name))], reporters: reporters.map(r => r.username), editor: editor.username,
   }, null, 2));
   if (!apply) { console.log('Dry run only. Re-run with --apply to write.'); return; }
 
-  async function insertBatched(collection, docs, size = 1000) {
-    for (let i = 0; i < docs.length; i += size) await db.collection(collection).insertMany(docs.slice(i, i + size));
+  async function insertBatched(model, docs, size = 1000) {
+    for (let i = 0; i < docs.length; i += size) await model.insertMany(docs.slice(i, i + size), { lean: true });
   }
-  await insertBatched('Articles', articles);
-  await insertBatched('Updates', updates);
-  if (comments.length) await insertBatched('Commnents', comments);
-  if (views.length) await insertBatched('Views', views);
+  await insertBatched(Article, articles);
+  await insertBatched(Update, updates);
+  if (comments.length) await insertBatched(Comment, comments);
+  if (views.length) await insertBatched(View, views);
+  // The documents above went straight in, so fill in the stored listing fields and hourly view totals.
+  const rebuilt = await rebuildDerivedData();
 
   console.log(JSON.stringify({
     inserted: { articles: articles.length, updates: updates.length, comments: comments.length, views: views.length },
-    totalArticlesInDb: await db.collection('Articles').countDocuments(),
+    totalArticlesInDb: await Article.countDocuments(), listingDataRebuiltFor: rebuilt.articles,
   }));
 }
 

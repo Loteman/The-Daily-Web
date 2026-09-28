@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ניהול כתבות - The Daily Web</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../header/style.css">
+</head>
+<body class="dashboard-body">
+        
+    <!-- Top header -->
+    <header class="header"></header>
+    <script>
+        // Paints the cached header markup + last-known login state immediately, before the deferred
+        // module script even runs, so returning to a page already visited this tab doesn't flash the
+        // "guest" defaults before the real nav items for the logged-in user pop in a moment later.
+        try {
+            var cachedUserRaw = sessionStorage.getItem('header-user-v1');
+            var cachedUser = cachedUserRaw ? JSON.parse(cachedUserRaw) : null;
+            var cachedHeader = sessionStorage.getItem('header-html-v1');
+            if (cachedHeader) {
+                var headerEl = document.querySelector('.header');
+                headerEl.innerHTML = cachedHeader;
+                if (cachedUserRaw) {
+                    headerEl.querySelector('.user-name').textContent = cachedUser ? (cachedUser.fullName || cachedUser.username) : 'Guest';
+                    headerEl.querySelector('.login-link').hidden = Boolean(cachedUser);
+                    var loggedInEls = headerEl.querySelectorAll('[data-logged-in]');
+                    for (var i = 0; i < loggedInEls.length; i++) loggedInEls[i].hidden = !cachedUser;
+                    var editorEls = headerEl.querySelectorAll('[data-editor-only]');
+                    for (var j = 0; j < editorEls.length; j++) editorEls[j].hidden = !cachedUser || cachedUser.role !== 'editor';
+                }
+            }
+        } catch (error) { /* sessionStorage unavailable - header.js will fill it in as normal */ }
+    </script>
+
+    <!-- Main content -->
+    <main class="dashboard-container">
+
+        <!-- Page title -->
+        <div class="page-heading">
+            <div>
+                <p class="eyebrow">ניהול תוכן</p>
+                <h1 class="page-title">ניהול כתבות</h1>
+                <p class="page-subtitle">כאן ניתן לנהל את הכתבות שלך</p>
+            </div>
+            <a class="back-link" href="/articlesFeed/index.html">בית ←</a>
+        </div>
+        <p class="management-message" role="status"></p>
+
+        <div class="dashboard-content">
+        <div class="loading-overlay" role="status" aria-label="טוען">
+            <div class="loading-spinner"></div>
+        </div>
+
+        <!-- 4 stat cards -->
+        <div class="stats-grid" id="statistics">
+            <!-- Card 1 -->
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-number skeleton color-blue"></div>
+                    <div class="stat-label">בהכנה</div>
+                </div>
+                <div class="stat-icon-box bg-blue-light">📄</div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-number skeleton color-orange"></div>
+                    <div class="stat-label">ממתינות לאישור</div>
+                </div>
+                <div class="stat-icon-box bg-orange-light">🕒</div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-number skeleton color-green"></div>
+                    <div class="stat-label">פורסמו</div>
+                </div>
+                <div class="stat-icon-box bg-green-light">☑️</div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="stat-card">
+                <div class="stat-content">
+                    <div class="stat-number skeleton color-red"></div>
+                    <div class="stat-label">הוחזרה לתיקונים</div>
+                </div>
+                <div class="stat-icon-box bg-red-light">📝</div>
+            </div>
+        </div>
+
+        <!-- Main table card -->
+        <div class="main-card">
+
+            <!-- Toolbar and filters -->
+            <div class="toolbar-section">
+                <button class="btn-new-article" hidden>
+                    <span class="plus-icon">+</span> כתבה חדשה
+                </button>
+                <script>
+                    // The page title's role prefix and this button's visibility only depend on the
+                    // cached role, so - like the header above - they don't need to wait for the
+                    // /api/auth/me round-trip to appear (these elements didn't exist yet up above).
+                    try { if (typeof cachedUser !== 'undefined' && cachedUser) {
+                        document.querySelector('.page-title').textContent = (cachedUser.role === 'editor' ? 'עורך' : 'כתב') + ' - ניהול כתבות';
+                        document.querySelector('.btn-new-article').hidden = cachedUser.role !== 'reporter';
+                    } } catch (error) { /* articlesManagement.js will fill it in as normal */ }
+                </script>
+
+                 <div class="feed-search search-bar">
+                        <span class="search-icon" aria-hidden="true">&#128269;</span>
+                        <input id="article-search" type="search" placeholder="חיפוש כתבות..." aria-label="חיפוש כתבות...">
+                    </div>
+
+                <section class="filter-bar">
+                    <div class="filter-group">
+                        <label>קטגוריה:</label>
+                        <select>
+                    
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>סטטוס:</label>
+                        <select>
+                    
+                        </select>
+                    </div>
+                </section>
+                    
+                   
+            </div>
+        </div>
+
+            <!-- Data table -->
+           <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                        <th class="th-title">כותרת הכתבה</th>
+                        <th class="th-category">קטגוריה</th>
+                        <th class="th-status">סטטוס</th>
+                        <th class="th-date">עדכון אחרון</th>
+                        <th class="th-actions">פעולות</th>
+                        </tr>
+                    </thead>
+                <tbody>
+                    <tr class="skeleton-row"><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td></tr>
+                    <tr class="skeleton-row"><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td></tr>
+                    <tr class="skeleton-row"><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td><td><div class="skeleton" style="height:1.2em"></div></td></tr>
+        </tbody>
+    </table>
+</div>
+
+            <!-- Bottom pagination bar -->
+            <div class="pagination-bar">
+                <div class="pagination-summary"></div>
+                <div class="pagination-buttons"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <dialog class="article-dialog">
+        <form id="article-form">
+            <h2 class="dialog-title"></h2>
+            
+            <div class="version-toggle" hidden>
+                <button type="button" class="btn-outline toggle-old" data-version="old">גרסה שפורסמה</button>
+                <button type="button" class="btn-outline toggle-new active" data-version="new">גרסה חדשה לבדיקה</button>
+            </div>
+            <label>כותרת<input name="title" required maxlength="200"></label>
+            <label>תקציר<textarea name="summary" required rows="3"></textarea></label>
+            <label>קטגוריה<select name="categoryId" required></select></label>
+            <label>כתובת תמונה<input name="mainImage" type="url" maxlength="2000"></label>
+            <label>תוכן הכתבה<textarea name="content" required rows="10"></textarea></label>
+            <p class="editor-note">הערות העורך: </p>
+            <label class="review-note-label">הערה ליוצר<textarea name="editorNote" rows="3"></textarea></label>
+            <p class="autosave-status" role="status" aria-live="polite"></p>
+            <p class="dialog-message" role="alert"></p>
+            <div class="dialog-actions">
+                <button type="button" class="btn-outline publish-article">אישור ופרסום</button>
+                <button type="button" class="btn-outline return-article">החזרה לתיקונים</button>
+                <button type="button" class="btn-outline close-dialog">סגירה</button>
+            </div>
+        </form>
+    </dialog>
+    <script type="module" src="../header/header.js"></script>
+
+<script type="module" src="articlesManagement.js"></script>
+
+</body>
+</html>

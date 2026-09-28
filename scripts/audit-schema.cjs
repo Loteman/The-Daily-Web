@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 (async () => {
     try {
-        await require('../config/db')();
+        await require('../server/config/db')({ prepare: false });
         const db = mongoose.connection.db;
         for (const name of ['Articles', 'Updates', 'Users', 'User_type', 'Categories', 'Commnents', 'Views', 'Statistics']) {
             const rows = await db.collection(name).find({}).toArray();
