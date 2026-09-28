@@ -124,6 +124,8 @@ export class ArticleView
             `;
         });
         this.relatedPostsWidgetEl.innerHTML = postsHtml;
+        this.relatedPostsWidgetEl.querySelectorAll('.related-post').forEach((el, i) =>
+        showImage(el.querySelector('.post-thumb-placeholder'), posts[i]?.mainImage, posts[i]?.title));
     }
 
     setCommentsLoading(loading)

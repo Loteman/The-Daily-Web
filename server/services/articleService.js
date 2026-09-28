@@ -98,10 +98,10 @@ async function getRelatedArticles(excludeId, categoryName, limit = 3) {
   if (categoryId === undefined) return [];
   const rows = await Article.find(
     { articleId: { $ne: excludeId }, published: { $ne: null }, 'published.categoryId': sameCategory(categoryId) },
-    { _id: 0, articleId: 1, 'published.title': 1, 'published.publishedAt': 1, 'published.updatedAt': 1 }
+    { _id: 0, articleId: 1, 'published.title': 1, 'published.publishedAt': 1, 'published.updatedAt': 1, 'published.mainImage': 1 }
   ).sort({ 'published.sortDate': -1, articleId: 1 }).limit(limit).lean();
   return rows.map(row => ({ id: row.articleId, title: row.published.title,
-    date: row.published.publishedAt ?? row.published.updatedAt, category: categoryName }));
+    date: row.published.publishedAt ?? row.published.updatedAt, category: categoryName, mainImage: row.published.mainImage }));
 }
 
 // The id and current status of every article the user can manage (reporters: their own; editors: all), for the
