@@ -95,7 +95,10 @@ export class ArticlesManagementController
     {
         try
         {
-            const article = await this.model.getArticle(articleId);
+            const cached = actionType === 'revise' ? null : this.model.cachedArticle(articleId);
+            const article = cached || await this.model.getArticle(articleId);
+            
+            
             if (actionType === 'view')
                 window.location.href = `../article/index.html?id=${encodeURIComponent(articleId)}`;
             else if (actionType === 'send')
@@ -106,9 +109,13 @@ export class ArticlesManagementController
             }
             else if (actionType === 'revise')
             {
+                // The list can be out of date: if a newer version already exists, open it instead of creating another.
+                const revision = article.status === 'published' ? await this.model.startRevision(articleId) : article;
+                await this.updateView();
                 // An editor's new version starts as pending, so it opens in review mode, where it can be published.
-                const revision = await this.model.startRevision(articleId);
-                this.view.openArticle(revision, revision.status === 'pending' ? 'review' : 'edit');
+                const mode = revision.status === 'pending' ? (this.model.role === 'editor' ? 'review' : 'preview') : 'edit';
+                this.view.openArticle(revision, mode);
+            
             }
             else if (actionType === 'delete')
             {

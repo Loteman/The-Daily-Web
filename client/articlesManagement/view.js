@@ -168,7 +168,15 @@ export class ArticlesManagementView
             }
         });
         const publishOrReturn = async (status, note) => {
-            if (this.viewingOld || !(await this.saveDraftAutomatically()))
+            if (this.viewingOld)
+                return;
+            if (status === 'returned' && !note.trim())
+            {
+                this.showEditorError('נדרשת הערה להחזרה לתיקונים.');
+                form.elements.editorNote.focus();
+                return;
+            }
+            if (!(await this.saveDraftAutomatically()))
                 return;
             onReview(this.editingId, status, note);
         };

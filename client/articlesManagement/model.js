@@ -7,7 +7,7 @@ const statuses = {
 };
 
 export class ArticlesManagementModel {
-    constructor(repository = new ManagementRepository()) { this.repository = repository; this.revisions = new Map(); }
+    constructor(repository = new ManagementRepository()) { this.repository = repository; this.revisions = new Map(); this.loaded = new Map(); }
     async initialize() {
         const user = await currentUser();
         this.username = user?.username; this.fullName = user?.fullName; this.role = user?.role;
@@ -24,10 +24,18 @@ export class ArticlesManagementModel {
         return Object.entries(statuses).find(([, [text]]) => text === label)?.[0] || '';
     }
     remember(article) { this.revisions.set(article.id, { updateId: article.updateId, updatedAt: article.updatedAt }); return article; }
+    
+
     decorate(article) {
         this.remember(article);
-        return { ...article, subtitle: article.summary, statusText: statuses[article.status]?.[0] || article.status, badgeClass: statuses[article.status]?.[1] || 'badge-blue', actions: this.getActions(article) };
+        const decorated = { ...article, subtitle: article.summary, statusText: statuses[article.status]?.[0] || article.status, badgeClass: statuses[article.status]?.[1] || 'badge-blue', actions: this.getActions(article) };
+        this.loaded.set(article.id, decorated);
+        return decorated;
     }
+    // The article as last loaded into the table, so the popup can open without another server round trip.
+    cachedArticle(id) { return this.loaded.get(id); }
+
+
     // Search/filter/sort/paging all run on the server now, so this scales with the article count
     // instead of downloading the whole table on every keystroke.
     async search(filters, skip, limit) {
