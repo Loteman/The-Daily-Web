@@ -1,0 +1,245 @@
+/* Reset default settings */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f7f9;
+    color: #1e293b;
+    line-height: 1.5;
+}
+
+/* Shared loading indicator used by any page that fetches data before it can render (management,
+   statistics, users, feed, ...): a skeleton shape sits in the page's normal layout so its structure
+   is visible immediately, and the spinner overlay sits ON TOP of it (absolutely positioned, not
+   pushing content down) until the real data replaces the skeleton. */
+.loading-spinner {
+    display: block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e2e8f0;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: loading-spin 0.8s linear infinite;
+}
+
+@keyframes loading-spin {
+    to { transform: rotate(360deg); }
+}
+
+.loading-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 80px;
+    background: rgba(244, 247, 249, 0.8);
+    z-index: 5;
+}
+
+.loading-overlay[hidden] {
+    display: none;
+}
+
+@keyframes skeleton-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
+}
+
+.skeleton {
+    background: #e2e8f0;
+    border-radius: 6px;
+    color: transparent !important;
+    animation: skeleton-pulse 1.4s ease-in-out infinite;
+}
+
+.skeleton * {
+    visibility: hidden;
+}
+
+/* ---------------------------------------------------- */
+/* Unified Header for all pages */
+/* ---------------------------------------------------- */
+.header {
+    background-color: #ffffff;
+    padding: 16px 0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    width: 100%;
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    flex-direction: column;
+}
+
+.logo-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #1d4ed8;
+    line-height: 1.2;
+}
+
+.logo-subtitle {
+    font-size: 12px;
+    color: #64748b;
+    direction: ltr;
+}
+
+.header-center {
+    flex: 1;
+    max-width: 380px;
+    margin: 0 20px;
+}
+
+.search-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    right: 14px;
+    font-size: 14px;
+    color: #94a3b8;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 9px 40px 9px 15px;
+    border: 1px solid #cbd5e1;
+    border-radius: 20px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    background-color: #f8fafc;
+    transition: all 0.2s;
+}
+
+.search-bar input:focus {
+    border-color: #2563eb;
+    background-color: #ffffff;
+}
+
+.nav ul {
+    list-style: none;
+    display: flex;
+    gap: 24px;
+    align-items: center;
+}
+
+.nav a {
+    text-decoration: none;
+    color: #334155;
+    font-weight: 600;
+    font-size: 15px;
+    transition: color 0.2s;
+}
+
+.nav a.active, .nav a:hover {
+    color: #2563eb;
+}
+
+
+/* Responsive */
+@media (max-width: 768px) {
+    .filter-bar {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+    }
+    .header-container {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+.header .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-inline-end: 20px;
+    color: #1d4ed8;
+    font-size: 14px;
+    font-weight: 600;
+    min-width: 0;
+}
+
+.header .user-profile svg {
+    flex-shrink: 0;
+}
+
+.header .user-name {
+    overflow-wrap: anywhere;
+    font-weight: 700;
+    font-size: 15px;
+
+}
+
+.header .user-profile .logout-link, .header .user-profile .login-link {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    border-inline-start: 1px solid #e2e8f0;
+    padding-inline-start: 10px;
+    white-space: nowrap;
+}
+
+.header .user-profile .logout-link:hover, .header .user-profile .login-link:hover {
+    color: #2563eb;
+}
+
+.header .header-container {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 24px;
+    direction: rtl;
+}
+
+.header .user-profile {
+    grid-column: 1;
+    grid-row: 1;
+    justify-self: start;
+    margin-inline-end: 0;
+}
+
+.header .nav {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: center;
+}
+
+.header .logo {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+    text-align: left;
+}
+
+@media (max-width: 768px) {
+    .header .header-container {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 15px;
+    }
+
+    .header .logo {
+        grid-column: 2;
+    }
+
+    .header .nav {
+        grid-column: 1 / -1;
+        grid-row: 2;
+    }
+}

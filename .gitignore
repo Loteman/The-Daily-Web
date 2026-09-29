@@ -1,10 +1,11 @@
-# תלויות וחבילות מותקנות
+# Installed dependencies
 node_modules/
 
-# קובצי סביבה וסיסמאות
+# Environment files and secrets
 .env
 .env.local
 
-# לוגים ומערכת
+# Logs and OS files
+logs/
 npm-debug.log*
 .DS_Store
