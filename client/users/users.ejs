@@ -15,7 +15,7 @@
       // #scope's text only depends on the cached user, so - like the header above - it doesn't need
       // to wait for the /api/auth/me round-trip to appear (this element didn't exist yet up above).
       try { if (typeof cachedUser !== 'undefined' && cachedUser) {
-        document.getElementById('scope').textContent = 'מחובר/ת כ-' + (cachedUser.fullName || cachedUser.username) + ' (כתב)';
+        document.getElementById('scope').textContent = 'מחובר/ת כ-' + (cachedUser.fullName || cachedUser.username);
       } } catch (error) { /* users.js will fill it in as normal */ }
     </script>
     <div id="message" role="status" aria-live="polite"></div>
