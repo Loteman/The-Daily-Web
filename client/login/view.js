@@ -94,6 +94,10 @@ export class LoginView
 
     bindLoginSubmit(handler) 
     {
+        this.loginForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // מונע רענון של הדף
+            handler();
+        });
         this.submitBtn.addEventListener('click', handler);
     }
 }
