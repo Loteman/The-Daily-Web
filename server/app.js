@@ -61,8 +61,7 @@ function createApp({ sessionStore } = {}) {
     if (/\.ejs\b/i.test(pathname)) return next('router');
     next();
   });
-  app.use('/vendor/dompurify', express.static(path.join(__dirname, '..', 'node_modules', 'dompurify', 'dist')));
-  for (const directory of ['articlesFeed', 'article', 'header', 'login', 'articlesManagement', 'users', 'data', 'statistics']) {
+  app.use('/node_modules/dompurify/dist', express.static(path.join(__dirname, '..', 'node_modules', 'dompurify', 'dist')));  for (const directory of ['articlesFeed', 'article', 'header', 'login', 'articlesManagement', 'users', 'data', 'statistics']) {
     app.use('/' + directory, express.static(path.join(__dirname, '..', 'client', directory)));
   }
   app.use('/api', (req, res) => res.status(404).json({ error: 'הנתיב לא נמצא.' }));

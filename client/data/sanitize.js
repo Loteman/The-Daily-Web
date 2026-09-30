@@ -1,4 +1,4 @@
-import DOMPurify from '/vendor/dompurify/purify.es.mjs';
+import DOMPurify from '../../node_modules/dompurify/dist/purify.es.mjs';
 
 // מנקה מחרוזת HTML לפני שהיא נכנסת לדף: מסיר סקריפטים, אירועים (onclick, onerror) וכו'.
 export function safeHTML(html) {
