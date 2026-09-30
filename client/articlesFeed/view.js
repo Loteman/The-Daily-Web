@@ -1,5 +1,5 @@
 import { formatDate, showImage } from '../data/presentation.js';
-
+import { safeHTML } from '../data/sanitize.js';
 
 
 export class ArticlesFeedView 
@@ -86,7 +86,7 @@ export class ArticlesFeedView
             return;
         }
 
-        this.articlesGrid.innerHTML = articles.map(article => `
+        this.articlesGrid.innerHTML = safeHTML(articles.map(article => `
             <article class="article-card" data-id="${this.sanitizeHTML(String(article.id)).replace(/"/g, '&quot;')}" style="cursor: pointer; border: ${article.isRead ? '2px solid #2563eb' : '2px solid transparent'}; transition: border 0.2s;">
                 <div class="card-image">
                     <svg width="60" height="40" viewBox="0 0 60 40" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -104,7 +104,7 @@ export class ArticlesFeedView
                     </div>
                 </div>
             </article>
-        `).join('');
+        `).join(''));
         this.articlesGrid.querySelectorAll('.article-card').forEach((card, index) =>
             showImage(card.querySelector('.card-image'), articles[index].mainImage, articles[index].title));
     }

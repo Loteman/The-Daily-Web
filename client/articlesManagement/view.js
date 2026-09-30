@@ -1,5 +1,6 @@
 
 import { showImage } from '../data/presentation.js';
+import { safeHTML, setRowHTML } from '../data/sanitize.js';
 
 export class ArticlesManagementView
 {
@@ -288,11 +289,11 @@ export class ArticlesManagementView
     {
         if (this.selectElements.length >= 2) 
         {
-            this.selectElements[0].innerHTML = options.categories
-                .map(cat => `<option value="${this.escape(cat)}">${this.escape(cat)}</option>`).join('');
+            this.selectElements[0].innerHTML = safeHTML(options.categories
+                .map(cat => `<option value="${this.escape(cat)}">${this.escape(cat)}</option>`).join(''));
 
-            this.selectElements[1].innerHTML = options.statuses
-                .map(status => `<option value="${this.escape(status)}">${this.escape(status)}</option>`).join('');
+            this.selectElements[1].innerHTML = safeHTML(options.statuses
+                .map(status => `<option value="${this.escape(status)}">${this.escape(status)}</option>`).join(''));
         }
     }
 
@@ -316,7 +317,7 @@ export class ArticlesManagementView
         articles.forEach(article => {
             const tr = document.createElement('tr');
             
-            tr.innerHTML = `
+            setRowHTML(tr, `
                 <td>
                     <div class="article-info">
                         <div class="article-img ${article.thumbClass || 'thumb-robot'}"></div>
@@ -337,7 +338,7 @@ export class ArticlesManagementView
                         ${article.actions.map(action => `<button class="btn-outline action-main-btn" data-id="${this.escape(article.id)}" data-action="${action.type}">${action.label}</button>`).join('')}
                     </div>
                 </td>
-            `;
+            `);
             this.tableBody.appendChild(tr);
             showImage(tr.querySelector('.article-img'), article.mainImage, article.title);
         });

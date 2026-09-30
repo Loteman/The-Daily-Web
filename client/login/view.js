@@ -94,6 +94,7 @@ export class LoginView
 
     bindLoginSubmit(handler) 
     {
+        this.loginForm.addEventListener('submit', handler);
         this.submitBtn.addEventListener('click', handler);
     }
 }

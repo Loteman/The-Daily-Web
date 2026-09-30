@@ -41,7 +41,8 @@ export class StatisticsController {
         this.view.setLoading(true);
         try {
             if (refreshArticles) {
-                const articles = await this.model.fetchArticles();
+                let articles = await this.model.fetchArticles();
+                articles = articles.sort((a, b) => a.title.localeCompare(b.title));
                 if (id !== this.requestId) return;
                 this.model.articles = articles;
                 this.view.renderArticleOptions(articles);

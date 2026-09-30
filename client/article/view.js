@@ -1,4 +1,5 @@
 import { formatDate, showImage } from '../data/presentation.js';
+import { safeHTML } from '../data/sanitize.js';
 
 export class ArticleView
 {
@@ -123,7 +124,7 @@ export class ArticleView
                 </div>
             `;
         });
-        this.relatedPostsWidgetEl.innerHTML = postsHtml;
+        this.relatedPostsWidgetEl.innerHTML = safeHTML(postsHtml);
         this.relatedPostsWidgetEl.querySelectorAll('.related-post').forEach((el, i) =>
         showImage(el.querySelector('.post-thumb-placeholder'), posts[i]?.mainImage, posts[i]?.title));
     }
@@ -168,7 +169,7 @@ export class ArticleView
                 </div>
             `;
         });
-        this.commentsSectionEl.innerHTML = commentsHtml;
+        this.commentsSectionEl.innerHTML = safeHTML(commentsHtml);
     }
 
     getCommentEl(commentId)
@@ -186,7 +187,7 @@ export class ArticleView
         const textEl = wrapper.querySelector('.comment-text');
         const actionsEl = wrapper.querySelector('.comment-actions');
         if (actionsEl) actionsEl.hidden = true;
-        textEl.outerHTML = `
+        textEl.outerHTML = safeHTML(`
             <div class="comment-edit-form">
                 <textarea class="comment-edit-textarea" rows="3">${this.sanitizeInput(comment.text)}</textarea>
                 <div class="comment-edit-actions">
@@ -194,7 +195,7 @@ export class ArticleView
                     <button type="button" class="comment-cancel-btn">ביטול</button>
                 </div>
             </div>
-        `;
+        `);
         wrapper.querySelector('.comment-edit-textarea').focus();
     }
 

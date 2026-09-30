@@ -1,4 +1,5 @@
 const $ = selector => document.querySelector(selector);
+import { setRowHTML } from '../data/sanitize.js';
 
 function cellText(value) {
     const element = document.createElement('span');
@@ -51,7 +52,7 @@ export class UsersView {
         }
         users.forEach(user => {
             const tr = document.createElement('tr');
-            tr.innerHTML = `
+            setRowHTML(tr, `
                 <td>${cellText(user.username)}</td>
                 <td>${cellText(user.fullName)}</td>
                 <td><span class="role-badge ${user.role}">${roleLabel[user.role] || user.role}</span></td>
@@ -60,7 +61,7 @@ export class UsersView {
                         <button type="button" class="edit-btn" data-id="${cellText(user.idNumber)}">עריכה</button>
                         <button type="button" class="delete-btn" data-id="${cellText(user.idNumber)}">מחיקה</button>
                     </div>
-                </td>`;
+                </td>`);
             body.appendChild(tr);
         });
     }
