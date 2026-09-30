@@ -73,7 +73,6 @@ export class UsersView {
         this.editingId = user?.idNumber || null;
         $('.dialog-title').textContent = user ? 'עריכת משתמש' : 'משתמש חדש';
         form.elements.username.value = user?.username || '';
-        form.elements.username.readOnly = Boolean(user);
         form.elements.fullName.value = user?.fullName || '';
         form.elements.role.value = user?.role || 'reporter';
         form.elements.password.value = '';
