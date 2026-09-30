@@ -39,10 +39,20 @@ async function createUser({ username, fullName, password, role }) {
   return presentUser({ idNumber, username, fullName, userType });
 }
 
-async function updateUser(idNumber, { fullName, role, password }) {
+async function updateUser(idNumber, { username, fullName, role, password }) {
   const user = await User.findOne({ idNumber }).lean();
   if (!user) throw httpError(404, 'המשתמש לא נמצא.');
   const set = {};
+  
+  if (username !== undefined) {
+    username = text(username, 100, 'שם משתמש', true);
+    if (await User.exists({ username, idNumber: { $ne: idNumber } })) 
+    {
+      throw httpError(409, 'שם המשתמש כבר קיים.');
+    }
+    set.username = username;
+  }
+  
   if (fullName !== undefined) set.fullName = text(fullName, 100, 'שם מלא', true);
   if (role !== undefined) {
     if (!['reporter', 'editor'].includes(role)) throw httpError(400, 'יש לבחור תפקיד.');
