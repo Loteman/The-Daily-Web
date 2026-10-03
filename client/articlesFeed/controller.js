@@ -18,6 +18,9 @@ export class ArticlesFeedController
         let categories = [];
         try
         {
+            if (typeof this.view.showLoadingOverlay === 'function') {
+                this.view.showLoadingOverlay(true);
+            }
             // All three are independent of each other (the featured article and first page never
             // depend on filters at this point), so fetching them together turns 2 sequential
             // round-trips to the database into 1 - the single biggest cost on this page's load time.
@@ -49,6 +52,13 @@ export class ArticlesFeedController
             this.view.showLoadError();
             return;
         }
+        finally
+        {
+            // 2. מכבים את עיגול הטעינה תמיד בסוף (הצלחה או שגיאה)
+            if (typeof this.view.hideLoadingOverlay === 'function') {
+                this.view.hideLoadingOverlay();
+            }
+        }
 
         this.view.bindFilterChange(() => this.handleFilterChange());
         this.view.bindArticleClick((id) => this.handleArticleClick(id));
@@ -69,6 +79,9 @@ export class ArticlesFeedController
         const requestId = this.requestId = (this.requestId || 0) + 1;
         try
         {
+            if (typeof this.view.showLoadingOverlay === 'function') {
+                this.view.showLoadingOverlay();
+            }
             const result = await this.model.getArticles(filters, this.skip, limit);
             if (requestId !== this.requestId) return;
             this.skip += result.articles.length;
@@ -80,6 +93,13 @@ export class ArticlesFeedController
         catch (error)
         {
             if (requestId === this.requestId) this.view.showLoadError();
+        }
+        finally
+        {
+            // 4. מכבים את עיגול הטעינה בסיום טעינת העמוד/הסינון
+            if (requestId === this.requestId && typeof this.view.hideLoadingOverlay === 'function') {
+                this.view.hideLoadingOverlay();
+            }
         }
     }
 

@@ -16,9 +16,20 @@ export class ArticlesFeedView
         this.loadingOverlay = document.querySelector('.loading-overlay');
     }
 
+   showLoadingOverlay(isInitial = false)
+    {
+        if (this.loadingOverlay && isInitial) 
+        {
+            this.loadingOverlay.hidden = false;
+        }
+    }
+
     hideLoadingOverlay()
     {
-        if (this.loadingOverlay) this.loadingOverlay.hidden = true;
+        if (this.loadingOverlay) 
+        {
+            this.loadingOverlay.hidden = true;
+        }
     }
 
     sanitizeHTML(str) 
