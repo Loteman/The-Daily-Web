@@ -600,13 +600,11 @@
 .action-group { flex-wrap: wrap; }
 [hidden] { display: none !important; }
 
-/* 1. מבטלים את ה-opacity שהאפר את השדות */
 .article-dialog.is-loading form > *:not(.dialog-title):not(.close-dialog) {
-    opacity: 1; /* נשאר רגיל לגמרי */
-    pointer-events: none; /* עדיין מונע לחיצות בזמן טעינה */
+    opacity: 1; 
+    pointer-events: none; 
 }
 
-/* 2 הופכים את ה-loader לשכבת כיסוי (Overlay) שמרחפת מעל הכל */
 .article-dialog .dialog-loader {
     display: none;
     position: absolute;
@@ -614,7 +612,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.85); /* רקע לבן בהיר ונעים שחוסם את העין */
+    background: rgba(255, 255, 255, 0.85); 
     flex-direction: column;
     justify-content: center;
     align-items: center;
@@ -625,13 +623,12 @@
 }
 
 
-/* מוודאים שהטופס עצמו יכול להכיל אלמנט אבסולוטי */
 .article-dialog form {
     position: relative;
 }
 
 .article-dialog.is-loading .dialog-loader {
-    display: flex; /* מציג את העיגול במרכז המסך מעל הכל */
+    display: flex; 
 }
 
 
