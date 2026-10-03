@@ -91,48 +91,6 @@ export class ArticlesManagementController
         this.view.openArticle(null, 'edit');
     }
 
-    /*async handleArticleAction(articleId, actionType)
-    {
-        try
-        {
-            const cached = actionType === 'revise' ? null : this.model.cachedArticle(articleId);
-            const article = cached || await this.model.getArticle(articleId);
-            
-            
-            if (actionType === 'view')
-                window.location.href = `../article/index.html?id=${encodeURIComponent(articleId)}`;
-            else if (actionType === 'send')
-            {
-                await this.model.changeStatus(articleId, 'pending');
-                await this.updateView();
-                this.view.showMessage('הכתבה נשלחה לאישור.');
-            }
-            else if (actionType === 'revise')
-            {
-                // The list can be out of date: if a newer version already exists, open it instead of creating another.
-                const revision = article.status === 'published' ? await this.model.startRevision(articleId) : article;
-                await this.updateView();
-                // An editor's new version starts as pending, so it opens in review mode, where it can be published.
-                const mode = revision.status === 'pending' ? (this.model.role === 'editor' ? 'review' : 'preview') : 'edit';
-                this.view.openArticle(revision, mode);
-            
-            }
-            else if (actionType === 'delete')
-            {
-                if (!window.confirm(`למחוק את הכתבה "${article.title || 'טיוטה ללא כותרת'}"? הפעולה בלתי הפיכה.`))
-                    return;
-                await this.model.deleteArticle(articleId);
-                await this.updateView();
-                this.view.showMessage('הכתבה נמחקה.');
-            }
-            else
-                this.view.openArticle(article, actionType === 'edit' ? 'edit' : actionType === 'review' ? 'review' : 'preview');
-        }
-        catch (error)
-        {
-            this.view.showMessage(error.message);
-        }
-    }*/
 
     async handleArticleAction(articleId, actionType)
     {
