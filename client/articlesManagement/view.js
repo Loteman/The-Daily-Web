@@ -90,9 +90,47 @@ export class ArticlesManagementView
         document.querySelector('.return-article').disabled = goingOld;
     }
 
+    showLoadingModal(mode) {
+        const dialog = document.querySelector('.article-dialog');
+        const form = document.getElementById('article-form');
+        if (!dialog || !form) return;
+
+        form.reset();
+        dialog.classList.add('is-loading'); // מדליק את עיגול הטעינה
+        if (typeof dialog.showModal === 'function' && !dialog.open) {
+            dialog.showModal();
+        }
+    }
+
+    hideLoadingModal() {
+        const dialog = document.querySelector('.article-dialog');
+        if (dialog) {
+            dialog.classList.remove('is-loading');
+            if (dialog.open) dialog.close();
+        }
+    }
+
+    openLoadingModal(mode) {
+        const dialog = document.querySelector('.article-dialog');
+        const form = document.getElementById('article-form');
+        if (!dialog || !form) return;
+
+        // מאפס את הטופס ומדליק את קלאס הטעינה שהגדרנו ב-CSS
+        form.reset();
+        dialog.classList.add('is-loading');
+        
+        // פותח את הפופ-אפ מיד
+        if (typeof dialog.showModal === 'function') {
+            dialog.showModal();
+        }
+    }
+
     openArticle(article, mode)
     {
         const dialog = document.querySelector('.article-dialog');
+        if (dialog)
+            dialog.classList.remove('is-loading'); // <--- מעלים את עיגול הטעינה!
+
         const form = dialog.querySelector('form');
         form.reset();
         this.editingId = article?.id || null;

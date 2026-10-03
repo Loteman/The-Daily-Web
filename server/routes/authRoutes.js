@@ -18,7 +18,7 @@ router.post('/login', rateLimit({ windowMs: 60000, limit: 10, standardHeaders: t
     const validHash = user && /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/.test(user.passwordHash);
     if (!validHash || !await bcrypt.compare(req.body.password, user.passwordHash)) {
       logEvent('login_failed', { username });
-      throw httpError(401, 'שם המשתמש או הסיסמה שגויים.');
+      throw httpError(401, 'שם המשתמש או הסיסמה שגויים');
     }
     const role = await roleFor(user);
     if (!role) throw httpError(403, 'סוג המשתמש אינו מוגדר במסד הנתונים.');

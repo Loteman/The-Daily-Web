@@ -91,45 +91,65 @@ export class ArticlesManagementController
         this.view.openArticle(null, 'edit');
     }
 
+
     async handleArticleAction(articleId, actionType)
     {
         try
         {
-            const cached = actionType === 'revise' ? null : this.model.cachedArticle(articleId);
-            const article = cached || await this.model.getArticle(articleId);
-            
-            
-            if (actionType === 'view')
+            if (actionType === 'view') {
+                const article = this.model.cachedArticle(articleId) || await this.model.getArticle(articleId);
                 window.location.href = `../article/index.html?id=${encodeURIComponent(articleId)}`;
+                return;
+            }
             else if (actionType === 'send')
             {
                 await this.model.changeStatus(articleId, 'pending');
                 await this.updateView();
                 this.view.showMessage('הכתבה נשלחה לאישור.');
-            }
-            else if (actionType === 'revise')
-            {
-                // The list can be out of date: if a newer version already exists, open it instead of creating another.
-                const revision = article.status === 'published' ? await this.model.startRevision(articleId) : article;
-                await this.updateView();
-                // An editor's new version starts as pending, so it opens in review mode, where it can be published.
-                const mode = revision.status === 'pending' ? (this.model.role === 'editor' ? 'review' : 'preview') : 'edit';
-                this.view.openArticle(revision, mode);
-            
+                return;
             }
             else if (actionType === 'delete')
             {
-                if (!window.confirm(`למחוק את הכתבה "${article.title || 'טיוטה ללא כותרת'}"? הפעולה בלתי הפיכה.`))
+                const cached = this.model.cachedArticle(articleId);
+                if (!window.confirm(`למחוק את הכתבה "${cached?.title || 'טיוטה ללא כותרת'}"? הפעולה בלתי הפיכה.`))
                     return;
                 await this.model.deleteArticle(articleId);
                 await this.updateView();
                 this.view.showMessage('הכתבה נמחקה.');
+                return;
+            }
+
+            const mode = actionType === 'review' ? 'review' : actionType === 'preview' ? 'preview' : 'edit';
+            
+            // 1. קריאה ל-View לפתוח מיד את הפופ-אפ במצב טעינה (בלי לגעת ב-DOM בקונטרולר!)
+            if (typeof this.view.showLoadingModal === 'function') {
+                this.view.showLoadingModal(mode);
+            }
+
+            // 2. שליפת הנתונים מהשרת ברקע
+            const cached = actionType === 'revise' ? null : this.model.cachedArticle(articleId);
+            let article = cached || await this.model.getArticle(articleId);
+
+            if (actionType === 'revise')
+            {
+                const revision = article.status === 'published' ? await this.model.startRevision(articleId) : article;
+                await this.updateView();
+                const targetMode = revision.status === 'pending' ? (this.model.role === 'editor' ? 'review' : 'preview') : 'edit';
+                
+                // 3. הצגת הנתונים האמיתיים (ה-View יסיר את הטעינה או יחליף את התוכן)
+                this.view.openArticle(revision, targetMode);
             }
             else
-                this.view.openArticle(article, actionType === 'edit' ? 'edit' : actionType === 'review' ? 'review' : 'preview');
+            {
+                this.view.openArticle(article, mode);
+            }
         }
         catch (error)
         {
+            // אם יש שגיאה, אומרים ל-View לסגור או לבטל את הטעינה
+            if (typeof this.view.hideLoadingModal === 'function') {
+                this.view.hideLoadingModal();
+            }
             this.view.showMessage(error.message);
         }
     }

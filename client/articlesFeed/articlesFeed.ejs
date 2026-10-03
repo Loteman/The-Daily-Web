@@ -4,138 +4,156 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>קטלוג כתבות - The Daily Web</title>
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.5.3.3/dist/css/bootstrap.rtl.min.css">
+    
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="/header/style.css">
-
 </head>
-<body>
+<body class="bg-light">
 
 <%- include('partials/header') -%>
 
-    <main class="main-container">
+    <main class="main-container container my-4">
 
-        <div class="loading-overlay" role="status" aria-label="טוען">
-            <div class="loading-spinner"></div>
+       
+        <div class="loading-overlay" role="status" aria-label="טוען" hidden>
+            <div class="spinner-border text-primary" role="status">
+            </div>
         </div>
+        
 
-        <section class="hero-card">
-            <div class="hero-image">
+
+        <section class="hero-card card shadow-sm mb-4 border-0">
+            <div class="hero-image card-img-top bg-secondary bg-opacity-10 text-center py-4">
                 <svg width="100" height="70" viewBox="0 0 100 70" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <rect width="100" height="70" rx="6" fill="#cbd5e1"/>
                     <path d="M20 52 L40 28 L60 48 L72 36 L85 52 Z" fill="#94a3b8"/>
                     <circle cx="70" cy="24" r="6" fill="#94a3b8"/>
                 </svg>
             </div>
-            <div class="hero-content">
-                <span class="category tag-blue"></span>
-                <h1 class="hero-title"></h1>
-                <p class="hero-summary"></p>
-                <div class="hero-meta"></div>
-                <a href="#" class="btn-read-more">קראו עוד ←</a>
+            <div class="hero-content card-body">
+                <span class="category tag-blue badge bg-primary mb-2"></span>
+                <h1 class="hero-title card-title h3"></h1>
+                <p class="hero-summary card-text text-muted"></p>
+                <div class="hero-meta text-muted small mb-3"></div>
+                <a href="#" class="btn-read-more btn btn-primary">קראו עוד ←</a>
             </div>
         </section>
-        <section class = "articles-view-settings">
-         <div class="feed-search search-bar">
-                <span class="search-icon" aria-hidden="true">&#128269;</span>
-                <input id="article-search" type="search" placeholder="חיפוש כתבות..." aria-label="חיפוש כתבות...">
-        </div>
 
-        <section class="filter-bar">
-
-            <div class="filter-group">
-                <label>קטגוריה:</label>
-                <select>
-                    
-                </select>
+        <!-- אזור החיפוש והמסננים במבנה המקורי הנקי -->
+        <section class="articles-view-settings mb-4">
+            <div class="feed-search search-bar input-group">
+                <span class="search-icon input-group-text bg-white border-end-0" aria-hidden="true">&#128269;</span>
+                <input id="article-search" type="search" class="form-control border-start-0" placeholder="חיפוש כתבות..." aria-label="חיפוש כתבות...">
             </div>
 
-            <div class="filter-group">
-                <label>סטטוס צפייה:</label>
-                <select>
-                    <option>הכל</option>
-                    <option>נקראו</option>
-                    <option>לא נקראו</option>
-                </select>
+            <div class="filter-bar">
+                <div class="filter-group">
+                    <label class="form-label small fw-semibold mb-0">קטגוריה:</label>
+                    <select class="form-select">
+                        
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="form-label small fw-semibold mb-0">סטטוס צפייה:</label>
+                    <select class="form-select">
+                        <option>הכל</option>
+                        <option>נקראו</option>
+                        <option>לא נקראו</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="form-label small fw-semibold mb-0">מיון לפי:</label>
+                    <select class="form-select">
+                        <option>תאריך פרסום</option>
+                        <option>פופולריות</option>
+                    </select>
+                </div>
+            </div>
+        </section>
+
+        <!-- Articles Grid -->
+        <section class="articles-grid row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4 mb-4">
+
+            <div class="col">
+                <article class="article-card skeleton-card card h-100 shadow-sm border-0">
+                    <div class="card-image card-img-top bg-secondary bg-opacity-10 d-flex justify-content-center align-items-center py-4">
+                        <svg width="60" height="40" viewBox="0 0 60 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 32 L25 16 L38 28 L46 20 L52 32 Z" fill="#94a3b8"/>
+                            <circle cx="43" cy="14" r="4" fill="#94a3b8"/>
+                        </svg>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <span class="category tag-blue badge bg-primary mb-2 align-self-start"></span>
+                        <h3 class="card-title h5"></h3>
+                        <p class="card-summary card-text text-muted small flex-grow-1"></p>
+                        <div class="card-meta text-muted small mt-2"></div>
+                    </div>
+                </article>
+            </div>
+            
+            <div class="col">
+                <article class="article-card skeleton-card card h-100 shadow-sm border-0">
+                    <div class="card-image card-img-top bg-secondary bg-opacity-10 d-flex justify-content-center align-items-center py-4">
+                        <svg width="60" height="40" viewBox="0 0 60 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 32 L25 16 L38 28 L46 20 L52 32 Z" fill="#94a3b8"/>
+                            <circle cx="43" cy="14" r="4" fill="#94a3b8"/>
+                        </svg>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <span class="category tag-blue badge bg-primary mb-2 align-self-start"></span>
+                        <h3 class="card-title h5"></h3>
+                        <p class="card-summary card-text text-muted small flex-grow-1"></p>
+                        <div class="card-meta text-muted small mt-2"></div>
+                    </div>
+                </article>
             </div>
 
-            <div class="filter-group">
-                <label>מיון לפי:</label>
-                <select>
-                    <option>תאריך פרסום</option>
-                    <option>פופולריות</option>
-                </select>
+            <div class="col">
+                <article class="article-card skeleton-card card h-100 shadow-sm border-0">
+                    <div class="card-image card-img-top bg-secondary bg-opacity-10 d-flex justify-content-center align-items-center py-4">
+                        <svg width="60" height="40" viewBox="0 0 60 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 32 L25 16 L38 28 L46 20 L52 32 Z" fill="#94a3b8"/>
+                            <circle cx="43" cy="14" r="4" fill="#94a3b8"/>
+                        </svg>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <span class="category tag-blue badge bg-primary mb-2 align-self-start"></span>
+                        <h3 class="card-title h5"></h3>
+                        <p class="card-summary card-text text-muted small flex-grow-1"></p>
+                        <div class="card-meta text-muted small mt-2"></div>
+                    </div>
+                </article>
             </div>
-        </section>
-        </section>
 
-        <section class="articles-grid">
-
-            <article class="article-card skeleton-card">
-                <div class="card-image">
-                    <svg width="60" height="40" viewBox="0 0 60 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M10 32 L25 16 L38 28 L46 20 L52 32 Z" fill="#94a3b8"/>
-                        <circle cx="43" cy="14" r="4" fill="#94a3b8"/>
-                    </svg>
-                </div>
-                <div class="card-body">
-                    <span class="category tag-blue"></span>
-                    <h3 class="card-title"></h3>
-                    <p class="card-summary"></p>
-                    <div class="card-meta"></div>
-                </div>
-            </article>
-            <article class="article-card skeleton-card">
-                <div class="card-image">
-                    <svg width="60" height="40" viewBox="0 0 60 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M10 32 L25 16 L38 28 L46 20 L52 32 Z" fill="#94a3b8"/>
-                        <circle cx="43" cy="14" r="4" fill="#94a3b8"/>
-                    </svg>
-                </div>
-                <div class="card-body">
-                    <span class="category tag-blue"></span>
-                    <h3 class="card-title"></h3>
-                    <p class="card-summary"></p>
-                    <div class="card-meta"></div>
-                </div>
-            </article>
-            <article class="article-card skeleton-card">
-                <div class="card-image">
-                    <svg width="60" height="40" viewBox="0 0 60 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M10 32 L25 16 L38 28 L46 20 L52 32 Z" fill="#94a3b8"/>
-                        <circle cx="43" cy="14" r="4" fill="#94a3b8"/>
-                    </svg>
-                </div>
-                <div class="card-body">
-                    <span class="category tag-blue"></span>
-                    <h3 class="card-title"></h3>
-                    <p class="card-summary"></p>
-                    <div class="card-meta"></div>
-                </div>
-            </article>
-            <article class="article-card skeleton-card">
-                <div class="card-image">
-                    <svg width="60" height="40" viewBox="0 0 60 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M10 32 L25 16 L38 28 L46 20 L52 32 Z" fill="#94a3b8"/>
-                        <circle cx="43" cy="14" r="4" fill="#94a3b8"/>
-                    </svg>
-                </div>
-                <div class="card-body">
-                    <span class="category tag-blue"></span>
-                    <h3 class="card-title"></h3>
-                    <p class="card-summary"></p>
-                    <div class="card-meta"></div>
-                </div>
-            </article>
+            <div class="col">
+                <article class="article-card skeleton-card card h-100 shadow-sm border-0">
+                    <div class="card-image card-img-top bg-secondary bg-opacity-10 d-flex justify-content-center align-items-center py-4">
+                        <svg width="60" height="40" viewBox="0 0 60 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 32 L25 16 L38 28 L46 20 L52 32 Z" fill="#94a3b8"/>
+                            <circle cx="43" cy="14" r="4" fill="#94a3b8"/>
+                        </svg>
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <span class="category tag-blue badge bg-primary mb-2 align-self-start"></span>
+                        <h3 class="card-title h5"></h3>
+                        <p class="card-summary card-text text-muted small flex-grow-1"></p>
+                        <div class="card-meta text-muted small mt-2"></div>
+                    </div>
+                </article>
+            </div>
 
         </section>
 
-        <div class="load-more-container" role="status" aria-live="polite"></div>
+        <div class="load-more-container text-center my-4" role="status" aria-live="polite"></div>
 
     </main>
 
-
-<script type="module" src="../header/header.js"></script>
-<script type="module" src="articlesFeed.js"></script>
+    <script type="module" src="../header/header.js"></script>
+    <script type="module" src="articlesFeed.js"></script>
 
 </body>
 </html>
