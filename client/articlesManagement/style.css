@@ -600,6 +600,45 @@
 .action-group { flex-wrap: wrap; }
 [hidden] { display: none !important; }
 
+/* 1. מבטלים את ה-opacity שהאפר את השדות */
+.article-dialog.is-loading form > *:not(.dialog-title):not(.close-dialog) {
+    opacity: 1; /* נשאר רגיל לגמרי */
+    pointer-events: none; /* עדיין מונע לחיצות בזמן טעינה */
+}
+
+/* 2 הופכים את ה-loader לשכבת כיסוי (Overlay) שמרחפת מעל הכל */
+.article-dialog .dialog-loader {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.85); /* רקע לבן בהיר ונעים שחוסם את העין */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    text-align: center;
+    font-size: 14px;
+    color: #64748b;
+}
+
+
+/* מוודאים שהטופס עצמו יכול להכיל אלמנט אבסולוטי */
+.article-dialog form {
+    position: relative;
+}
+
+.article-dialog.is-loading .dialog-loader {
+    display: flex; /* מציג את העיגול במרכז המסך מעל הכל */
+}
+
+
+
+
+
+
 /* Phones: the four status cards side by side need a window at least 649px wide; in anything narrower the
    whole page used to be laid out about 650px wide and scroll sideways. Put the cards two per row and let
    the filters and the pagination bar wrap; the table keeps scrolling sideways inside .table-responsive.
