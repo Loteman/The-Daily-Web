@@ -228,6 +228,11 @@ body {
     text-align: left;
 }
 
+.header .nav ul {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
 @media (max-width: 768px) {
     .header .header-container {
         grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
