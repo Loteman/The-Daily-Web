@@ -10,8 +10,7 @@ function createApp({ sessionStore } = {}) {
   const app = express();
   app.disable('x-powered-by');
   app.set('view engine', 'ejs');
-  // Each page's template sits in its client folder (client/article/article.ejs) and the shared header and footer
-  // in client/partials. The array form lets include('partials/...') find client/partials from every template.
+  // Each page's template sits in its client folder (client/article/article.ejs) 
   app.set('views', [path.join(__dirname, '..', 'client')]);
   app.use(express.json({ limit: '150kb' }));
   app.use('/api', (req, res, next) => {
